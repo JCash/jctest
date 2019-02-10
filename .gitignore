@@ -1,3 +1,6 @@
+build/**
+test/external/gtest/**
+
 # Prerequisites
 *.d
 
