@@ -57,6 +57,7 @@
 //  * Create log events, and a log_event function that can be replaced by user
 //  * Handle input parameters (e.g. --jctest_filter=FooBar*)
 //  * Support ASSERT_DEATH_IF_SUPPORTED
+//  * Support ASSERT_NO_FATAL_FAILURE
 //  * Check for TTY
 //  * Add UNUSED macro
 
