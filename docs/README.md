@@ -9,22 +9,9 @@ for the one I was already using (gtest).
 
 As it turns out, it was perfectly doable, and here is the result.
 
-## Goals
-
-* Replacement for googletest, with minimal changes
-* Support the use cases we needed: TEST, TEST_F, TEST_P et al
-* As few templates as possible
-* As few lines as possible
-
-And given that, the expected result was:
-
-* Fast compile times
-* Small executable size
-
 ## Usage
 
-
-[test_example.cpp](./examples/test_example.cpp) :
+[test_example.cpp](../examples/test_example.cpp) :
 ```C++
 #define JC_TEST_IMPLEMENTATION
 #include <jc_test.h>
@@ -50,15 +37,28 @@ int main(int argc, char *argv[]) {
     # Run the test
     $ ./a.out
 
-![test_example.png](./examples/test_example.png)
+![test_example.png](../examples/test_example.png)
 
 You can find more examples in the API documentation and also under the ./test/ folder
 
 ## API
 
+
+## Goals
+
+* Replacement for googletest, with minimal changes
+* Support the use cases we needed: TEST, TEST_F, TEST_P et al
+* As few templates as possible
+* As few lines as possible
+
+And given that, the expected result was:
+
+* Fast compile times
+* Small executable size
+
 ## Benchmarks
 
-[Benchmarks](./README_BENCHMARKS.md)
+[Benchmarks](./README_BENCHMARK.md)
 
 ## Alternatives
 

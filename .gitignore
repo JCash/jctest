@@ -1,4 +1,4 @@
-build/**
+**/build/**
 test/external/gtest/**
 
 # Prerequisites
