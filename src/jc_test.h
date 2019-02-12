@@ -1,10 +1,11 @@
 /* test.h    Copyright 2018 Mathias Westerdahl
  *
- * https://github.com/JCash/containers
+ * https://github.com/JCash/jctest
+ * https://jcash.github.io/jctest
  *
  * BRIEF:
  *
- *      A small, single header C/C++ test framework
+ *      A single header C/C++ test framework in <900 loc
  *      Made sure to compile with hardest warning/error levels possible
  *
  * HISTORY:
@@ -17,7 +18,7 @@
  *
  *     The MIT License (MIT)
  *
- *     Copyright (c) 2018 Mathias Westerdahl
+ *     Copyright (c) 2018-2019 Mathias Westerdahl
  *
  *     Permission is hereby granted, free of charge, to any person obtaining a copy
  *     of this software and associated documentation files (the "Software"), to deal
@@ -56,10 +57,11 @@
 //  * Log start and end of each test (to easier see what output comes from each test)
 //  * Create log events, and a log_event function that can be replaced by user
 //  * Handle input parameters (e.g. --jctest_filter=FooBar*)
-//  * Support ASSERT_DEATH_IF_SUPPORTED
-//  * Support ASSERT_NO_FATAL_FAILURE
+//  * Support ASSERT_DEATH_IF_SUPPORTED (or similar)
+//  * Support ASSERT_NO_FATAL_FAILURE (or similar)
 //  * Check for TTY
 //  * Add UNUSED macro
+//  * ASSERT_GT(A,B) should use "!(A > B)" as check. (Etc.)
 
 
 #ifndef JC_TEST_H
@@ -82,6 +84,24 @@
 
 #ifndef JC_TEST_FMT
     #define JC_TEST_FMT
+#endif
+
+#ifndef JC_TEST_FILENO
+    #include <stdio.h> // fileno
+    #if defined(_MSC_VER)
+        #define JC_TEST_FILENO _fileno
+    #else
+        #define JC_TEST_FILENO fileno
+    #endif
+#endif
+
+#ifndef JC_TEST_ISATTY
+    #include <unistd.h> // isatty
+    #if defined(_MSC_VER)
+        #define JC_TEST_ISATTY _isatty
+    #else
+        #define JC_TEST_ISATTY isatty
+    #endif
 #endif
 
 #define JC_TEST_PASS    0
@@ -170,7 +190,8 @@ typedef struct jc_test_fixture
     unsigned int            last:1;     // If it's the last in a range of fixtures
     unsigned int            index;      // the index of the param in the original params array
     unsigned int            num_tests;
-    unsigned int            _pad;
+    int                     signum:8;   // If we're checking for a signal
+    int                     _pad:24;
     jc_test_entry   tests[JC_TEST_MAX_NUM_TESTS_PER_FIXTURE];
 
     #if defined(__cplusplus)
@@ -183,7 +204,9 @@ typedef struct jc_test_state
 {
     jc_test_stats       stats;
     int num_fixtures;
-    int _padding[3];
+    int is_a_tty:1;
+    int _padding1;
+    int _padding2[2];
     jc_test_fixture*    current_fixture;
     jc_test_fixture*    fixtures[JC_TEST_MAX_NUM_FIXTURES];
 } jc_test_state;
@@ -415,17 +438,6 @@ struct jc_test_factory : public jc_test_factory_interface<typename T::param_t> {
     void SetParam(const typename T::param_t* param)     { T::SetParam(param); }
 };
 
-// struct jc_test_typed_factory_interface {
-//     virtual ~jc_test_typed_factory_interface() {}
-//     template <typename TypeParam>
-//     virtual jc_test_base_class* New<typename TypeParam>() = 0;
-// };
-
-// template<template <typename> class T>
-// struct jc_test_typed_factory : public jc_test_typed_factory_interface {
-//     template <typename TypeParam> jc_test_base_class* New()   { return new T<TypeParam>; }
-// };
-
 #define JC_TEST_FIXTURE_TYPE_FUNCTION           0
 #define JC_TEST_FIXTURE_TYPE_CLASS              1
 #define JC_TEST_FIXTURE_TYPE_PARAMS_CLASS       2
@@ -648,8 +660,18 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
     #define ASSERT_NEAR                     JC_TEST_ASSERT_NEAR
     #define ASSERT_STREQ                    JC_TEST_ASSERT_STREQ
     #define ASSERT_STRNE                    JC_TEST_ASSERT_STRNE
+    #define EXPECT_TRUE                     JC_TEST_ASSERT_TRUE
     #define EXPECT_FALSE                    JC_TEST_ASSERT_FALSE
     #define EXPECT_EQ                       JC_TEST_ASSERT_EQ
+    #define EXPECT_NE                       JC_TEST_ASSERT_NE
+    #define EXPECT_GT                       JC_TEST_ASSERT_GT
+    #define EXPECT_LT                       JC_TEST_ASSERT_LT
+    #define EXPECT_GE                       JC_TEST_ASSERT_GE
+    #define EXPECT_LE                       JC_TEST_ASSERT_LE
+    #define EXPECT_NEAR                     JC_TEST_ASSERT_NEAR
+    #define EXPECT_STREQ                    JC_TEST_ASSERT_STREQ
+    #define EXPECT_STRNE                    JC_TEST_ASSERT_STRNE
+
     #define SCOPED_TRACE                    JC_TEST_SCOPED_TRACE
 #endif
 
@@ -733,6 +755,7 @@ jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* na
     fixture->index = 0xFFFFFFFF;
     fixture->num_tests = 0;
     fixture->first = fixture->last = 1;
+    fixture->signum = 0;
     jc_test_memset(&fixture->c, 0, sizeof(fixture->c));
     jc_test_memset(&fixture->stats, 0, sizeof(fixture->stats));
     jc_test_memset(fixture->tests, 0, sizeof(fixture->tests));
@@ -789,6 +812,12 @@ int jc_test_register_class_test(const char* fixture_name, const char* test_name,
     }
     jc_test_add_test_to_fixture(fixture, test_name, 0, instance);
     return 0;
+}
+
+static void jc_test_signal_hook_sigabrt(int signum)
+{
+    if (jc_test_global_state.current_fixture)
+        jc_test_global_state.current_fixture->signum = signum;
 }
 
 static void jc_test_global_cleanup() {
@@ -1038,6 +1067,9 @@ void jc_test_init(int* argc, char** argv)
 {
     (void)argc; (void)argv;
     JC_TEST_ATEXIT(jc_test_global_cleanup);
+    signal(SIGABRT, jc_test_signal_hook_sigabrt);
+
+    jc_test_global_state.is_a_tty = JC_TEST_ISATTY(JC_TEST_FILENO(stdout));
 }
 
 #endif

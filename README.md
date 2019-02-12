@@ -9,7 +9,9 @@ https://jcash.github.io/jctest/ (or [here](./docs/README.md))
 
 # jctest
 
-A tiny C/C++ header only test framework
+A C/C++ header only test framework
+
+See documentation for a full list of features
 
 # Disclaimer
 

@@ -1,6 +1,6 @@
 # jctest
 
-A tiny C/C++ header only test framework
+A C/C++ header only test framework
 
 ## About
 
@@ -39,19 +39,20 @@ int main(int argc, char *argv[]) {
 
 ![test_example.png](../examples/test_example.png)
 
-You can find more examples in the API documentation and also under the ./test/ folder
+You can find more examples in the [API documentation](./README_API.md) and also under the ./test/ folder
 
 ## API
 
+See [API documentation](./README_API.md)
 
 ## Goals
 
 * Replacement for googletest, with minimal changes
-* Support the use cases we needed: TEST, TEST_F, TEST_P et al
+* Support a few use cases: TEST, TEST_F, TEST_P, TYPED_TEST, (See API)
 * As few templates as possible
 * As few lines as possible
 
-And given that, the expected result was:
+From this, the expected result was:
 
 * Fast compile times
 * Small executable size

@@ -9,3 +9,5 @@ There are a bunch of alternatives out there
 * [utest](https://github.com/evolutional/utest) : Small, Header only, C99
 
 * [doctest](https://github.com/onqtam/doctest) : Small, Medium executable, Header Only, Slow headers, C++11
+
+* [catch2](https://github.com/catchorg/Catch2) : Large, Very large executable, Header Only, Very Slow headers, "Modern" C++11
