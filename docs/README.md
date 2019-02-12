@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     # Run the test
     $ ./a.out
 
-![test_example.png](https://github.com/JCash/jctest/blob/master/examples/test_example.png)
+<img src="https://github.com/JCash/jctest/blob/master/examples/test_example.png" >
 
 You can find more examples in the [API documentation](./README_API.md) and also under the ./test/ folder
 
