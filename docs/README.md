@@ -11,7 +11,7 @@ As it turns out, it was perfectly doable, and here is the result.
 
 ## Usage
 
-[test_example.cpp](../examples/test_example.cpp) :
+[test_example.cpp](https://www.github.com/JCash/jctest/examples/test_example.cpp) :
 ```C++
 #define JC_TEST_IMPLEMENTATION
 #include <jc_test.h>
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     # Run the test
     $ ./a.out
 
-![test_example.png](../examples/test_example.png)
+![test_example.png](https://www.github.com/JCash/jctest/examples/test_example.png)
 
 You can find more examples in the [API documentation](./README_API.md) and also under the ./test/ folder
 
