@@ -104,6 +104,12 @@
     #endif
 #endif
 
+#if defined(__GNUC__) || defined(__clang__)
+    #define JC_TEST_UNUSED __attribute__ ((unused))
+#else
+    #define JC_TEST_UNUSED
+#endif
+
 #define JC_TEST_PASS    0
 #define JC_TEST_FAIL    1
 
@@ -205,7 +211,7 @@ typedef struct jc_test_state
     jc_test_stats       stats;
     int num_fixtures;
     int is_a_tty:1;
-    int _padding1;
+    int _padding1:31;
     int _padding2[2];
     jc_test_fixture*    current_fixture;
     jc_test_fixture*    fixtures[JC_TEST_MAX_NUM_FIXTURES];
@@ -216,7 +222,7 @@ typedef struct jc_test_state
 void jc_test_init(int* argc, char** argv);
 
 #ifdef JC_TEST_IMPLEMENTATION
-static jc_test_state jc_test_global_state = { {0, 0, 0, 0, 0}, 0, {0, 0, 0}, 0, {0} };
+static jc_test_state jc_test_global_state = { {0, 0, 0, 0, 0}, 0, 0, 0, {0, 0}, 0, {0} };
 #else
 extern jc_test_state jc_test_global_state;
 #endif
@@ -567,7 +573,7 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
     extern void JC_TEST_MAKE_FUNCTION_NAME(testfixture,testfn)(void* _jc_test_ctx);                         \
     static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) =                                      \
         jc_test_register_test_fn(#testfixture, #testfn, JC_TEST_MAKE_FUNCTION_NAME(testfixture,testfn));    \
-    void JC_TEST_MAKE_FUNCTION_NAME(testfixture,testfn)(void* _jc_test_ctx)
+    void JC_TEST_MAKE_FUNCTION_NAME(testfixture,testfn)(void* JC_TEST_UNUSED _jc_test_ctx)
 
 
 // class MyTest : public jc_test_base_class {

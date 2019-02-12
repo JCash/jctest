@@ -42,3 +42,5 @@ if [ "Darwin" == `uname` ]; then
     time compile_test params
     time compile_test typed_test
 fi
+
+clang++ -o ./build/test_example $OPT $DISASSEMBLY $ARCH $CXXFLAGS docs/examples/test_example.cpp
