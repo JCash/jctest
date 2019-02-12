@@ -12,6 +12,7 @@ As it turns out, it was perfectly doable, and here is the result.
 ## Usage
 
 [test_example.cpp](./examples/test_example.cpp) :
+
 ```C++
 #define JC_TEST_IMPLEMENTATION
 #include <jc_test.h>
