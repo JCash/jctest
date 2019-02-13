@@ -96,12 +96,17 @@
 #endif
 
 #ifndef JC_TEST_ISATTY
-    #include <unistd.h> // isatty
     #if defined(_MSC_VER)
+        #include <io.h>
         #define JC_TEST_ISATTY _isatty
     #else
+        #include <unistd.h>
         #define JC_TEST_ISATTY isatty
     #endif
+#endif
+
+#ifndef JC_TEST_NO_DEATH_TEST
+    #include <signal.h>
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -1073,7 +1078,10 @@ void jc_test_init(int* argc, char** argv)
 {
     (void)argc; (void)argv;
     JC_TEST_ATEXIT(jc_test_global_cleanup);
+
+#ifndef JC_TEST_NO_DEATH_TEST
     signal(SIGABRT, jc_test_signal_hook_sigabrt);
+#endif
 
     jc_test_global_state.is_a_tty = JC_TEST_ISATTY(JC_TEST_FILENO(stdout));
 }
