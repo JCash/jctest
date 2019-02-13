@@ -1,5 +1,7 @@
 #theme: jekyll-theme-slate
-remote_theme: Wiredcraft/carte
+#remote_theme: Wiredcraft/carte
+#remote_theme: pmarsceill/just-the-docs
+theme: just-the-docs
 
 # Jekyll 3 now only supports Kramdown for Markdown
 kramdown:
@@ -20,4 +22,5 @@ baseurl: "/jctest"
 
 # Use the following plug-ins
 gems:
-- jekyll-sitemap # Create a sitemap using the official Jekyll sitemap gem
+#- jekyll-sitemap # Create a sitemap using the official Jekyll sitemap gem
+- just-the-docs
