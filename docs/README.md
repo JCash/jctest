@@ -1,17 +1,11 @@
 # jctest
 
-A C/C++ header only test framework
+A C/C++ header only test library implementing a GTEST-like API.
+The library was created with compile time, run time, code size and executable size in mind.
 
-## About
+## Example usage
 
-This library came about as a test to see if it was possible to write a small and fast replacement
-for the one I was already using (gtest).
-
-As it turns out, it was perfectly doable, and here is the result.
-
-## Usage
-
-[test_example.cpp](./examples/test_example.cpp) :
+![test_example.png](./examples/test_example.png)
 
 ```c++
 #define JC_TEST_IMPLEMENTATION
@@ -20,7 +14,6 @@ As it turns out, it was perfectly doable, and here is the result.
 TEST(MyTest, Multiplication) {
     ASSERT_EQ(4, 2 * 2);
 }
-
 TEST(MyTest, Division) {
     ASSERT_EQ(2, 4 / 2);
 }
@@ -32,13 +25,13 @@ int main(int argc, char *argv[]) {
 }
 ```
 
-    # Compile the test
-    $ clang++ -Isrc ./examples/test_example.cpp
-    
-    # Run the test
-    $ ./a.out
+```bash
+# Compile the test
+$ clang++ -Isrc ./examples/test_example.cpp
 
-![test_example.png](./examples/test_example.png)
+# Run the test
+$ ./a.out
+```
 
 You can find more examples in the [API documentation](./README_API.md) and also under the ./test/ folder
 

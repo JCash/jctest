@@ -1,12 +1,12 @@
 # C++ API
 
-### Tests
+## Tests
 
-#### TEST(FixtureName, TestName)
+### TEST(FixtureName, TestName)
 
 Tests a single function.
 
-#### TEST_F(FixtureName, TestName)
+### TEST_F(FixtureName, TestName)
 
 Uses a base class:
 
@@ -22,7 +22,7 @@ TEST_F(MyTest, TestName) {
 }
 ```
 
-#### TEST_P + INSTANTIATE_TEST_CASE_P
+### TEST_P + INSTANTIATE_TEST_CASE_P
 
 Using a templated base class which accepts a parameter type,
 it's easy to use a test case with multiple values.
@@ -48,7 +48,7 @@ const TestParam high_values[] = { {100}, {102}, {104} };
 INSTANTIATE_TEST_CASE_P(HighNumbers, MyParamTest, jc_test_values_in(high_values));
 ```
 
-#### TYPED_TEST + INSTANTIATE_TEST_CASE_P
+### TYPED_TEST + INSTANTIATE_TEST_CASE_P
 
 If you wish to use a different base class to use with your tests, you can do so with too.
 
@@ -78,13 +78,13 @@ TYPED_TEST(TypedTest, Even)
 }
 ```
 
-### Base classes
+## Base classes
 
-#### jc_test_base_class
+### jc_test_base_class
 
 Used in conjunction with `TEST_F`
 
-#### template <typename ParamType> jc_test_params_class<ParamType>
+### template <typename ParamType> jc_test_params_class<ParamType>
 
 Only used in conjunction with `TEST_P`
 
@@ -98,7 +98,7 @@ jc_test_params_class {
 }
 ```
 
-### Assertions
+## Assertions
 
 The general format of each assertion is that the expected value is to the left,
 and the value to test is on the right.
