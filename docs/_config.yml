@@ -1,4 +1,5 @@
-theme: jekyll-theme-slate
+#theme: jekyll-theme-slate
+remote_theme: Wiredcraft/carte
 
 # Jekyll 3 now only supports Kramdown for Markdown
 kramdown:
