@@ -1,4 +1,4 @@
-#theme: jekyll-theme-slate
+theme: jekyll-theme-slate
 
 # Jekyll 3 now only supports Kramdown for Markdown
 kramdown:

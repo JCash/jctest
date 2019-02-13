@@ -13,7 +13,7 @@ As it turns out, it was perfectly doable, and here is the result.
 
 [test_example.cpp](./examples/test_example.cpp) :
 
-```C++
+```c++
 #define JC_TEST_IMPLEMENTATION
 #include <jc_test.h>
 

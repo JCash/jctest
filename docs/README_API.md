@@ -1,4 +1,4 @@
-# C++ API
+# c++ API
 
 ### Tests
 
@@ -10,7 +10,7 @@ Tests a single function.
 
 Uses a base class:
 
-```C++
+```c++
 struct MyTest : public jc_test_base_class {
     static void SetUpTestCase()      {...};
     static void TearDownTestCase()   {...};
@@ -27,7 +27,7 @@ TEST_F(MyTest, TestName) {
 Using a templated base class which accepts a parameter type,
 it's easy to use a test case with multiple values.
 
-```C++
+```c++
 struct TestParam {
     int value;
 };
@@ -53,7 +53,7 @@ INSTANTIATE_TEST_CASE_P(HighNumbers, MyParamTest, jc_test_values_in(high_values)
 If you wish to use a different base class to use with your tests, you can do so with too.
 
 
-```C++
+```c++
 // First, create the classes you wish to test:
 struct TestClass1 {
     int value;
@@ -91,7 +91,7 @@ Only used in conjunction with `TEST_P`
 This class implements a function `GetParam()` which is used to get the current parameter value.
 
 
-```C++
+```c++
 template <typename ParamType>
 jc_test_params_class {
     const ParamType& GetParam();
@@ -103,7 +103,7 @@ jc_test_params_class {
 The general format of each assertion is that the expected value is to the left,
 and the value to test is on the right.
 
-```C++
+```c++
     ASSERT_EQ(expected, actual);
 ```
 
@@ -111,14 +111,14 @@ Here is a full list of assertions:
 
 Boolean checks:
 
-```C++
+```c++
     ASSERT_TRUE(expr)
     ASSERT_FALSE(expr)
 ```
 
 Value A vs B checks. E.g. int, float, double or anything that has the 
 
-```C++
+```c++
     ASSERT_EQ(expected, actual) // A==B
     ASSERT_NE(expected, actual) // !(A==B)
     ASSERT_GT(expected, actual) // A > B
@@ -134,11 +134,11 @@ Value A vs B checks. E.g. int, float, double or anything that has the
 
 The EXPECT_* macros currently are defined as their fatal ASSERT_ counterparts:
 
-```C++
+```c++
     EXPECT_TRUE(expr)
     EXPECT_FALSE(expr)
     EXPECT_EQ(expected, actual)
-```
+``
 
 ### Run Time Control
 
