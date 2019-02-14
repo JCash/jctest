@@ -7,10 +7,10 @@ remote_theme: pmarsceill/just-the-docs
 search_enabled: false
 
 # just-the-docs
-color_scheme: "dark"
+#color_scheme: "dark"
 # $body-text-color: $grey-dk-100;
 # $body-heading-color: $grey-dk-300;
-# $link-color: $blue-000;
+$link-color: $blue-000;
 # $body-text-color: $grey-dk-000
 # $body-heading-color: $grey-dk-300;
 
@@ -31,7 +31,7 @@ kramdown:
 
 footer-links:
   github: JCash/jctest
-  twitter: mwesterdahl76
+  twitter: @mwesterdahl76
 
 baseurl: "/jctest"
 
