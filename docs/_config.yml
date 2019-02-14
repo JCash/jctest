@@ -14,6 +14,10 @@ $link-color: $blue-000;
 $body-text-color: $grey-dk-000
 $body-heading-color: $grey-dk-300;
 
+markdown: kramdown
+highlighter: 'rouge'
+  css_class: 'cobalt'
+
 # Jekyll 3 now only supports Kramdown for Markdown
 kramdown:
   # Use GitHub flavored markdown, including triple backtick fenced code blocks
@@ -22,7 +26,8 @@ kramdown:
   syntax_highlighter: rouge
   syntax_highlighter_opts:
     # Use existing pygments syntax highlighting css
-    css_class: 'highlight'
+    css_class: 'cobalt'
+
 
 footer-links:
   github: JCash/jctest
