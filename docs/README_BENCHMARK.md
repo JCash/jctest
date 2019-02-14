@@ -1,3 +1,7 @@
+---
+nav_order: 3
+---
+
 # Benchmarks
 
 # Feature comparisons

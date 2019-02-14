@@ -3,6 +3,10 @@
 remote_theme: pmarsceill/just-the-docs
 #theme: just-the-docs
 
+# Enable or disable the site search
+search_enabled: true
+
+
 # Jekyll 3 now only supports Kramdown for Markdown
 kramdown:
   # Use GitHub flavored markdown, including triple backtick fenced code blocks
@@ -11,7 +15,7 @@ kramdown:
   syntax_highlighter: rouge
   syntax_highlighter_opts:
     # Use existing pygments syntax highlighting css
-css_class: 'highlight'
+    css_class: 'highlight'
 
 footer-links:
   github: JCash/jctest

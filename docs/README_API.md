@@ -1,4 +1,13 @@
+---
+nav_order: 2
+has_toc: true
+---
+
 # C++ API
+{: .no_toc }
+
+1. TOC
+{:toc}
 
 ## Tests
 
@@ -12,10 +21,10 @@ Uses a base class:
 
 ```c++
 struct MyTest : public jc_test_base_class {
-    static void SetUpTestCase()      {/**/};
-    static void TearDownTestCase()   {/**/};
-    void SetUp()                     {/**/};
-    void TearDown()                  {/**/};
+    static void SetUpTestCase()     {};
+    static void TearDownTestCase()  {};
+    void SetUp()                    {};
+    void TearDown()                 {};
 };
 TEST_F(MyTest, TestName) {
     ASSERT_EQ(4, 2*2);
@@ -33,10 +42,10 @@ struct TestParam {
 };
 struct MyParamTest : public jc_test_params_class<TestParam> {
 public:
-    static void SetUpTestCase()      {/**/};
-    static void TearDownTestCase()   {/**/};
-    void SetUp()                     {/**/};
-    void TearDown()                  {/**/};
+    static void SetUpTestCase()     {};
+    static void TearDownTestCase()  {};
+    void SetUp()                    {};
+    void TearDown()                 {};
 };
 TEST_P(MyParamTest, TestParamIsEven) {
     ParamType value = GetParam();
