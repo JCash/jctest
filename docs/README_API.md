@@ -147,13 +147,13 @@ The EXPECT_* macros currently are defined as their fatal ASSERT_ counterparts:
     EXPECT_TRUE(expr)
     EXPECT_FALSE(expr)
     EXPECT_EQ(expected, actual)
-``
+```
 
-### Run Time Control
+## Run Time Control
 
-#### Command line options
+### Command line options
 
 TBD
 
-#### Environment variables
+### Environment variables
 

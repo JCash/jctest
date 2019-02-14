@@ -6,6 +6,13 @@ remote_theme: pmarsceill/just-the-docs
 # Enable or disable the site search
 search_enabled: true
 
+# just-the-docs
+# color_scheme: "dark"
+# $body-text-color: $grey-dk-100;
+# $body-heading-color: $grey-dk-300;
+$link-color: $blue-000;
+$body-text-color: $grey-dk-000
+$body-heading-color: $grey-dk-300;
 
 # Jekyll 3 now only supports Kramdown for Markdown
 kramdown:
