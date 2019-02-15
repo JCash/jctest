@@ -18,7 +18,7 @@ markdown: kramdown
 highlighter: 'rouge'
 syntax-highlighting:
   enabled : true
-  css: css/monokai.css
+  css: /assets/css/monokai.css
 
 # Jekyll 3 now only supports Kramdown for Markdown
 kramdown:
