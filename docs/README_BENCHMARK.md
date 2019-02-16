@@ -1,5 +1,6 @@
 ---
-nav_order: 3
+parent: README.md # will make this menu item a child of the index.md item
+weight: 2 # smaller weights rise to the top of the menu
 ---
 
 # Benchmarks

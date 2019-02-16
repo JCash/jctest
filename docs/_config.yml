@@ -1,6 +1,7 @@
 #theme: jekyll-theme-slate
 #remote_theme: Wiredcraft/carte
-remote_theme: pmarsceill/just-the-docs
+#remote_theme: pmarsceill/just-the-docs
+remote_theme: chromatical/jekyll-materialdocs
 #theme: just-the-docs
 
 # Enable or disable the site search
@@ -31,6 +32,13 @@ kramdown:
   #   css_class: 'cobalt'
 
 
+# site options for MaterialDocs (https://github.com/chromatical/jekyll-materialdocs)
+# logo: /path/to/logo.png # an absolute or relative image path to use as the site logo
+# mdl_colors: indigo-pink # a supported Material Design Lite color scheme
+copyright: Mathias Westerdahl # will override the copyright notice (default is site title)
+search: true # enabled by default, set to false to disable site search
+# menu_style: dropdown # will only show child menu items for the main item selected
+
 footer-links:
   github: JCash/jctest
   twitter: mwesterdahl76
@@ -40,5 +48,6 @@ baseurl: "/jctest"
 
 # Use the following plug-ins
 gems:
-#- jekyll-sitemap # Create a sitemap using the official Jekyll sitemap gem
-- just-the-docs
+  - jekyll-remote-theme
+  - jekyll-sitemap # Create a sitemap using the official Jekyll sitemap gem
+  #- just-the-docs

@@ -1,6 +1,6 @@
 ---
-nav_order: 2
-has_toc: true
+parent: README.md # will make this menu item a child of the index.md item
+weight: 1 # smaller weights rise to the top of the menu
 ---
 
 # C++ API
