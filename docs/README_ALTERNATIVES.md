@@ -1,6 +1,5 @@
 ---
-parent: README.md # will make this menu item a child of the index.md item
-weight: 3 # smaller weights rise to the top of the menu
+nav_order: 4
 ---
 
 # Alternatives

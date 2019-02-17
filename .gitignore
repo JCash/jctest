@@ -1,6 +1,9 @@
 **/build/**
 test/external/gtest/**
 
+docs/Gemfile.lock
+docs/_site/**
+
 # Prerequisites
 *.d
 

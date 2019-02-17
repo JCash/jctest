@@ -1,6 +1,5 @@
 ---
-parent: README.md # will make this menu item a child of the index.md item
-weight: 2 # smaller weights rise to the top of the menu
+nav_order: 3
 ---
 
 # Benchmarks
@@ -21,9 +20,9 @@ weight: 2 # smaller weights rise to the top of the menu
 | Run time***            |    3ms  |    3ms  |    6ms   |    5ms  |    3ms  |   4ms   |
 
 
-    *) Needs -Wno-global-constructors 
-    **) Counting code lines in C/C++ files using cloc
-    ***) A minimal test example. "clang++ -O2". Picking the fastest time.
+1. * Needs -Wno-global-constructors 
+1. ** Counting code lines in C/C++ files using cloc
+1. *** A minimal test example. "clang++ -O2". Picking the fastest time.
 
 ## Special notes
 

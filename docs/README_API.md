@@ -1,13 +1,8 @@
 ---
-parent: README.md # will make this menu item a child of the index.md item
-weight: 1 # smaller weights rise to the top of the menu
+nav_order: 2
 ---
 
 # C++ API
-{: .no_toc }
-
-1. TOC
-{:toc}
 
 ## Tests
 
@@ -20,7 +15,9 @@ Tests a single function.
 Uses a base class:
 
 ```cpp
+// a comment
 struct MyTest : public jc_test_base_class {
+    void TearDown()                 {};
     static void SetUpTestCase()     {};
     static void TearDownTestCase()  {};
     void SetUp()                    {};
@@ -28,6 +25,7 @@ struct MyTest : public jc_test_base_class {
 };
 TEST_F(MyTest, TestName) {
     ASSERT_EQ(4, 2*2);
+    ASSERT_STREQ("a", "b");
 }
 ```
 
@@ -128,25 +126,25 @@ Boolean checks:
 Value A vs B checks. E.g. int, float, double or anything that has the 
 
 ```cpp
-    ASSERT_EQ(expected, actual) // A==B
-    ASSERT_NE(expected, actual) // !(A==B)
-    ASSERT_GT(expected, actual) // A > B
-    ASSERT_LT(expected, actual) // A < B
-    ASSERT_GE(expected, actual) // A >= B
-    ASSERT_LE(expected, actual) // A <= B
+    ASSERT_EQ(expected, actual); // A==B
+    ASSERT_NE(expected, actual); // !(A==B)
+    ASSERT_GT(expected, actual); // A > B
+    ASSERT_LT(expected, actual); // A < B
+    ASSERT_GE(expected, actual); // A >= B
+    ASSERT_LE(expected, actual); // A <= B
 
-    ASSERT_NEAR(expected, actual, epsilon)  // abs(A - B) <= epsilon
+    ASSERT_NEAR(expected, actual, epsilon);  // abs(A - B) <= epsilon
 
-    ASSERT_STREQ(expected, actual)  // strcmp(A, B) == 0. A or B can be 0.
-    ASSERT_STRNE(expected, actual)  // strcmp(A, B) != 0. A or B can be 0.
+    ASSERT_STREQ(expected, actual);  // strcmp(A, B) == 0. A or B can be 0.
+    ASSERT_STRNE(expected, actual);  // strcmp(A, B) != 0. A or B can be 0.
 ```
 
 The EXPECT_* macros currently are defined as their fatal ASSERT_ counterparts:
 
 ```cpp
-    EXPECT_TRUE(expr)
-    EXPECT_FALSE(expr)
-    EXPECT_EQ(expected, actual)
+    EXPECT_TRUE(expr);
+    EXPECT_FALSE(expr);
+    EXPECT_EQ(expected, actual);
 ```
 
 ## Run Time Control
