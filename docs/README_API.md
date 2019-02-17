@@ -4,7 +4,7 @@ nav_order: 2
 
 # C++ API
 
-## Tests
+## Tests Fixtures
 
 ### TEST(FixtureName, TestName)
 
@@ -17,7 +17,6 @@ Uses a base class:
 ```cpp
 // a comment
 struct MyTest : public jc_test_base_class {
-    void TearDown()                 {};
     static void SetUpTestCase()     {};
     static void TearDownTestCase()  {};
     void SetUp()                    {};
