@@ -4,7 +4,7 @@ nav_order: 2
 
 # C++ API
 
-## Tests Fixtures
+## Test Fixtures
 
 ### TEST(FixtureName, TestName)
 

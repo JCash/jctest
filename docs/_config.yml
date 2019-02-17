@@ -1,27 +1,27 @@
-# #theme: jekyll-theme-slate
-# remote_theme: pmarsceill/just-the-docs
+#theme: jekyll-theme-slate
+remote_theme: pmarsceill/just-the-docs
 
-# search: false
+search: false
 
-# markdown: kramdown
-# highlighter: rouge
+markdown: kramdown
+highlighter: rouge
 
-# # Jekyll 3 now only supports Kramdown for Markdown
-# kramdown:
-#   # Use GitHub flavored markdown, including triple backtick fenced code blocks
-#   input: GFM
-#   # Jekyll 3 and GitHub Pages now only support rouge for syntax highlighting
-#   syntax_highlighter: rouge
-#   syntax_highlighter_opts:
-#   # Use existing pygments syntax highlighting css
-#     default_lang: c++
-#     css_class: 'highlight'
-#     #line_numbers: true # bad idea, spans don't need linenos and would inherit this option
-#     span:
-#       line_numbers: false
-#     block:
-#       line_numbers: true
-#       start_line: 1
+# Jekyll 3 now only supports Kramdown for Markdown
+kramdown:
+  # Use GitHub flavored markdown, including triple backtick fenced code blocks
+  input: GFM
+  # Jekyll 3 and GitHub Pages now only support rouge for syntax highlighting
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+  # Use existing pygments syntax highlighting css
+    default_lang: c++
+    css_class: 'highlight'
+    #line_numbers: true # bad idea, spans don't need linenos and would inherit this option
+    # span:
+    #   line_numbers: false
+    # block:
+    #   line_numbers: true
+    #   start_line: 1
 
 # #exclude: ["node_modules/", "*.gemspec", "*.gem", "Gemfile", "Gemfile.lock", "package.json", "package-lock.json"]
 
@@ -52,29 +52,29 @@
 #   #- jekyll-avatar
 #   - just-the-docs
 
-#theme: jekyll-theme-slate
-#remote_theme: Wiredcraft/carte
-remote_theme: pmarsceill/just-the-docs
-#theme: just-the-docs
+# #theme: jekyll-theme-slate
+# #remote_theme: Wiredcraft/carte
+# remote_theme: pmarsceill/just-the-docs
+# #theme: just-the-docs
 
-# Jekyll 3 now only supports Kramdown for Markdown
-kramdown:
-  # Use GitHub flavored markdown, including triple backtick fenced code blocks
-  input: GFM
-  # Jekyll 3 and GitHub Pages now only support rouge for syntax highlighting
-  syntax_highlighter: rouge
-  syntax_highlighter_opts:
-    # Use existing pygments syntax highlighting css
-css_class: 'highlight'
+# # Jekyll 3 now only supports Kramdown for Markdown
+# kramdown:
+#   # Use GitHub flavored markdown, including triple backtick fenced code blocks
+#   input: GFM
+#   # Jekyll 3 and GitHub Pages now only support rouge for syntax highlighting
+#   syntax_highlighter: rouge
+#   syntax_highlighter_opts:
+#     # Use existing pygments syntax highlighting css
+# css_class: 'highlight'
 
-footer-links:
-  github: JCash/jctest
-  twitter: mwesterdahl76
+# footer-links:
+#   github: JCash/jctest
+#   twitter: mwesterdahl76
 
-baseurl: "/"
+# baseurl: "/"
 
 
-# Use the following plug-ins
-gems:
-#- jekyll-sitemap # Create a sitemap using the official Jekyll sitemap gem
-- just-the-docs
+# # Use the following plug-ins
+# gems:
+# #- jekyll-sitemap # Create a sitemap using the official Jekyll sitemap gem
+# - just-the-docs
