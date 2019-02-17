@@ -4,7 +4,7 @@ nav_order: 4
 
 # Alternatives
 
-There are a bunch of alternatives out there
+There are many alternative test frameworks out there
 
 * [googletest](https://github.com/google/googletest) : Big Corp, Large Executable Size, Slow headers, C++11
 

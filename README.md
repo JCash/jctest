@@ -5,7 +5,7 @@
 
 # Documentation
 
-https://jcash.github.io/jctest/ (or [here](./docs/README.md))
+https://jcash.github.io/jctest/ (or [here](./docs/index.md))
 
 # jctest
 
