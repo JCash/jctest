@@ -1,20 +1,10 @@
 #theme: jekyll-theme-slate
-#remote_theme: Wiredcraft/carte # didn't work at all
 remote_theme: pmarsceill/just-the-docs
-# remote_theme: chromatical/jekyll-materialdocs # tables were ugly, search seemed to somewhat work
 
 search: false
 
 markdown: kramdown
 highlighter: rouge
-
-# syntax-highlighting:
-#   enabled : true
-#   css: /assets/css/monokai.css
-
-# rougify style base16.solarized.dark > docs/css/base16.solarized.dark.css
-# https://github.com/richleland/pygments-css
-# https://github.com/search?q=pygments+style
 
 # Jekyll 3 now only supports Kramdown for Markdown
 kramdown:
@@ -35,14 +25,6 @@ kramdown:
 
 exclude: ["node_modules/", "*.gemspec", "*.gem", "Gemfile", "Gemfile.lock", "package.json", "package-lock.json"]
 
-
-# site options for MaterialDocs (https://github.com/chromatical/jekyll-materialdocs)
-# logo: /path/to/logo.png # an absolute or relative image path to use as the site logo
-# mdl_colors: indigo-pink # a supported Material Design Lite color scheme
-# copyright: Mathias Westerdahl # will override the copyright notice (default is site title)
-# search: true # enabled by default, set to false to disable site search
-# menu_style: dropdown # will only show child menu items for the main item selected
-
 title: jctest
 description: A fast, lightweight header only C/C++ test framework library
 url: "https://jcash.github.io/jctest"
@@ -55,7 +37,6 @@ aux_links:
 
 # just-the-docs
 
-# Enable or disable the site search
 #search_enabled: false
 
 color_scheme: "dark"
@@ -68,5 +49,5 @@ footer-links:
 
 # Use the following plug-ins
 gems:
-  - jekyll-avatar
-  #- jekyll-sitemap # Create a sitemap using the official Jekyll sitemap gem
+  #- jekyll-avatar
+  - just-the-docs
