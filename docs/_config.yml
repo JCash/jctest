@@ -17,11 +17,11 @@ kramdown:
     default_lang: c++
     css_class: 'highlight'
     #line_numbers: true # bad idea, spans don't need linenos and would inherit this option
-    # span:
-    #   line_numbers: false
-    # block:
-    #   line_numbers: true
-    #   start_line: 1
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1
 
 # #exclude: ["node_modules/", "*.gemspec", "*.gem", "Gemfile", "Gemfile.lock", "package.json", "package-lock.json"]
 
@@ -30,9 +30,9 @@ kramdown:
 # url: "https://jcash.github.io/jctest"
 # baseurl: "/"
 
-# aux_links:
-#   "jctest on GitHub":
-#     - "//github.com/JCash/jctest"
+aux_links:
+  "jctest on GitHub":
+    - "//github.com/JCash/jctest"
 
 
 # # just-the-docs
