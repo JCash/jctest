@@ -26,7 +26,7 @@ kramdown:
 # #exclude: ["node_modules/", "*.gemspec", "*.gem", "Gemfile", "Gemfile.lock", "package.json", "package-lock.json"]
 
 title: jctest
-description: "A fast, lightweight header only C/C++ test framework library"
+#description: "A fast, lightweight header only C/C++ test framework library"
 url: "https://jcash.github.io/jctest"
 # baseurl: "/"
 
