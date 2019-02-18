@@ -40,29 +40,86 @@
  *
  * DISCLAIMER:
  *
- *     This software is supplied "AS IS" without any warranties and support
+ *      This software is supplied "AS IS" without any warranties and support
+ *
+ *      This software was designed to be a (non complete) replacement for GTEST,
+ *      with the intent to replace the library in an existing code base.
+ *      Although the supported features were implemented in the same spirit as the GTEST
+ *      fixtures/functions, there will be discprepancies. However, those differences have
+ *      been chosen from a pragmatic standpoint, in favor of making porting of the existing
+ *      tests feasible with minimal changes, as well as keeping this library
+ *      as light weight as possible.
+ *
  *
  * USAGE:
- *
- *
- */
 
-// WIP!
-// This new GTEST-like api needs a lot of testing
-// and also making sure the C-API is still intact.
-//
-// TODOS:
-//  * Print erroneous values, not just the expression
-//  * SCOPED_TRACE
-//  * Log start and end of each test (to easier see what output comes from each test)
-//  * Create log events, and a log_event function that can be replaced by user
-//  * Handle input parameters (e.g. --jctest_filter=FooBar*)
-//  * Support ASSERT_DEATH_IF_SUPPORTED (or similar)
-//  * Support ASSERT_NO_FATAL_FAILURE (or similar)
-//  * Check for TTY
-//  * Add UNUSED macro
-//  * ASSERT_GT(A,B) should use "!(A > B)" as check. (Etc.)
+// Use case 1:
 
+// Smallest test case
+
+#define JC_TEST_IMPLEMENTATION
+#include <jc_test.h>
+
+TEST(FixtureName, TestName) {
+    ASSERT_EQ(4, 2*2);
+}
+
+int main(int argc, char** argv) {
+    jc_test_init(int* argc, char** argv); // may modify the command line
+    return JC_TEST_RUN_ALL();
+}
+
+// Use case 2:
+
+// Test fixtures are good if you wish to call code before or after the test or fixture itself.
+
+class MyTest : public jc_test_base_class {
+public:
+ static void SetUpTestCase()      {...};
+ static void TearDownTestCase()   {...};
+ virtual void SetUp()             {...};
+ virtual void TearDown()          {...};
+};
+
+TEST_F(MyTest, TestName) {
+ ASSERT_EQ(4, 2*2);
+}
+
+// Use case 3:
+
+// Parameterized tests are good if you wish to call a test case with different parameters
+
+class MyParamTest : public jc_test_params_class<ParamType> {
+public:
+    static void SetUpTestCase()      {...};
+    static void TearDownTestCase()   {...};
+    virtual void SetUp()             {...};
+    virtual void TearDown()          {...};
+    static const ParamType&          GetParam(); // New param for each test iteration
+};
+
+TEST_P(MyParamTest, IsEven) {
+    ParamType value = GetParam();
+    ASSERT_EQ(0, value & 1);
+}
+
+// Creates a new fixture for each test param
+INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
+
+
+WIP!
+This new GTEST-like api needs a lot of testing
+and also making sure the C-API is still intact.
+TODOS:
+ * Print erroneous values, not just the expression
+ * SCOPED_TRACE
+ * Handle input parameters (e.g. --jctest_filter=FooBar*)
+ * Support ASSERT_DEATH_IF_SUPPORTED (or similar)
+ * Support ASSERT_NO_FATAL_FAILURE (or similar)
+ * ASSERT_GT(A,B) should use "!(A > B)" as check. (Etc.)
+ * Support EXPECT_* macros
+
+*/
 
 #ifndef JC_TEST_H
 #define JC_TEST_H
@@ -72,9 +129,8 @@
     #define JC_TEST_ATEXIT atexit
 #endif
 
-#ifndef JC_TEST_PRINTF
-    #include <stdio.h>
-    #define JC_TEST_PRINTF printf
+#ifndef JC_TEST_LOGF
+    #define JC_TEST_LOGF jc_test_logf
 #endif
 
 #ifndef JC_TEST_ASSERT_FN
@@ -82,26 +138,34 @@
     #define JC_TEST_ASSERT_FN assert
 #endif
 
-#ifndef JC_TEST_FMT
-    #define JC_TEST_FMT
-#endif
-
-#ifndef JC_TEST_FILENO
-    #include <stdio.h> // fileno
+#ifndef JC_TEST_SNPRINTF
+    #include <stdio.h>
     #if defined(_MSC_VER)
-        #define JC_TEST_FILENO _fileno
+        #define JC_TEST_SNPRINTF _snprintf
     #else
-        #define JC_TEST_FILENO fileno
+        #define JC_TEST_SNPRINTF snprintf
     #endif
 #endif
 
-#ifndef JC_TEST_ISATTY
-    #if defined(_MSC_VER)
-        #include <io.h>
-        #define JC_TEST_ISATTY _isatty
-    #else
-        #include <unistd.h>
-        #define JC_TEST_ISATTY isatty
+#if defined(JC_TEST_NO_COLORS)
+    #define JC_TEST_ISATTY(_X) 0
+#else
+    #ifndef JC_TEST_FILENO
+        #include <stdio.h> // fileno
+        #if defined(_MSC_VER)
+            #define JC_TEST_FILENO _fileno
+        #else
+            #define JC_TEST_FILENO fileno
+        #endif
+    #endif
+    #ifndef JC_TEST_ISATTY
+        #if defined(_MSC_VER)
+            #include <io.h>
+            #define JC_TEST_ISATTY(_X) _isatty(_X)
+        #else
+            #include <unistd.h>
+            #define JC_TEST_ISATTY(_X) isatty(_X)
+        #endif
     #endif
 #endif
 
@@ -117,6 +181,14 @@
 
 #define JC_TEST_PASS    0
 #define JC_TEST_FAIL    1
+
+#define JC_TEST_EVENT_FIXTURE_SETUP     0
+#define JC_TEST_EVENT_FIXTURE_TEARDOWN  1
+#define JC_TEST_EVENT_TEST_SETUP        2
+#define JC_TEST_EVENT_TEST_TEARDOWN     3
+#define JC_TEST_EVENT_ASSERT_FAILED     4
+#define JC_TEST_EVENT_EXPECT_FAILED     5
+#define JC_TEST_EVENT_SUMMARY           6
 
 #ifndef JC_TEST_MAX_NUM_TESTS_PER_FIXTURE
     #define JC_TEST_MAX_NUM_TESTS_PER_FIXTURE 128
@@ -218,8 +290,10 @@ typedef struct jc_test_state
     int is_a_tty:1;
     int _padding1:31;
     int _padding2[2];
+    jc_test_entry*      current_test;
     jc_test_fixture*    current_fixture;
     jc_test_fixture*    fixtures[JC_TEST_MAX_NUM_FIXTURES];
+    fpos_t              stdout_pos; // set at the start of each test
 } jc_test_state;
 
 
@@ -227,9 +301,9 @@ typedef struct jc_test_state
 void jc_test_init(int* argc, char** argv);
 
 #ifdef JC_TEST_IMPLEMENTATION
-static jc_test_state jc_test_global_state = { {0, 0, 0, 0, 0}, 0, 0, 0, {0, 0}, 0, {0} };
+static jc_test_state jc_test_global_state = { {0, 0, 0, 0, 0}, 0, 0, 0, {0, 0}, 0, 0, {0}, 0 };
 #else
-extern jc_test_state jc_test_global_state;
+static jc_test_state jc_test_global_state;
 #endif
 
 #if defined(_MSC_VER)
@@ -278,7 +352,7 @@ extern jc_test_state jc_test_global_state;
 
 #define JC_TEST_FN(_TEST_)         { #_TEST_, JC_TEST_CAST(jc_test_func, (_TEST_)) },
 
-#define JC_TEST_RUN(_NAME_)         jc_test_run_test_fixture( & __jc_test_fixture_##_NAME_ )
+#define JC_TEST_RUN(_NAME_)         jc_test_run_fixture( & __jc_test_fixture_##_NAME_ )
 #define JC_TEST_RUN_ALL()           jc_test_run_all_tests(&jc_test_global_state)
 
 #define JC_TEST_FILE_AND_LINE       const int jc_test_line = __LINE__; const char* jc_test_filename = __FILE__;
@@ -286,12 +360,17 @@ extern jc_test_state jc_test_global_state;
 extern void jc_test_set_test_fail();
 extern void jc_test_increment_assertions();
 extern int jc_test_streq(const char* a, const char* b);
+extern void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, const jc_test_stats* stats, int event, const char* format, ...);
 
-#define JC_TEST_FAILm(_MSG)                                                             \
-    {                                                                                   \
-        JC_TEST_FILE_AND_LINE;                                                          \
-        JC_TEST_PRINTF("\n\t%s( %d ): %s\n", jc_test_filename, jc_test_line, (_MSG));   \
-        jc_test_set_test_fail();                                                        \
+#define JC_TEST_FAILm(_MSG)                                                 \
+    {                                                                       \
+        JC_TEST_FILE_AND_LINE;                                              \
+        JC_TEST_LOGF(   jc_test_global_state.current_fixture,               \
+                        jc_test_global_state.current_test,                  \
+                        &jc_test_global_state.current_fixture->stats,       \
+                        JC_TEST_EVENT_ASSERT_FAILED, "\n\t%s( %d ): %s\n",  \
+                        jc_test_filename, jc_test_line, (_MSG));            \
+        jc_test_set_test_fail();                                            \
     }
 
 #define JC_TEST_ASSERT_TRUEm(_VALUE, _MSG)                                 \
@@ -371,7 +450,7 @@ extern int jc_test_streq(const char* a, const char* b);
 
 // <-- End C TEST API
 
-extern void jc_test_run_test_fixture(jc_test_fixture* fixture);
+extern void jc_test_run_fixture(jc_test_fixture* fixture);
 extern int jc_test_run_all_tests(jc_test_state* state);
 
 #if defined(__cplusplus)
@@ -573,22 +652,12 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
 #define JC_TEST_MAKE_FUNCTION_NAME(X, Y)        JC_TEST_MAKE_NAME2(X, Y)
 #define JC_TEST_MAKE_UNIQUE_NAME(X, Y, LINE)    JC_TEST_MAKE_NAME3(X, Y, LINE)
 
-// TEST(MyNameSpace, TestName)( ASSERT_EQ(4, 2*2); )
 #define JC_TEST(testfixture,testfn)                                                                         \
     extern void JC_TEST_MAKE_FUNCTION_NAME(testfixture,testfn)(void* _jc_test_ctx);                         \
     static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) =                                      \
         jc_test_register_test_fn(#testfixture, #testfn, JC_TEST_MAKE_FUNCTION_NAME(testfixture,testfn));    \
     void JC_TEST_MAKE_FUNCTION_NAME(testfixture,testfn)(void* JC_TEST_UNUSED _jc_test_ctx)
 
-
-// class MyTest : public jc_test_base_class {
-// public:
-//     static void SetUpTestCase()      {...};
-//     static void TearDownTestCase()   {...};
-//     void SetUp()                     {...};
-//     void TearDown()                  {...};
-// };
-// TEST_F(MyTest, TestName)( ASSERT_EQ(4, 2*2); )
 #define JC_TEST_F(testfixture,testfn)                                                                       \
     class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture {                                \
         virtual void TestBody();                                                                            \
@@ -598,15 +667,6 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
             new JC_TEST_MAKE_CLASS_NAME(testfixture,testfn), JC_TEST_FIXTURE_TYPE_CLASS);                   \
     void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
 
-
-// class MyParamTest : public jc_test_params_class<ParamType> {
-// public:
-//     static void SetUpTestCase()      {...};
-//     static void TearDownTestCase()   {...};
-//     void SetUp()                     {...};
-//     void TearDown()                  {...};
-// };
-// TEST_P(MyParamTest, TestName)( ParamType value = GetParam(); ASSERT_EQ(0, value&1; )
 #define JC_TEST_P(testfixture,testfn)                                                                       \
     class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture {                                \
         virtual void TestBody();                                                                            \
@@ -616,8 +676,6 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
             new jc_test_factory<JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)>());                            \
     void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
 
-// Creates a fixture placeholder, that creates instances of the appropriate TEST_P classes, and gives them the params
-// INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
 #define JC_TEST_INSTANTIATE_TEST_CASE_P(prefix,testfixture,testvalues)                                      \
     static int JC_TEST_MAKE_UNIQUE_NAME(prefix,testfixture,__LINE__) =                                      \
         jc_test_register_param_tests<testfixture::param_t>(#testfixture, #prefix "/" #testfixture, testvalues)
@@ -691,36 +749,78 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 #ifdef JC_TEST_IMPLEMENTATION
 #undef JC_TEST_IMPLEMENTATION
 
-#ifdef JC_TEST_NO_COLORS
-    #define JC_TEST_CLR_DEFAULT ""
-    #define JC_TEST_CLR_RED     ""
-    #define JC_TEST_CLR_GREEN   ""
-    #define JC_TEST_CLR_YELLOW  ""
-    #define JC_TEST_CLR_BLUE    ""
-    #define JC_TEST_CLR_MAGENTA ""
-    #define JC_TEST_CLR_CYAN    ""
-    #define JC_TEST_CLR_WHITE   ""
-#else
-    #define JC_TEST_CLR_DEFAULT "\x1B[0m"
-    #define JC_TEST_CLR_RED     "\x1B[31m"
-    #define JC_TEST_CLR_GREEN   "\x1B[32m"
-    #define JC_TEST_CLR_YELLOW  "\x1B[33m"
-    #define JC_TEST_CLR_BLUE    "\x1B[34m"
-    #define JC_TEST_CLR_MAGENTA "\x1B[35m"
-    #define JC_TEST_CLR_CYAN    "\x1B[36m"
-    #define JC_TEST_CLR_WHITE   "\x1B[37m"
-#endif
+#define JC_TEST_CLR_DEFAULT "\x1B[0m"
+#define JC_TEST_CLR_RED     "\x1B[31m"
+#define JC_TEST_CLR_GREEN   "\x1B[32m"
+#define JC_TEST_CLR_YELLOW  "\x1B[33m"
+#define JC_TEST_CLR_BLUE    "\x1B[34m"
+#define JC_TEST_CLR_MAGENTA "\x1B[35m"
+#define JC_TEST_CLR_CYAN    "\x1B[36m"
+#define JC_TEST_CLR_WHITE   "\x1B[37m"
 
-// wip
-// static const int JC_TEST_CLR_DEFAULT = 0;
-// static const int JC_TEST_CLR_RED     = 1;
-// static const int JC_TEST_CLR_GREEN   = 2;
-// static const int JC_TEST_CLR_YELLOW  = 3;
-// static const int JC_TEST_CLR_BLUE    = 4;
-// static const int JC_TEST_CLR_MAGENTA = 5;
-// static const int JC_TEST_CLR_CYAN    = 6;
-// static const int JC_TEST_CLR_WHITE   = 7;
-// static char* jc_test_colors[] = {"\x1B[0m","\x1B[31m","\x1B[32m","\x1B[33m","\x1B[34m","\x1B[35m","\x1B[36m","\x1B[37m"};
+#define JC_TEST_COL(CLR) (jc_test_global_state.is_a_tty ? JC_TEST_CLR_ ## CLR : "")
+
+static inline int jc_test_cmp_fpos_t(const fpos_t* a, const fpos_t* b) {
+    #if defined(__linux__)
+        return a->__pos == b->__pos;
+    #else
+        return *a == *b;
+    #endif
+}
+
+static size_t jc_test_snprint_time(char* buffer, size_t buffer_len, jc_test_time_t t);
+
+void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, const jc_test_stats* stats, int event, const char* format, ...) {
+    char buffer[1024];
+    char* cursor = buffer;
+    const char* end = buffer + sizeof(buffer);
+    const char* pass = jc_test_global_state.is_a_tty ? JC_TEST_CLR_GREEN "PASS" JC_TEST_CLR_DEFAULT : "PASS";
+    const char* fail = jc_test_global_state.is_a_tty ? JC_TEST_CLR_RED "FAIL" JC_TEST_CLR_DEFAULT : "FAIL";
+
+    if (event == JC_TEST_EVENT_FIXTURE_SETUP) {
+        JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "%s%s%s\n", JC_TEST_COL(CYAN), fixture->name, JC_TEST_COL(DEFAULT));
+    } else if (event == JC_TEST_EVENT_FIXTURE_TEARDOWN) {
+        jc_test_time_t totaltime = fixture->stats.totaltime;
+        if (fixture->parent) {
+            totaltime = fixture->parent->stats.totaltime;
+        }
+        cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "%s%s%s took ", JC_TEST_COL(CYAN), fixture->name, JC_TEST_COL(DEFAULT));
+        jc_test_snprint_time(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), totaltime);
+        JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), ")\n");
+
+    } else if (event == JC_TEST_EVENT_TEST_SETUP) {
+        cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "%s%s%s", JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
+        if (fixture->index != 0xFFFFFFFF) {
+            JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "/%d ", fixture->index);
+        }
+    } else if (event == JC_TEST_EVENT_TEST_TEARDOWN) {
+        fpos_t stdout_pos;
+        fgetpos(stdout, &stdout_pos);
+        const char* return_char = jc_test_cmp_fpos_t(&stdout_pos, &jc_test_global_state.stdout_pos) ? "\r" : "\n";
+
+        cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "%s%s%s%s", return_char, JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
+        if (fixture->index != 0xFFFFFFFF) {
+            cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "/%d ", fixture->index);
+        }
+        cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), " %s (", fixture->fail == JC_TEST_PASS ? pass : fail);
+        cursor += jc_test_snprint_time(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), stats->totaltime);
+        JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), ")\n");
+    } else if (event == JC_TEST_EVENT_ASSERT_FAILED) {
+        (void)format;
+    } else if (event == JC_TEST_EVENT_EXPECT_FAILED) {
+    } else if (event == JC_TEST_EVENT_SUMMARY) {
+        cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "Ran %d tests, with %d assertions in ", stats->num_tests, stats->num_assertions);
+        cursor += jc_test_snprint_time(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), stats->totaltime);
+        if( stats->num_fail)
+            JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "\n%d tests passed, and %d tests %sFAILED%s\n", stats->num_pass, stats->num_fail, JC_TEST_COL(RED), JC_TEST_COL(DEFAULT));
+        else
+            JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "\n%d tests %sPASSED%s\n", stats->num_pass, JC_TEST_COL(GREEN), JC_TEST_COL(DEFAULT));
+    }
+    buffer[sizeof(buffer)-1] = 0;
+    printf("%s", buffer);
+}
+
+#undef JC_TEST_COL
 
 #if defined(__cplusplus)
 
@@ -856,20 +956,21 @@ void jc_test_increment_assertions()
     ++jc_test_global_state.current_fixture->stats.num_assertions;
 }
 
-static void jc_test_report_time(jc_test_time_t t) // Micro seconds
+static size_t jc_test_snprint_time(char* buffer, size_t buffer_len, jc_test_time_t t) // Micro seconds
 {
 #ifdef _MSC_VER
     #define JC_TEST_MICROSECONDS_STR "us"
 #else
     #define JC_TEST_MICROSECONDS_STR "\u00b5s"
 #endif
-
+    int printed;
     if( t < 5000 )
-        JC_TEST_PRINTF("%g %s", JC_TEST_STATIC_CAST(double, t), JC_TEST_MICROSECONDS_STR);
+        printed = JC_TEST_SNPRINTF(buffer, buffer_len, "%g %s", JC_TEST_STATIC_CAST(double, t), JC_TEST_MICROSECONDS_STR);
     else if( t < 500000 )
-        JC_TEST_PRINTF("%g %s", t / 1000.0, "ms");
+        printed = JC_TEST_SNPRINTF(buffer, buffer_len, "%g %s", t / 1000.0, "ms");
     else
-        JC_TEST_PRINTF("%g %s", t / 1000000.0, "s");
+        printed = JC_TEST_SNPRINTF(buffer, buffer_len, "%g %s", t / 1000000.0, "s");
+    return JC_TEST_STATIC_CAST(size_t, printed);
 }
 
 #if defined(__cplusplus)
@@ -882,15 +983,7 @@ static void jc_test_report_time(jc_test_time_t t) // Micro seconds
             //(((jc_test_base_class*)(INSTANCE)) -> * (_FN) ) ();
 #endif
 
-static inline int jc_test_cmp_fpos_t(const fpos_t* a, const fpos_t* b) {
-    #if defined(__linux__)
-        return a->__pos == b->__pos;
-    #else
-        return *a == *b;
-    #endif
-}
-
-void jc_test_run_test_fixture(jc_test_fixture* fixture)
+void jc_test_run_fixture(jc_test_fixture* fixture)
 {
     jc_test_global_state.current_fixture = fixture;
     if (fixture->type == JC_TEST_FIXTURE_TYPE_PARAMS_CLASS) {
@@ -902,7 +995,7 @@ void jc_test_run_test_fixture(jc_test_fixture* fixture)
     fixture->stats.totaltime = 0;
     jc_test_time_t timestart = JC_TEST_TIMING_FUNC();
     if (fixture->first) {
-        JC_TEST_PRINTF("%s%s%s\n", JC_TEST_CLR_CYAN, fixture->name, JC_TEST_CLR_DEFAULT);
+        JC_TEST_LOGF(fixture, 0, 0, JC_TEST_EVENT_FIXTURE_SETUP, "");
     }
     if(fixture->type == JC_TEST_FIXTURE_TYPE_FUNCTION) {
         if (fixture->first && fixture->c.fixture_setup != 0) {
@@ -923,14 +1016,11 @@ void jc_test_run_test_fixture(jc_test_fixture* fixture)
     {
         jc_test_entry* test = &fixture->tests[count];
         fixture->fail = JC_TEST_PASS;
+        jc_test_global_state.current_test = test;
 
-        if (fixture->index == 0xFFFFFFFF) {
-            JC_TEST_PRINTF("%s%s%s: ", JC_TEST_CLR_YELLOW, test->name, JC_TEST_CLR_DEFAULT);
-        } else {
-            JC_TEST_PRINTF("%s%s%s/%d: ", JC_TEST_CLR_YELLOW, test->name, JC_TEST_CLR_DEFAULT, fixture->index);
-        }
-        fpos_t stdout_pos_start;
-        fgetpos(stdout, &stdout_pos_start);
+        JC_TEST_LOGF(fixture, test, 0, JC_TEST_EVENT_TEST_SETUP, "");
+
+        fgetpos(stdout, &jc_test_global_state.stdout_pos);
 
         jc_test_time_t teststart = 0;
         jc_test_time_t testend = 0;
@@ -972,18 +1062,8 @@ void jc_test_run_test_fixture(jc_test_fixture* fixture)
             }
         }
 
-        fpos_t stdout_pos_end;
-        fgetpos(stdout, &stdout_pos_end);
-
-        const char* return_char = jc_test_cmp_fpos_t(&stdout_pos_end, &stdout_pos_start) ? "\r" : "\n";
-
-        if (fixture->index == 0xFFFFFFFF) {
-            JC_TEST_PRINTF("%s%s%s%s %s (", return_char, JC_TEST_CLR_YELLOW, test->name, JC_TEST_CLR_DEFAULT, fixture->fail == JC_TEST_PASS ? (JC_TEST_CLR_GREEN "PASS" JC_TEST_CLR_DEFAULT) : (JC_TEST_CLR_RED "FAIL" JC_TEST_CLR_DEFAULT) );
-        } else {
-            JC_TEST_PRINTF("%s%s%s%s/%d %s (", return_char, JC_TEST_CLR_YELLOW, test->name, JC_TEST_CLR_DEFAULT, fixture->index, fixture->fail == JC_TEST_PASS ? (JC_TEST_CLR_GREEN "PASS" JC_TEST_CLR_DEFAULT) : (JC_TEST_CLR_RED "FAIL" JC_TEST_CLR_DEFAULT) );
-        }
-        jc_test_report_time(testend - teststart);
-        JC_TEST_PRINTF(")\n");
+        jc_test_stats test_stats = {0, 0, 0, 0, testend-teststart};
+        JC_TEST_LOGF(fixture, test, &test_stats, JC_TEST_EVENT_TEST_TEARDOWN, "");
 
         if( fixture->fail == JC_TEST_PASS )
             ++fixture->stats.num_pass;
@@ -991,6 +1071,7 @@ void jc_test_run_test_fixture(jc_test_fixture* fixture)
             ++fixture->stats.num_fail;
         ++fixture->stats.num_tests;
     }
+    jc_test_global_state.current_test = 0;
 
     if(fixture->type == JC_TEST_FIXTURE_TYPE_FUNCTION) {
         if(fixture->last && fixture->c.fixture_teardown != 0) {
@@ -1012,14 +1093,7 @@ void jc_test_run_test_fixture(jc_test_fixture* fixture)
     }
 
     if (fixture->last) {
-        jc_test_time_t totaltime = fixture->stats.totaltime;
-        if (fixture->parent) {
-            totaltime = fixture->parent->stats.totaltime;
-        }
-
-        JC_TEST_PRINTF("%s%s%s took ", JC_TEST_CLR_CYAN, fixture->name, JC_TEST_CLR_DEFAULT);
-        jc_test_report_time(totaltime);
-        JC_TEST_PRINTF("\n");
+        JC_TEST_LOGF(fixture, 0, &fixture->stats, JC_TEST_EVENT_FIXTURE_TEARDOWN, "");
     }
     jc_test_global_state.current_fixture = 0;
 }
@@ -1031,7 +1105,7 @@ int jc_test_run_all_tests(jc_test_state* state)
     {
         if( state->fixtures[i] )
         {
-            jc_test_run_test_fixture( state->fixtures[i] );
+            jc_test_run_fixture( state->fixtures[i] );
 
             state->stats.num_assertions += state->fixtures[i]->stats.num_assertions;
             state->stats.num_pass += state->fixtures[i]->stats.num_pass;
@@ -1041,14 +1115,7 @@ int jc_test_run_all_tests(jc_test_state* state)
         }
     }
 
-    JC_TEST_PRINTF("Ran %d tests, with %d assertions in ", state->stats.num_tests, state->stats.num_assertions);
-    jc_test_report_time(state->stats.totaltime);
-    JC_TEST_PRINTF("\n");
-    if( state->stats.num_fail)
-        JC_TEST_PRINTF("%d tests passed, and %d tests %sFAILED%s\n", state->stats.num_pass, state->stats.num_fail, JC_TEST_CLR_RED, JC_TEST_CLR_DEFAULT);
-    else
-        JC_TEST_PRINTF("%d tests %sPASSED%s\n", state->stats.num_pass, JC_TEST_CLR_GREEN, JC_TEST_CLR_DEFAULT);
-
+    JC_TEST_LOGF(0, 0, &state->stats, JC_TEST_EVENT_SUMMARY, "");
     return state->stats.num_fail;
 }
 

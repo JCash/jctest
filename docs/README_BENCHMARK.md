@@ -23,19 +23,3 @@ nav_order: 3
 1. * Needs -Wno-global-constructors 
 1. ** Counting code lines in C/C++ files using cloc
 1. *** A minimal test example. "clang++ -O2". Picking the fastest time.
-
-## Special notes
-
-### utest
-
-* utest doesn't compile unless you include "\_stricmp" before the header
-
-* catch2 is extremely slow, and the code size is extreme too
-
-### Coding style
-
-* jctest was designed to mimic gtest as closely as possible, to ease the transition.
-
-* greatest and utest are quite alike in the setup and testing.
-
-* doctest and catch2 has a similar code style (BDD?)
