@@ -104,48 +104,6 @@ jc_test_params_class {
 }
 ```
 
-## Assertions
-
-The general format of each assertion is that the expected value is to the left,
-and the value to test is on the right.
-
-```cpp
-    ASSERT_EQ(expected, actual);
-```
-
-Here is a full list of assertions:
-
-Boolean checks:
-
-```cpp
-    ASSERT_TRUE(expr)
-    ASSERT_FALSE(expr)
-```
-
-Value A vs B checks. E.g. int, float, double or anything that has the 
-
-```cpp
-    ASSERT_EQ(expected, actual); // A==B
-    ASSERT_NE(expected, actual); // !(A==B)
-    ASSERT_GT(expected, actual); // A > B
-    ASSERT_LT(expected, actual); // A < B
-    ASSERT_GE(expected, actual); // A >= B
-    ASSERT_LE(expected, actual); // A <= B
-
-    ASSERT_NEAR(expected, actual, epsilon);  // abs(A - B) <= epsilon
-
-    ASSERT_STREQ(expected, actual);  // strcmp(A, B) == 0. A or B can be 0.
-    ASSERT_STRNE(expected, actual);  // strcmp(A, B) != 0. A or B can be 0.
-```
-
-The EXPECT_* macros currently are defined as their fatal ASSERT_ counterparts:
-
-```cpp
-    EXPECT_TRUE(expr);
-    EXPECT_FALSE(expr);
-    EXPECT_EQ(expected, actual);
-```
-
 ## Run Time Control
 
 ### Command line options

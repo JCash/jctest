@@ -1,5 +1,5 @@
 ---
-nav_order: 3
+nav_order: 4
 ---
 
 # Benchmarks
@@ -14,7 +14,7 @@ nav_order: 3
 | -Wall                  |   yes   |   yes   |    no    |   no    |   yes   |   yes   |
 | -Weverything           |   yes   |    no   |    no    |   no    |   yes   |    no   |
 | -pedantic              |   yes*  |    no   |    no    |   no    |   yes   |    no   |
-| Lines of Code**        |  <800   |  10000+ |   <1000  |  <400   |  4000+  |  11000+ |
+| Lines of Code**        |  <1100  |  10000+ |   <1000  |  <400   |  4000+  |  11000+ |
 | Size of program***     |  16144  |  414608 |   19228  |  18280  |  146348 |  829572 |
 | Compile time***        |  145ms  |  639ms  |   168ms  |   89ms  |  1891ms | 10965ms |
 | Run time***            |    3ms  |    3ms  |    6ms   |    5ms  |    3ms  |   4ms   |

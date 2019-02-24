@@ -9,8 +9,10 @@ fi
 OPT="-g -O2"
 #DISASSEMBLY="-S -masm=intel"
 #PREPROCESS="-E"
-#ASAN="-fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope -fsanitize=undefined"
-#ASAN_LDFLAGS="-fsanitize=address "
+#OPT="-g -O0"
+ASAN="-fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope -fsanitize=undefined"
+ASAN_LDFLAGS="-fsanitize=address "
+
 CXXFLAGS="$CXXFLAGS -std=c++98 -Wall -Weverything -pedantic -Wno-global-constructors -Isrc -I. $ASAN $PREPROCESS"
 LDFLAGS="$ASAN_LDFLAGS"
 ARCH=-m64
@@ -29,6 +31,7 @@ function compile_test {
 
 time compile_test params
 time compile_test typed_test
+time compile_test expect
 
 if [ "Darwin" == `uname` ]; then
     echo ""
@@ -41,6 +44,7 @@ if [ "Darwin" == `uname` ]; then
 
     time compile_test params
     time compile_test typed_test
+    time compile_test expect
 fi
 
 clang++ -o ./build/test_example $OPT $DISASSEMBLY $ARCH $CXXFLAGS docs/examples/test_example.cpp

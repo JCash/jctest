@@ -1,0 +1,55 @@
+---
+nav_order: 3
+---
+
+# Assertions
+
+There are two type of assertions:
+
+* ASSERT_* - fatal asserts
+* EXPECT_* - non fatal asserts
+
+The general format of each assertion is that the expected value is to the left,
+and the value to test is on the right.
+
+```cpp
+    ASSERT_EQ(expected, actual);
+```
+
+Below is a full list of assertions
+
+## ASSERT_*
+
+Boolean assertions:
+
+* ASSERT_TRUE(expr)
+* ASSERT_FALSE(expr)
+
+Value A vs B checks. E.g. int, float, double or any type that has the correct operator defined
+
+* ASSERT_EQ(expected, value) -> ==
+* ASSERT_NE(expected, value) -> !=
+* ASSERT_LT(expected, value) ->  <
+* ASSERT_GT(expected, value) ->  >
+* ASSERT_LE(expected, value) -> <=
+* ASSERT_GE(expected, value) -> >=
+* ASSERT_NEAR(expected, value, epsilon) -> abs(expected - value) < epsilon
+
+String assertions:
+
+* ASSERT_STREQ(expected, value) -> Tests two null terminated strings for equality
+* ASSERT_STRNE(expected, value) -> Tests two null terminated strings for inequality
+
+## EXPECT_*
+
+See the list under ASSERT_*
+Only difference is that these tests aren't fatal.
+
+# Floating point assertions
+
+## ASSERT_EQ, ASSERT_NE
+
+In this framework the comparison is done by comparing the bits in each float number.
+
+## ASSERT_NEAR
+
