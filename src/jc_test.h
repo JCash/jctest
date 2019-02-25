@@ -278,7 +278,7 @@ typedef struct jc_test_fixture
     unsigned int            last:1;     // If it's the last in a range of fixtures
     unsigned int            fatal:1;    // If set, it aborts the test
     unsigned int            index;      // the index of the param in the original params array
-    unsigned int            num_tests;
+    int                     num_tests;
     int                     signum:8;   // If we're checking for a signal
     int                     line:16;    // The line of the current ASSERT/EXPECT
     int                     _pad:8;
@@ -1314,7 +1314,7 @@ jc_test_time_t jc_test_get_time(void) {
     LARGE_INTEGER tick;
     QueryPerformanceFrequency(&tickPerSecond);
     QueryPerformanceCounter(&tick);
-    return JC_TEST_STATIC_CAST(jc_test_time_t, tick.QuadPart / (tickPerSecond.QuadPart / 1000000);
+    return JC_TEST_STATIC_CAST(jc_test_time_t, tick.QuadPart / (tickPerSecond.QuadPart / 1000000));
 }
 
 #else
