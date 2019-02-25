@@ -11,5 +11,5 @@ function run_tests {
     done
 }
 
-run_tests gtest_*
+#run_tests gtest_*
 run_tests jctest_*

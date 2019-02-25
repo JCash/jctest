@@ -1128,15 +1128,14 @@ static void jc_test_signal_hook_sigabrt(int signum) {
 }
 
 static void jc_test_global_cleanup() {
-    for (int i = 0; i < jc_test_get_state()->num_fixtures; ++i) {
-        for (int j = 0; j < JC_TEST_MAX_NUM_TESTS_PER_FIXTURE; ++j) {
-            if (!jc_test_get_state()->fixtures[i]->tests[j].name) {
-                break;
-            }
-            if (jc_test_get_state()->fixtures[i]->tests[j].instance)
-                delete jc_test_get_state()->fixtures[i]->tests[j].instance;
+    jc_test_state* state = jc_test_get_state();
+    for (int i = 0; i < state->num_fixtures; ++i) {
+        for (int j = 0; j < state->fixtures[i]->num_tests; ++j) {
+            if (state->fixtures[i]->tests[j].instance)
+                delete state->fixtures[i]->tests[j].instance;
         }
-        delete jc_test_get_state()->fixtures[i];
+        delete state->fixtures[i]->ctx;
+        delete state->fixtures[i];
     }
 }
 
@@ -1346,8 +1345,8 @@ void jc_test_init(int* argc, char** argv) {
 #ifndef JC_TEST_NO_DEATH_TEST
     signal(SIGABRT, jc_test_signal_hook_sigabrt);
 #endif
-
-    jc_test_global_state.is_a_tty = JC_TEST_ISATTY(JC_TEST_FILENO(stdout));
+    FILE* o = stdout;
+    jc_test_global_state.is_a_tty = JC_TEST_ISATTY(JC_TEST_FILENO(o));
 }
 
 #endif
