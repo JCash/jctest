@@ -111,13 +111,10 @@ WIP!
 This new GTEST-like api needs a lot of testing
 and also making sure the C-API is still intact.
 TODOS:
- * Print erroneous values, not just the expression
  * SCOPED_TRACE
  * Handle input parameters (e.g. --jctest_filter=FooBar*)
  * Support ASSERT_DEATH_IF_SUPPORTED (or similar)
  * Support ASSERT_NO_FATAL_FAILURE (or similar)
- * ASSERT_GT(A,B) should use "!(A > B)" as check. (Etc.)
- * Support EXPECT_* macros
 
 */
 
@@ -180,6 +177,12 @@ TODOS:
     #define JC_TEST_UNUSED __attribute__ ((unused))
 #else
     #define JC_TEST_UNUSED
+#endif
+
+#if !defined(JC_TEST_UINT64)
+    #include <stdint.h>
+    #define JC_TEST_UINT64 uint64_t
+    #define JC_TEST_UINT32 uint32_t
 #endif
 
 #define JC_TEST_PASS    0
@@ -445,23 +448,23 @@ static inline bool jc_test_cmp_float(T a, T b) {
 }
 
 template <typename T> int jc_test_cmp_EQ(double a, T b, const char* exprA, const char* exprB) {
-    if (jc_test_cmp_float<uint64_t>(a, b)) return 1;
+    if (jc_test_cmp_float<JC_TEST_UINT64>(a, b)) return 1;
     jc_test_log_failure(a, b, exprA, exprB, "==");
     return 0;
 }
 template <typename T> int jc_test_cmp_EQ(float a, T b, const char* exprA, const char* exprB) {
-    if (jc_test_cmp_float<uint32_t>(a, b)) return 1;
+    if (jc_test_cmp_float<JC_TEST_UINT32>(a, b)) return 1;
     jc_test_log_failure(a, b, exprA, exprB, "==");
     return 0;
 }
 
 template <typename T> int jc_test_cmp_NE(double a, T b, const char* exprA, const char* exprB) {
-    if (!jc_test_cmp_float<uint64_t>(a, b)) return 1;
+    if (!jc_test_cmp_float<JC_TEST_UINT64>(a, b)) return 1;
     jc_test_log_failure(a, b, exprA, exprB, "!=");
     return 0;
 }
 template <typename T> int jc_test_cmp_NE(float a, T b, const char* exprA, const char* exprB) {
-    if (!jc_test_cmp_float<uint32_t>(a, b)) return 1;
+    if (!jc_test_cmp_float<JC_TEST_UINT32>(a, b)) return 1;
     jc_test_log_failure(a, b, exprA, exprB, "!=");
     return 0;
 }
@@ -1312,7 +1315,7 @@ jc_test_time_t jc_test_get_time(void) {
     LARGE_INTEGER tick;
     QueryPerformanceFrequency(&tickPerSecond);
     QueryPerformanceCounter(&tick);
-    return tick.QuadPart / (tickPerSecond.QuadPart / 1000000);
+    return JC_TEST_STATIC_CAST(jc_test_time_t, tick.QuadPart / (tickPerSecond.QuadPart / 1000000);
 }
 
 #else

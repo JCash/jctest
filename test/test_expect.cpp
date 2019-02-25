@@ -42,7 +42,7 @@ TEST(Assertions, ExpectOk)
     EXPECT_NE(1u, zero_u);
     EXPECT_NE(1.0f, zero_f);
     EXPECT_NE(1.0, zero_d);
-    //EXPECT_NEAR(1.0, zero_d);
+    EXPECT_NEAR(0.001, zero_d, 0.01);
     EXPECT_STREQ("zero", zero_s);
     EXPECT_STRNE("one", zero_s);
 }
@@ -65,6 +65,7 @@ TEST(Assertions, ExpectFail)
     EXPECT_NE(1u, zero_u);
     EXPECT_NE(1.0f, zero_f);
     EXPECT_NE(1.0, zero_d);
+    EXPECT_NEAR(0.001, zero_d, 0.01);
     EXPECT_STREQ("zero", zero_s);
     EXPECT_STRNE("one", zero_s);
 }
