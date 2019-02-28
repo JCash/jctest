@@ -376,11 +376,15 @@ static inline jc_test_fixture* jc_test_get_fixture() {
 static inline jc_test_entry* jc_test_get_test() {
     return jc_test_get_state()->current_test;
 }
-template <typename T>
-char* jc_test_print_value(char* buffer, size_t, const T) {
+template <typename T> char* jc_test_print_value(char* buffer, size_t, const T) {
     buffer[0] = '?'; buffer[1] = 0;
     return buffer+2;
 }
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const double value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const float value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const int value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const unsigned int value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const char* value);
 
 template <typename T1, typename T2>
 static inline void jc_test_log_failure(T1 a, T2 b, const char* exprA, const char* exprB, const char* op) {
@@ -1204,7 +1208,7 @@ void jc_test_run_fixture(jc_test_fixture* fixture) {
     }
     #endif
 
-    for (unsigned int count = 0; count < fixture->num_tests; ++count)
+    for (int count = 0; count < fixture->num_tests; ++count)
     {
         jc_test_entry* test = &fixture->tests[count];
         fixture->fail = JC_TEST_PASS;
