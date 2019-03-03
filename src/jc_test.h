@@ -223,10 +223,12 @@ typedef void* (*jc_test_fixture_setup_func)();
 
 #if defined(__cplusplus)
     class jc_test_base_class;
+    struct jc_test_factory_base_interface;
     typedef void (*jc_test_void_staticfunc)();
     typedef void (jc_test_base_class::*jc_test_void_memberfunc)();
 #else
     typedef int jc_test_base_class;
+    typedef int jc_test_factory_base_interface;
     typedef void (*jc_test_void_staticfunc)();
     typedef void (*jc_test_void_memberfunc)();
 #endif
@@ -264,9 +266,16 @@ struct jc_test_funcs_cpp {
 
 typedef struct jc_test_fixture
 {
-    const char*             name;
-    void*                   ctx;        // The test case instance
-    struct jc_test_fixture* parent;     // In case of parameterized tests, this points to the first test
+#if defined(__cplusplus)
+    virtual ~jc_test_fixture();
+    virtual void SetParam();
+#endif
+    const char*                     name;       // The name of the fixture
+    const char*                     filename;   // The filename of the current ASSERT/EXPECT
+    void*                           ctx;        // The test case context
+    struct jc_test_fixture*         parent;     // In case of parameterized tests, this points to the first test
+    jc_test_base_class*             instance;   // The (parameterized) test case instance
+    jc_test_factory_base_interface* factory; // The factory creating parameterized test case instances
     union {
         jc_test_funcs_c     c;
         jc_test_funcs_cpp   cpp;
@@ -278,17 +287,11 @@ typedef struct jc_test_fixture
     unsigned int            last:1;     // If it's the last in a range of fixtures
     unsigned int            fatal:1;    // If set, it aborts the test
     unsigned int            index;      // the index of the param in the original params array
-    int                     num_tests;
     int                     signum:8;   // If we're checking for a signal
     int                     line:16;    // The line of the current ASSERT/EXPECT
     int                     _pad:8;
-    const char*             filename;   // The filename of the current ASSERT/EXPECT
-    jc_test_entry   tests[JC_TEST_MAX_NUM_TESTS_PER_FIXTURE];
-
-    #if defined(__cplusplus)
-    virtual ~jc_test_fixture();
-    virtual void SetParam();
-    #endif
+    int                     num_tests;
+    jc_test_entry           tests[JC_TEST_MAX_NUM_TESTS_PER_FIXTURE];
 } jc_test_fixture;
 
 typedef struct jc_test_state
@@ -684,9 +687,12 @@ struct jc_test_fixture_with_param : public jc_test_fixture
     const ParamType* param;
 };
 
+struct jc_test_factory_base_interface {
+    virtual ~jc_test_factory_base_interface();
+};
+
 template<typename ParamType>
-struct jc_test_factory_interface {
-    virtual ~jc_test_factory_interface() {}
+struct jc_test_factory_interface : public jc_test_factory_base_interface {
     virtual jc_test_params_class<ParamType>* New() = 0;
     virtual void SetParam(const ParamType* param) = 0;
 };
@@ -719,7 +725,8 @@ int jc_test_register_param_class_test(const char* fixture_name, const char* test
                         jc_test_factory_interface<ParamType>* factory) {
     jc_test_fixture* fixture = jc_test_find_fixture(fixture_name, JC_TEST_FIXTURE_TYPE_PARAMS_CLASS);
     if (!fixture) {
-        fixture = jc_test_alloc_fixture(fixture_name, JC_TEST_FIXTURE_TYPE_PARAMS_CLASS, factory);
+        fixture = jc_test_alloc_fixture(fixture_name, JC_TEST_FIXTURE_TYPE_PARAMS_CLASS, 0);
+        fixture->factory = factory;
         fixture->cpp.fixture_setup = class_setup;
         fixture->cpp.fixture_teardown = class_teardown;
     }
@@ -797,11 +804,11 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
         fixture->cpp = prototype_fixture->cpp;
         fixture->index = index++;
 
-        jc_test_factory_interface<ParamType>* factory = JC_TEST_CAST(jc_test_factory_interface<ParamType>*, prototype_fixture->ctx);
+        jc_test_factory_interface<ParamType>* factory = JC_TEST_CAST(jc_test_factory_interface<ParamType>*, prototype_fixture->factory);
 
         fixture->param = values->Get();
         factory->SetParam(fixture->param);
-        fixture->ctx = JC_TEST_CAST(void*, factory->New());
+        fixture->instance = factory->New();
 
         fixture->num_tests = prototype_fixture->num_tests;
         jc_test_memcpy(fixture->tests, prototype_fixture->tests, sizeof(fixture->tests));
@@ -929,20 +936,18 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 #ifdef JC_TEST_IMPLEMENTATION
 #undef JC_TEST_IMPLEMENTATION
 
-template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const double value) {
-    return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "%f", value);
-}
+#define JC_TEST_PRINT_TYPE_FN(TYPE, FORMAT) \
+    template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const TYPE value) { \
+        return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, FORMAT, value); \
+    }
+
+JC_TEST_PRINT_TYPE_FN(double, "%f")
+JC_TEST_PRINT_TYPE_FN(int, "%d")
+JC_TEST_PRINT_TYPE_FN(unsigned int, "%u")
+JC_TEST_PRINT_TYPE_FN(char*, "%s")
+
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const float value) {
     return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "%f", JC_TEST_STATIC_CAST(double, value));
-}
-template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const int value) {
-    return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "%d", value);
-}
-template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const unsigned int value) {
-    return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "%u", value);
-}
-template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const char* value) {
-    return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "%s", value);
 }
 
 #define JC_TEST_CLR_DEFAULT "\x1B[0m"
@@ -1050,6 +1055,8 @@ int jc_test_streq(const char* a, const char* b) {
     return (*a - *b) == 0 ? 1 : 0;
 }
 
+jc_test_factory_base_interface::~jc_test_factory_base_interface() {}
+
 jc_test_fixture::~jc_test_fixture() {}
 void jc_test_fixture::SetParam() {}
 
@@ -1062,6 +1069,7 @@ jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* na
     fixture->ctx = ctx;
     fixture->type = fixture_type;
     fixture->parent = 0;
+    fixture->instance = 0;
     fixture->fail = 0;
     fixture->fatal = 0;
     fixture->index = 0xFFFFFFFF;
@@ -1138,7 +1146,7 @@ static void jc_test_global_cleanup() {
             if (state->fixtures[i]->tests[j].instance)
                 delete state->fixtures[i]->tests[j].instance;
         }
-        delete state->fixtures[i]->ctx;
+        delete state->fixtures[i]->instance;
         delete state->fixtures[i];
     }
 }
@@ -1225,7 +1233,7 @@ void jc_test_run_fixture(jc_test_fixture* fixture) {
         jc_test_void_memberfunc cppfns[3] = { &jc_test_base_class::SetUp, &jc_test_base_class::TestBody, &jc_test_base_class::TearDown };
 
         #if defined(__cplusplus)
-        jc_test_base_class* instance = JC_TEST_CAST(jc_test_base_class*, fixture->ctx);
+        jc_test_base_class* instance = fixture->instance; // parameterized test
         if (test->instance) {
             instance = test->instance;
         }
