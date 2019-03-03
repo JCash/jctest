@@ -13,9 +13,11 @@ OPT="-g -O2"
 ASAN="-fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope -fsanitize=undefined"
 ASAN_LDFLAGS="-fsanitize=address "
 
-CXXFLAGS="$CXXFLAGS -std=c++98 -Wall -Weverything -pedantic -Wno-global-constructors -Isrc -I. $ASAN $PREPROCESS"
+CXXFLAGS="$CXXFLAGS -std=c++98 -Wall -Weverything -pedantic -Wno-global-constructors -fno-exceptions -Isrc -I. $ASAN $PREPROCESS"
 LDFLAGS="$ASAN_LDFLAGS"
 ARCH=-m64
+# CXX=/usr/local/opt/llvm/bin/clang++
+# SYSROOT="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk"
 
 # Use pedantic flags when compiling jctest tests
 echo "COMPILING WITH JCTEST"
