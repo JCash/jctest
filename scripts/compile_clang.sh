@@ -16,8 +16,9 @@ ASAN_LDFLAGS="-fsanitize=address "
 CXXFLAGS="$CXXFLAGS -std=c++98 -Wall -Weverything -pedantic -Wno-global-constructors -fno-exceptions -Isrc -I. $ASAN $PREPROCESS"
 LDFLAGS="$ASAN_LDFLAGS"
 ARCH=-m64
-# CXX=/usr/local/opt/llvm/bin/clang++
-# SYSROOT="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk"
+CXX=clang++
+CXX=/usr/local/opt/llvm/bin/clang++
+SYSROOT="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk"
 
 # Use pedantic flags when compiling jctest tests
 echo "COMPILING WITH JCTEST"
@@ -26,9 +27,9 @@ PREFIX=jctest
 
 function compile_test {
     local name=$1
-    clang++ -o ./build/${PREFIX}_test_${name}.o $OPT $DISASSEMBLY $ARCH $CXXFLAGS -c test/test_${name}.cpp
-    clang++ -o ./build/${PREFIX}_main.o $OPT $DISASSEMBLY $ARCH $CXXFLAGS -c test/main.cpp
-    clang++ -o ./build/${PREFIX}_${name} $OPT $ARCH $LDFLAGS ./build/${PREFIX}_main.o ./build/${PREFIX}_test_${name}.o
+    $CXX -o ./build/${PREFIX}_test_${name}.o $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS -c test/test_${name}.cpp
+    $CXX -o ./build/${PREFIX}_main.o $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS -c test/main.cpp
+    $CXX -o ./build/${PREFIX}_${name} $OPT $ARCH $LDFLAGS ./build/${PREFIX}_main.o ./build/${PREFIX}_test_${name}.o
 }
 
 time compile_test params
@@ -49,4 +50,4 @@ if [ "Darwin" == `uname` ]; then
     time compile_test expect
 fi
 
-clang++ -o ./build/test_example $OPT $DISASSEMBLY $ARCH $CXXFLAGS docs/examples/test_example.cpp
+$CXX -o ./build/test_example $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS docs/examples/test_example.cpp

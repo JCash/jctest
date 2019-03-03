@@ -235,12 +235,10 @@ typedef void* (*jc_test_fixture_setup_func)();
 
 typedef struct jc_test_entry
 {
-    const char*         name;
-    jc_test_base_class* instance;
-    union {
-        jc_test_func            test;
-        jc_test_void_memberfunc member_test;
-    };
+    const char*                     name;
+    jc_test_base_class*             instance;
+    jc_test_factory_base_interface* factory;    // Factory for parameterized tests
+    jc_test_func                    test; // still used?
 } jc_test_entry;
 
 typedef struct jc_test_stats
@@ -275,7 +273,6 @@ typedef struct jc_test_fixture
     void*                           ctx;        // The test case context
     struct jc_test_fixture*         parent;     // In case of parameterized tests, this points to the first test
     jc_test_base_class*             instance;   // The (parameterized) test case instance
-    jc_test_factory_base_interface* factory; // The factory creating parameterized test case instances
     union {
         jc_test_funcs_c     c;
         jc_test_funcs_cpp   cpp;
@@ -711,7 +708,7 @@ struct jc_test_factory : public jc_test_factory_interface<typename T::param_t> {
 extern jc_test_fixture* jc_test_find_fixture(const char* name, unsigned int fixture_type);
 extern jc_test_fixture* jc_test_alloc_fixture(const char* name, unsigned int fixture_type, void* ctx);
 extern jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* name, unsigned int fixture_type, void* ctx);
-extern jc_test_entry*   jc_test_add_test_to_fixture(jc_test_fixture* fixture, const char* test_name, jc_test_func test_fn, jc_test_base_class* instance);
+extern jc_test_entry*   jc_test_add_test_to_fixture(jc_test_fixture* fixture, const char* test_name, jc_test_func test_fn, jc_test_base_class* instance, jc_test_factory_base_interface* factory);
 extern void             jc_test_memcpy(void* dst, void* src, size_t size);
 
 extern int jc_test_register_test_fn(const char* fixture_name, const char* test_name, jc_test_func test_fn);
@@ -726,11 +723,10 @@ int jc_test_register_param_class_test(const char* fixture_name, const char* test
     jc_test_fixture* fixture = jc_test_find_fixture(fixture_name, JC_TEST_FIXTURE_TYPE_PARAMS_CLASS);
     if (!fixture) {
         fixture = jc_test_alloc_fixture(fixture_name, JC_TEST_FIXTURE_TYPE_PARAMS_CLASS, 0);
-        fixture->factory = factory;
         fixture->cpp.fixture_setup = class_setup;
         fixture->cpp.fixture_teardown = class_teardown;
     }
-    jc_test_add_test_to_fixture(fixture, test_name, 0, 0);
+    jc_test_add_test_to_fixture(fixture, test_name, 0, 0, factory);
     return 0;
 }
 
@@ -765,7 +761,7 @@ struct jc_test_register_typed_class_test {
             fixture->cpp.fixture_teardown = TestClass::TearDownTestCase;
         }
         fixture->index = index;
-        jc_test_add_test_to_fixture(fixture, test_name, 0, new TestClass);
+        jc_test_add_test_to_fixture(fixture, test_name, 0, new TestClass, 0);
         return jc_test_register_typed_class_test<BaseClassSelector, typename TypeList::tail>::
                     register_test(fixture_name, test_name, index+1);
     }
@@ -803,15 +799,17 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
         fixture->parent = first_fixture;
         fixture->cpp = prototype_fixture->cpp;
         fixture->index = index++;
-
-        jc_test_factory_interface<ParamType>* factory = JC_TEST_CAST(jc_test_factory_interface<ParamType>*, prototype_fixture->factory);
-
         fixture->param = values->Get();
-        factory->SetParam(fixture->param);
-        fixture->instance = factory->New();
 
         fixture->num_tests = prototype_fixture->num_tests;
-        jc_test_memcpy(fixture->tests, prototype_fixture->tests, sizeof(fixture->tests));
+        for (int i = 0; i < fixture->num_tests; ++i) {
+            fixture->tests[i].name = prototype_fixture->tests[i].name;
+            fixture->tests[i].factory = 0;
+
+            jc_test_factory_interface<ParamType>* factory = JC_TEST_CAST(jc_test_factory_interface<ParamType>*, prototype_fixture->tests[i].factory);
+            factory->SetParam(fixture->param);
+            fixture->tests[i].instance = factory->New();
+        }
 
         values->Advance();
 
@@ -1031,8 +1029,6 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
 
 #if defined(__cplusplus)
 
-static void jc_test_global_cleanup();
-
 static inline void jc_test_memset(void* _mem, unsigned int pattern, size_t size)
 {
     for (size_t i = 0; i < size; ++i) {
@@ -1083,15 +1079,15 @@ jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* na
     return jc_test_get_state()->fixtures[jc_test_get_state()->num_fixtures++] = fixture;
 }
 
-jc_test_entry* jc_test_add_test_to_fixture(jc_test_fixture* fixture, const char* test_name, jc_test_func test_fn, jc_test_base_class* instance) {
+jc_test_entry* jc_test_add_test_to_fixture(jc_test_fixture* fixture, const char* test_name, jc_test_func test_fn, jc_test_base_class* instance, jc_test_factory_base_interface* factory) {
     if (fixture->num_tests >= JC_TEST_MAX_NUM_TESTS_PER_FIXTURE) {
-        // error
-        return 0;
+        return 0; // error
     }
     jc_test_entry* test = &fixture->tests[fixture->num_tests++];
     test->name = test_name;
     test->test = test_fn;
     test->instance = instance;
+    test->factory = factory;
     return test;
 }
 
@@ -1117,7 +1113,7 @@ static jc_test_fixture* jc_test_find_or_alloc_fixture(const char* fixture_name, 
 
 int jc_test_register_test_fn(const char* fixture_name, const char* test_name, jc_test_func test_fn) {
     jc_test_fixture* fixture = jc_test_find_or_alloc_fixture(fixture_name, JC_TEST_FIXTURE_TYPE_FUNCTION, 0);
-    jc_test_add_test_to_fixture(fixture, test_name, test_fn, 0);
+    jc_test_add_test_to_fixture(fixture, test_name, test_fn, 0, 0);
     return 0;
 }
 
@@ -1130,7 +1126,7 @@ int jc_test_register_class_test(const char* fixture_name, const char* test_name,
         fixture->cpp.fixture_setup = class_setup;
         fixture->cpp.fixture_teardown = class_teardown;
     }
-    jc_test_add_test_to_fixture(fixture, test_name, 0, instance);
+    jc_test_add_test_to_fixture(fixture, test_name, 0, instance, 0);
     return 0;
 }
 
@@ -1143,8 +1139,8 @@ static void jc_test_global_cleanup() {
     jc_test_state* state = jc_test_get_state();
     for (int i = 0; i < state->num_fixtures; ++i) {
         for (int j = 0; j < state->fixtures[i]->num_tests; ++j) {
-            if (state->fixtures[i]->tests[j].instance)
-                delete state->fixtures[i]->tests[j].instance;
+            delete state->fixtures[i]->tests[j].instance;
+            delete state->fixtures[i]->tests[j].factory;
         }
         delete state->fixtures[i]->instance;
         delete state->fixtures[i];
