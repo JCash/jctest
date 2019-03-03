@@ -17,8 +17,8 @@ CXXFLAGS="$CXXFLAGS -std=c++98 -Wall -Weverything -pedantic -Wno-global-construc
 LDFLAGS="$ASAN_LDFLAGS"
 ARCH=-m64
 CXX=clang++
-CXX=/usr/local/opt/llvm/bin/clang++
-SYSROOT="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk"
+# CXX=/usr/local/opt/llvm/bin/clang++
+# SYSROOT="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk"
 
 # Use pedantic flags when compiling jctest tests
 echo "COMPILING WITH JCTEST"
