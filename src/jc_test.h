@@ -1118,7 +1118,7 @@ jc_test_time_t jc_test_get_time(void) {
 #if defined(__clang__) || defined(__GNUC__)
 __attribute__ ((noreturn))
 #endif
-static void jc_test_segfault_sigaction(int, siginfo_t*, void*) {
+static void jc_test_signal_handler(int) {
     longjmp(jc_test_get_state()->jumpenv, 1);
 }
 #endif
@@ -1134,16 +1134,24 @@ void jc_test_init(int* argc, char** argv) {
     JC_TEST_ATEXIT(jc_test_global_cleanup);
 
 #ifndef JC_TEST_NO_DEATH_TEST
+    #if defined(_MSC_VER)
+    signal(SIGILL, jc_test_signal_handler);
+    signal(SIGABRT, jc_test_signal_handler);
+    signal(SIGBUS, jc_test_signal_handler);
+    signal(SIGFPE, jc_test_signal_handler);
+    signal(SIGSEGV, jc_test_signal_handler);
+    signal(SIGPIPE, jc_test_signal_handler);
+    #else
     struct sigaction handler;
     jc_test_memset(&handler, 0, sizeof(struct sigaction));
-    handler.sa_sigaction = jc_test_segfault_sigaction;
-    handler.sa_flags = SA_SIGINFO;
+    handler.sa_handler = jc_test_signal_handler;
     sigaction(SIGILL, &handler, 0);
     sigaction(SIGABRT, &handler, 0);
     sigaction(SIGBUS, &handler, 0);
     sigaction(SIGFPE, &handler, 0);
     sigaction(SIGSEGV, &handler, 0);
     sigaction(SIGPIPE, &handler, 0);
+    #endif
 #endif
     FILE* o = stdout;
     jc_test_global_state.is_a_tty = JC_TEST_ISATTY(JC_TEST_FILENO(o));
