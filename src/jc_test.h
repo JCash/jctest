@@ -73,8 +73,7 @@ int main(int argc, char** argv) {
 
 // Test fixtures are good if you wish to call code before or after the test or fixture itself.
 
-class MyTest : public jc_test_base_class {
-public:
+struct MyTest : public jc_test_base_class {
  static void SetUpTestCase()      {...};
  static void TearDownTestCase()   {...};
  virtual void SetUp()             {...};
@@ -89,8 +88,7 @@ TEST_F(MyTest, TestName) {
 
 // Parameterized tests are good if you wish to call a test case with different parameters
 
-class MyParamTest : public jc_test_params_class<ParamType> {
-public:
+struct MyParamTest : public jc_test_params_class<ParamType> {
     static void SetUpTestCase()      {...};
     static void TearDownTestCase()   {...};
     virtual void SetUp()             {...};
@@ -105,8 +103,10 @@ TEST_P(MyParamTest, IsEven) {
 
 // Creates a new fixture for each test param
 INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
+*/
 
 
+/*
 WIP!
 This new GTEST-like api needs a lot of testing
 and also making sure the C-API is still intact.
@@ -129,6 +129,7 @@ TODOS:
 #ifndef JC_TEST_LOGF
     #include <stdarg.h>
     #include <stdio.h>
+    // Can be overridden to log in a differnt
     #define JC_TEST_LOGF jc_test_logf
     #define JC_TEST_PRINTF printf
 #endif
@@ -171,6 +172,8 @@ TODOS:
 
 #ifndef JC_TEST_NO_DEATH_TEST
     #include <signal.h>
+    #include <setjmp.h> // longjmp
+    #define JC_TEST_SETJMP _setjmp
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -215,34 +218,21 @@ TODOS:
     extern jc_test_time_t jc_test_get_time(void);
 #endif
 
-
-typedef void (*jc_test_func)(void* ctx);
-
 // Returns the user defined context for the fixture
 typedef void* (*jc_test_fixture_setup_func)();
 
-#if defined(__cplusplus)
-    class jc_test_base_class;
-    struct jc_test_factory_base_interface;
-    typedef void (*jc_test_void_staticfunc)();
-    typedef void (jc_test_base_class::*jc_test_void_memberfunc)();
-#else
-    typedef int jc_test_base_class;
-    typedef int jc_test_factory_base_interface;
-    typedef void (*jc_test_void_staticfunc)();
-    typedef void (*jc_test_void_memberfunc)();
-#endif
+struct jc_test_base_class;
+struct jc_test_factory_base_interface;
+typedef void (*jc_test_void_staticfunc)();
+typedef void (jc_test_base_class::*jc_test_void_memberfunc)();
 
-typedef struct jc_test_entry
-{
+typedef struct jc_test_entry {
     const char*                     name;
     jc_test_base_class*             instance;
     jc_test_factory_base_interface* factory;    // Factory for parameterized tests
-    jc_test_func                    test; // still used?
 } jc_test_entry;
 
-typedef struct jc_test_stats
-{
+typedef struct jc_test_stats {
     int num_pass;
     int num_fail;
     int num_assertions;
@@ -250,77 +240,50 @@ typedef struct jc_test_stats
     jc_test_time_t totaltime;
 } jc_test_stats;
 
-struct jc_test_funcs_c {
-    jc_test_fixture_setup_func  fixture_setup;
-    jc_test_func                fixture_teardown;
-    jc_test_func                test_setup;
-    jc_test_func                test_teardown;
-};
-
-struct jc_test_funcs_cpp {
-    jc_test_void_staticfunc     fixture_setup;
-    jc_test_void_staticfunc     fixture_teardown;
-};
-
-typedef struct jc_test_fixture
-{
-#if defined(__cplusplus)
+typedef struct jc_test_fixture {
     virtual ~jc_test_fixture();
     virtual void SetParam();
-#endif
-    const char*                     name;       // The name of the fixture
-    const char*                     filename;   // The filename of the current ASSERT/EXPECT
-    void*                           ctx;        // The test case context
-    struct jc_test_fixture*         parent;     // In case of parameterized tests, this points to the first test
-    jc_test_base_class*             instance;   // The (parameterized) test case instance
-    union {
-        jc_test_funcs_c     c;
-        jc_test_funcs_cpp   cpp;
-    };
-    jc_test_stats           stats;
-    unsigned int            fail:27;
-    unsigned int            type:2;     // 0: function, 1: class, 2: params class, 3: params instance
-    unsigned int            first:1;    // If it's the first in a range of fixtures
-    unsigned int            last:1;     // If it's the last in a range of fixtures
-    unsigned int            fatal:1;    // If set, it aborts the test
-    unsigned int            index;      // the index of the param in the original params array
-    int                     signum:8;   // If we're checking for a signal
-    int                     line:16;    // The line of the current ASSERT/EXPECT
-    int                     _pad:8;
-    int                     num_tests;
-    jc_test_entry           tests[JC_TEST_MAX_NUM_TESTS_PER_FIXTURE];
+    const char*                 name;       // The name of the fixture
+    const char*                 filename;   // The filename of the current ASSERT/EXPECT
+    struct jc_test_fixture*     parent;     // In case of parameterized tests, this points to the first test
+    jc_test_void_staticfunc     fixture_setup;
+    jc_test_void_staticfunc     fixture_teardown;
+    jc_test_stats               stats;
+    unsigned int                fail:27;
+    unsigned int                type:2;     // 0: function, 1: class, 2: params class, 3: params instance
+    unsigned int                first:1;    // If it's the first in a range of fixtures
+    unsigned int                last:1;     // If it's the last in a range of fixtures
+    unsigned int                fatal:1;    // If set, it aborts the test
+    unsigned int                index;      // the index of the param in the original params array
+    int                         signum:8;   // If we're checking for a signal
+    int                         line:16;    // The line of the current ASSERT/EXPECT
+    int                         _pad:8;
+    int                         num_tests;
+    jc_test_entry               tests[JC_TEST_MAX_NUM_TESTS_PER_FIXTURE];
 } jc_test_fixture;
 
-typedef struct jc_test_state
-{
-    jc_test_stats       stats;
-    int num_fixtures;
-    int is_a_tty:1;
-    int _padding1:31;
-    int _padding2[2];
+typedef struct jc_test_state {
     jc_test_entry*      current_test;
     jc_test_fixture*    current_fixture;
     jc_test_fixture*    fixtures[JC_TEST_MAX_NUM_FIXTURES];
+    jc_test_stats       stats;
     fpos_t              stdout_pos; // set at the start of each test
+    jmp_buf             jumpenv;    // Set before trying to catch exceptions
+    int                 num_fixtures:31;
+    int                 is_a_tty:1;
 } jc_test_state;
 
+// ***************************************************************************************
+// PUBLIC functions
 
 // May modify the argument list, to remove the test specific arguments
-void jc_test_init(int* argc, char** argv);
+extern void jc_test_init(int* argc, char** argv);
 
-#if defined(_MSC_VER)
-  #pragma section(".CRT$XCU",read)
-  #define JC_TEST_INITIALIZER(_NAME_) \
-    static void __cdecl jc_test_global_init_##_NAME_(void); \
-    __declspec(allocate(".CRT$XCU")) void (__cdecl* jc_test_global_init_##_NAME_##_)(void) = jc_test_global_init_##_NAME_; \
-    static void __cdecl jc_test_global_init_##_NAME_(void)
-#else
-  #define JC_TEST_INITIALIZER(_NAME_) \
-    static void jc_test_global_init_##_NAME_(void) __attribute__((constructor)); \
-    static void jc_test_global_init_##_NAME_(void)
-#endif
+extern void jc_test_run_fixture(jc_test_fixture* fixture);
+extern int jc_test_run_all_tests(jc_test_state* state);
 
-// functions
+// ***************************************************************************************
+// Private functions
 
 extern jc_test_state* jc_test_get_state();
 extern void jc_test_set_test_fail(int fatal);
@@ -329,47 +292,14 @@ extern int jc_test_streq(const char* a, const char* b);
 extern void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, const jc_test_stats* stats, int event, const char* format, ...);
 
 
-// C TEST API Begin -->
+// TEST API Begin -->
 
-#ifdef __cplusplus // casting operators to silence warnings
 #define JC_TEST_CAST(_TYPE_, _EXPR_)            reinterpret_cast< _TYPE_ >( _EXPR_ )
 #define JC_TEST_STATIC_CAST(_TYPE_, _EXPR_)     static_cast< _TYPE_ >( _EXPR_ )
-#else
-#define JC_TEST_CAST(_TYPE_, _EXPR_)            ((_TYPE_)(_EXPR_))
-#define JC_TEST_STATIC_CAST(_TYPE_, _EXPR_)     ((_TYPE_)(_EXPR_))
-#endif
 
-#ifdef __x86_64__
-#define JC_TEST_BEGIN(_NAME_, _FIXTURESETUP_, _FIXTURETEARDOWN_, _TESTSETUP_, _TESTTEARDOWN_)  \
-    static jc_test_fixture __jc_test_fixture_##_NAME_ = { #_NAME_, 0, \
-            JC_TEST_CAST(jc_test_fixture_setup_func, (_FIXTURESETUP_)), JC_TEST_CAST(jc_test_func, (_FIXTURETEARDOWN_)), \
-            JC_TEST_CAST(jc_test_func, (_TESTSETUP_)), JC_TEST_CAST(jc_test_func, (_TESTTEARDOWN_)), \
-            {0, 0, 0, 0, 0}, 0, 0, {
-#else
+#define JC_TEST_RUN(_NAME_)                     jc_test_run_fixture( & __jc_test_fixture_##_NAME_ )
+#define JC_TEST_RUN_ALL()                       jc_test_run_all_tests(jc_test_get_state())
 
-#define JC_TEST_BEGIN(_NAME_, _FIXTURESETUP_, _FIXTURETEARDOWN_, _TESTSETUP_, _TESTTEARDOWN_)  \
-    static jc_test_fixture __jc_test_fixture_##_NAME_ = { #_NAME_, 0, \
-            JC_TEST_CAST(jc_test_fixture_setup_func, (_FIXTURESETUP_)), JC_TEST_CAST(jc_test_func, (_FIXTURETEARDOWN_)), \
-            JC_TEST_CAST(jc_test_func, (_TESTSETUP_)), JC_TEST_CAST(jc_test_func, (_TESTTEARDOWN_)), \
-            {0, 0, 0, 0, 0}, 0, {
-#endif
-
-#define JC_TEST_END(_NAME_)        {0, 0} } }; \
-                                JC_TEST_INITIALIZER(_NAME_) \
-                                { \
-                                    jc_test_global_state.fixtures[jc_test_global_state.num_fixtures] = &__jc_test_fixture_##_NAME_; \
-                                    ++jc_test_global_state.num_fixtures; \
-                                }
-
-#define JC_TEST_FN(_TEST_)         { #_TEST_, JC_TEST_CAST(jc_test_func, (_TEST_)) },
-
-#define JC_TEST_RUN(_NAME_)         jc_test_run_fixture( & __jc_test_fixture_##_NAME_ )
-#define JC_TEST_RUN_ALL()           jc_test_run_all_tests(jc_test_get_state())
-
-#define JC_TEST_FILE_AND_LINE       { const int jc_test_line = __LINE__; const char* jc_test_filename = __FILE__;
-
-
-#if defined(__cplusplus)
 static inline jc_test_fixture* jc_test_get_fixture() {
     return jc_test_get_state()->current_fixture;
 }
@@ -486,82 +416,10 @@ template <typename T> int jc_test_cmp_NEAR(T a, T b, T epsilon, const char* expr
     return 0;
 }
 
-
-#endif
-
-#define JC_TEST_ASSERT_SETUP                                                \
-    jc_test_get_fixture()->line = __LINE__;                                 \
-    jc_test_get_fixture()->filename = __FILE__;                             \
+#define JC_TEST_ASSERT_SETUP                                                    \
+    jc_test_get_fixture()->line = __LINE__;                                     \
+    jc_test_get_fixture()->filename = __FILE__;                                 \
     jc_test_increment_assertions()
-
-#define JC_TEST_FAILm(_MSG)                                                 \
-    {                                                                       \
-        JC_TEST_FILE_AND_LINE;                                              \
-        JC_TEST_LOGF(   jc_test_get_fixture(),                              \
-                        jc_test_get_test(),                                 \
-                        &jc_test_get_fixture()->stats,                      \
-                        JC_TEST_EVENT_ASSERT_FAILED, "\n\t%s( %d ): %s\n",  \
-                        jc_test_filename, jc_test_line, (_MSG));            \
-        jc_test_set_test_fail();                                            \
-        return JC_TEST_FAIL;                                                \
-    }
-
-#if !defined(__cplusplus)
-
-#define JC_TEST_ASSERT_TRUEm(_VALUE, _MSG)                                  \
-    do { JC_TEST_ASSERT_SETUP;                                              \
-        if( !(_VALUE) ) { JC_TEST_FAILm(_MSG) }                             \
-    } while(0)
-
-#define JC_TEST_ASSERT_FALSEm( _VALUE, _MSG)                                \
-    do { JC_TEST_ASSERT_SETUP;                                              \
-        if( (_VALUE) ) { JC_TEST_FAILm(_MSG) }                              \
-    } while(0)
-
-#define JC_TEST_ASSERT_EQm( _EXPECTED, _VALUE, _MSG)                        \
-    do { JC_TEST_ASSERT_SETUP;                                              \
-        if( !((_EXPECTED) == (_VALUE)) ) { JC_TEST_FAILm(_MSG) }            \
-    } while(0)
-
-#define JC_TEST_ASSERT_NEm( _EXPECTED, _VALUE, _MSG)                        \
-    do { JC_TEST_ASSERT_SETUP;                                              \
-        if( ((_EXPECTED) == (_VALUE)) ) { JC_TEST_FAILm(_MSG) }             \
-    } while(0)
-
-#define JC_TEST_ASSERT_GTm( _EXPECTED, _VALUE, _MSG )                       \
-    do { JC_TEST_ASSERT_SETUP;                                              \
-        if ((_EXPECTED) <= (_VALUE)) { JC_TEST_FAILm(_MSG) }                \
-    } while(0)
-
-#define JC_TEST_ASSERT_LTm( _EXPECTED, _VALUE, _MSG )                       \
-    do { JC_TEST_ASSERT_SETUP;                                              \
-        if ((_EXPECTED) >= (_VALUE)) { JC_TEST_FAILm(_MSG) }                \
-    } while(0)
-
-#define JC_TEST_ASSERT_GEm( _EXPECTED, _VALUE, _MSG )                       \
-    do { JC_TEST_ASSERT_SETUP;                                              \
-        if ((_EXPECTED) < (_VALUE)) { JC_TEST_FAILm(_MSG) }                 \
-    } while(0)
-
-#define JC_TEST_ASSERT_LEm( _EXPECTED, _VALUE, _MSG )                       \
-    do { JC_TEST_ASSERT_SETUP;                                              \
-        if ((_EXPECTED) > (_VALUE)) { JC_TEST_FAILm(_MSG) }                 \
-    } while(0)
-
-#define JC_TEST_ASSERT_NEARm( _EXPECTED, _VALUE, _EPSILON, _MSG)                            \
-    do { JC_TEST_ASSERT_SETUP;                                                              \
-        double _expected = (_EXPECTED);                                                     \
-        double _value = (_VALUE);                                                           \
-        double _epsilon = (_EPSILON);                                                       \
-        if( JC_TEST_ABS(_expected - _value) > _epsilon ) { JC_TEST_FAILm(_MSG) }            \
-     } while(0)
-
-#define JC_TEST_ASSERT_STRm( OP, _EXPECTED, _VALUE, _MSG )                      \
-    do { JC_TEST_ASSERT_SETUP;                                                  \
-        if ( !jc_test_str_##OP(_EXPECTED, _VALUE) ) { JC_TEST_FAILm(_MSG) }     \
-    } while(0)
-
-#else
 
 #define JC_ASSERT_TEST_BOOLEAN(OP, VALUE, FATAL)                                \
     {                                                                           \
@@ -588,6 +446,16 @@ template <typename T> int jc_test_cmp_NEAR(T a, T b, T epsilon, const char* expr
         }                                                                       \
     }
 
+#define JC_TEST_EXPECT_DEATH_OP(STATEMENT, RE, FATAL)                           \
+    {                                                                           \
+        JC_TEST_ASSERT_SETUP;                                                   \
+        if (JC_TEST_SETJMP(jc_test_get_state()->jumpenv) == 0) {                \
+            STATEMENT;                                                          \
+            jc_test_set_test_fail(FATAL);                                       \
+            if (FATAL) { return; }                                              \
+        }                                                                       \
+    }
+
 #define JC_TEST_ASSERT_TRUE( VALUE )            JC_ASSERT_TEST_BOOLEAN( TRUE, VALUE, 1 )
 #define JC_TEST_ASSERT_FALSE( VALUE )           JC_ASSERT_TEST_BOOLEAN( FALSE, VALUE, 1 )
 #define JC_TEST_ASSERT_EQ( A, B )               JC_ASSERT_TEST_OP( EQ, A, B, 1 )
@@ -599,6 +467,7 @@ template <typename T> int jc_test_cmp_NEAR(T a, T b, T epsilon, const char* expr
 #define JC_TEST_ASSERT_STREQ( A, B )            JC_ASSERT_TEST_OP( STREQ, A, B, 1 )
 #define JC_TEST_ASSERT_STRNE( A, B )            JC_ASSERT_TEST_OP( STRNE, A, B, 1 )
 #define JC_TEST_ASSERT_NEAR( A, B, EPS )        JC_ASSERT_TEST_3OP( NEAR, A, B, EPS, 1 )
+#define JC_TEST_EXPECT_DEATH_IF_SUPPORTED(S, RE) JC_TEST_EXPECT_DEATH_OP(S, RE, 0)
 
 #define JC_TEST_EXPECT_TRUE( VALUE )            JC_ASSERT_TEST_BOOLEAN( TRUE, VALUE, 0 )
 #define JC_TEST_EXPECT_FALSE( VALUE )           JC_ASSERT_TEST_BOOLEAN( FALSE, VALUE, 0 )
@@ -611,21 +480,11 @@ template <typename T> int jc_test_cmp_NEAR(T a, T b, T epsilon, const char* expr
 #define JC_TEST_EXPECT_STREQ( A, B )            JC_ASSERT_TEST_OP( STREQ, A, B, 0 )
 #define JC_TEST_EXPECT_STRNE( A, B )            JC_ASSERT_TEST_OP( STRNE, A, B, 0 )
 #define JC_TEST_EXPECT_NEAR( A, B, EPS )        JC_ASSERT_TEST_3OP( NEAR, A, B, EPS, 0 )
-
-#endif
+#define JC_TEST_EXPECT_DEATH_IF_SUPPORTED(S, RE) JC_TEST_EXPECT_DEATH_OP(S, RE, 0)
 
 #define JC_TEST_SCOPED_TRACE(_MSG)
 
-
-// <-- End C TEST API
-
-extern void jc_test_run_fixture(jc_test_fixture* fixture);
-extern int jc_test_run_all_tests(jc_test_state* state);
-
-#if defined(__cplusplus)
-
-class jc_test_base_class {
-public:
+struct jc_test_base_class {
     virtual ~jc_test_base_class();
     static void SetUpTestCase() {}      // The UserClass::SetUpTestCase is called before each test case runs
     static void TearDownTestCase() {}   // The UserClass::TearDownTestCase is called after all tests have run
@@ -638,8 +497,7 @@ private:
 };
 
 template<typename T>
-class jc_test_value_iterator {
-public:
+struct jc_test_value_iterator {
     virtual ~jc_test_value_iterator();
     virtual const T* Get() const = 0;
     virtual void Advance() = 0;
@@ -649,8 +507,7 @@ public:
 template<typename T> jc_test_value_iterator<T>::~jc_test_value_iterator() {} // separate line to silence warning
 
 template<typename T>
-class jc_test_array_iterator : public jc_test_value_iterator<T> {
-public:
+struct jc_test_array_iterator : public jc_test_value_iterator<T> {
     const T *begin, *cursor, *end;
     jc_test_array_iterator(const T* _begin, const T* _end) : begin(_begin), cursor(_begin), end(_end) {}
     const T* Get() const{ return cursor; }
@@ -667,8 +524,7 @@ template<typename T, size_t N> jc_test_array_iterator<T>* jc_test_values_in(cons
 }
 
 template<typename ParamType>
-class jc_test_params_class : public jc_test_base_class {
-public:
+struct jc_test_params_class : public jc_test_base_class {
     typedef ParamType param_t;
     jc_test_params_class() {}
     static const ParamType&    GetParam()                           { return *param; }
@@ -678,9 +534,8 @@ public:
 template<typename ParamType> const ParamType* jc_test_params_class<ParamType>::param = 0;
 
 template<typename ParamType>
-struct jc_test_fixture_with_param : public jc_test_fixture
-{
-    void SetParam() { JC_TEST_CAST(jc_test_params_class<ParamType>*, ctx)->SetParam(param); }
+struct jc_test_fixture_with_param : public jc_test_fixture {
+    void SetParam() { JC_TEST_CAST(jc_test_params_class<ParamType>*, jc_test_get_state()->current_test)->SetParam(param); }
     const ParamType* param;
 };
 
@@ -700,19 +555,16 @@ struct jc_test_factory : public jc_test_factory_interface<typename T::param_t> {
     void SetParam(const typename T::param_t* param)     { T::SetParam(param); }
 };
 
-#define JC_TEST_FIXTURE_TYPE_FUNCTION           0
-#define JC_TEST_FIXTURE_TYPE_CLASS              1
-#define JC_TEST_FIXTURE_TYPE_PARAMS_CLASS       2
-#define JC_TEST_FIXTURE_TYPE_TYPED_CLASS        3
+#define JC_TEST_FIXTURE_TYPE_CLASS              0
+#define JC_TEST_FIXTURE_TYPE_PARAMS_CLASS       1
+#define JC_TEST_FIXTURE_TYPE_TYPED_CLASS        2
 
 extern jc_test_fixture* jc_test_find_fixture(const char* name, unsigned int fixture_type);
-extern jc_test_fixture* jc_test_alloc_fixture(const char* name, unsigned int fixture_type, void* ctx);
-extern jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* name, unsigned int fixture_type, void* ctx);
-extern jc_test_entry*   jc_test_add_test_to_fixture(jc_test_fixture* fixture, const char* test_name, jc_test_func test_fn, jc_test_base_class* instance, jc_test_factory_base_interface* factory);
+extern jc_test_fixture* jc_test_alloc_fixture(const char* name, unsigned int fixture_type);
+extern jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* name, unsigned int fixture_type);
+extern jc_test_entry*   jc_test_add_test_to_fixture(jc_test_fixture* fixture, const char* test_name, jc_test_base_class* instance, jc_test_factory_base_interface* factory);
 extern void             jc_test_memcpy(void* dst, void* src, size_t size);
 
-extern int jc_test_register_test_fn(const char* fixture_name, const char* test_name, jc_test_func test_fn);
-extern int jc_test_register_test(const char* fixture_name, const char* test_name, jc_test_func test_fn);
 extern int jc_test_register_class_test(const char* fixture_name, const char* test_name,
                                                 jc_test_void_staticfunc class_setup, jc_test_void_staticfunc class_teardown,
                                                 jc_test_base_class* instance, unsigned int fixture_type);
@@ -722,11 +574,11 @@ int jc_test_register_param_class_test(const char* fixture_name, const char* test
                         jc_test_factory_interface<ParamType>* factory) {
     jc_test_fixture* fixture = jc_test_find_fixture(fixture_name, JC_TEST_FIXTURE_TYPE_PARAMS_CLASS);
     if (!fixture) {
-        fixture = jc_test_alloc_fixture(fixture_name, JC_TEST_FIXTURE_TYPE_PARAMS_CLASS, 0);
-        fixture->cpp.fixture_setup = class_setup;
-        fixture->cpp.fixture_teardown = class_teardown;
+        fixture = jc_test_alloc_fixture(fixture_name, JC_TEST_FIXTURE_TYPE_PARAMS_CLASS);
+        fixture->fixture_setup = class_setup;
+        fixture->fixture_teardown = class_teardown;
     }
-    jc_test_add_test_to_fixture(fixture, test_name, 0, 0, factory);
+    jc_test_add_test_to_fixture(fixture, test_name, 0, factory);
     return 0;
 }
 
@@ -756,12 +608,12 @@ struct jc_test_register_typed_class_test {
 
         jc_test_fixture* fixture = jc_test_find_fixture(fixture_name, JC_TEST_FIXTURE_TYPE_TYPED_CLASS);
         if (!fixture) {
-            fixture = jc_test_alloc_fixture(fixture_name, JC_TEST_FIXTURE_TYPE_CLASS, 0);
-            fixture->cpp.fixture_setup = TestClass::SetUpTestCase;
-            fixture->cpp.fixture_teardown = TestClass::TearDownTestCase;
+            fixture = jc_test_alloc_fixture(fixture_name, JC_TEST_FIXTURE_TYPE_CLASS);
+            fixture->fixture_setup = TestClass::SetUpTestCase;
+            fixture->fixture_teardown = TestClass::TearDownTestCase;
         }
         fixture->index = index;
-        jc_test_add_test_to_fixture(fixture, test_name, 0, new TestClass, 0);
+        jc_test_add_test_to_fixture(fixture, test_name, new TestClass, 0);
         return jc_test_register_typed_class_test<BaseClassSelector, typename TypeList::tail>::
                     register_test(fixture_name, test_name, index+1);
     }
@@ -775,8 +627,8 @@ struct jc_test_register_typed_class_test<BaseClassSelector,jc_test_type0> {
 };
 
 template<typename ParamType>
-jc_test_fixture* jc_test_alloc_fixture_with_param(const char* name, unsigned int type, void* ctx) {
-    return jc_test_create_fixture(new jc_test_fixture_with_param<ParamType>, name, type, ctx);
+jc_test_fixture* jc_test_alloc_fixture_with_param(const char* name, unsigned int type) {
+    return jc_test_create_fixture(new jc_test_fixture_with_param<ParamType>, name, type);
 }
 
 template<typename ParamType>
@@ -790,16 +642,17 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
 
         // Allocate a new fixture, and create the test class
         jc_test_fixture_with_param<ParamType>* fixture = JC_TEST_CAST(jc_test_fixture_with_param<ParamType>*,
-                                jc_test_alloc_fixture_with_param<ParamType>(fixture_name, JC_TEST_FIXTURE_TYPE_CLASS, 0) );
+                                jc_test_alloc_fixture_with_param<ParamType>(fixture_name, JC_TEST_FIXTURE_TYPE_CLASS) );
 
         fixture->first = first_fixture == 0 ? 1 : 0;
         if (!first_fixture) {
             first_fixture = fixture; // A silly trick to make the first fixture accumulate all the timings from this batch
         }
         fixture->parent = first_fixture;
-        fixture->cpp = prototype_fixture->cpp;
         fixture->index = index++;
         fixture->param = values->Get();
+        fixture->fixture_setup = prototype_fixture->fixture_setup;
+        fixture->fixture_teardown = prototype_fixture->fixture_teardown;
 
         fixture->num_tests = prototype_fixture->num_tests;
         for (int i = 0; i < fixture->num_tests; ++i) {
@@ -826,22 +679,14 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
 #define JC_TEST_MAKE_FUNCTION_NAME(X, Y)        JC_TEST_MAKE_NAME2(X, Y)
 #define JC_TEST_MAKE_UNIQUE_NAME(X, Y, LINE)    JC_TEST_MAKE_NAME3(X, Y, LINE)
 
-#if !defined(__cplusplus)
-#define JC_TEST(testfixture,testfn)                                                                         \
-    extern void JC_TEST_MAKE_FUNCTION_NAME(testfixture,testfn)(void* _jc_test_ctx);                         \
-    static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) =                                      \
-        jc_test_register_test_fn(#testfixture, #testfn, JC_TEST_MAKE_FUNCTION_NAME(testfixture,testfn));    \
-    void JC_TEST_MAKE_FUNCTION_NAME(testfixture,testfn)(void* JC_TEST_UNUSED _jc_test_ctx)
-#else
-    #define JC_TEST(testfixture,testfn)                                                                     \
-    class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public jc_test_base_class {                         \
-        virtual void TestBody();                                                                            \
-    };                                                                                                      \
-    static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) = jc_test_register_class_test(         \
-            #testfixture, #testfn, jc_test_base_class::SetUpTestCase, jc_test_base_class::TearDownTestCase,               \
-            new JC_TEST_MAKE_CLASS_NAME(testfixture,testfn), JC_TEST_FIXTURE_TYPE_CLASS);                   \
-    void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
-#endif
+#define JC_TEST(testfixture,testfn)                                                                     \
+class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public jc_test_base_class {                         \
+    virtual void TestBody();                                                                            \
+};                                                                                                      \
+static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) = jc_test_register_class_test(         \
+        #testfixture, #testfn, jc_test_base_class::SetUpTestCase, jc_test_base_class::TearDownTestCase,               \
+        new JC_TEST_MAKE_CLASS_NAME(testfixture,testfn), JC_TEST_FIXTURE_TYPE_CLASS);                   \
+void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
 
 #define JC_TEST_F(testfixture,testfn)                                                                       \
     class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture {                                \
@@ -891,8 +736,6 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
                 JC_TEST_MAKE_NAME2(testfixture,Types)>::register_test(#testfixture, #testfn, 0);            \
     template<typename T> void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)<T>::TestBody()
 
-#endif // __cplusplus
-
 
 #ifndef JC_UNDEF_SHORT_NAMES
     #define RUN                             JC_TEST_RUN
@@ -914,6 +757,7 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
     #define ASSERT_NEAR                     JC_TEST_ASSERT_NEAR
     #define ASSERT_STREQ                    JC_TEST_ASSERT_STREQ
     #define ASSERT_STRNE                    JC_TEST_ASSERT_STRNE
+    #define ASSERT_DEATH_IF_SUPPORTED       JC_TEST_ASSERT_DEATH_IF_SUPPORTED
     #define EXPECT_TRUE                     JC_TEST_EXPECT_TRUE
     #define EXPECT_FALSE                    JC_TEST_EXPECT_FALSE
     #define EXPECT_EQ                       JC_TEST_EXPECT_EQ
@@ -925,6 +769,7 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
     #define EXPECT_NEAR                     JC_TEST_EXPECT_NEAR
     #define EXPECT_STREQ                    JC_TEST_EXPECT_STREQ
     #define EXPECT_STRNE                    JC_TEST_EXPECT_STRNE
+    #define EXPECT_DEATH_IF_SUPPORTED       JC_TEST_EXPECT_DEATH_IF_SUPPORTED
 
     #define SCOPED_TRACE                    JC_TEST_SCOPED_TRACE
 #endif
@@ -1027,8 +872,6 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
 
 #undef JC_TEST_COL
 
-#if defined(__cplusplus)
-
 static inline void jc_test_memset(void* _mem, unsigned int pattern, size_t size)
 {
     for (size_t i = 0; i < size; ++i) {
@@ -1060,32 +903,30 @@ jc_test_base_class::~jc_test_base_class() {}
 void jc_test_base_class::SetUp() {}
 void jc_test_base_class::TearDown() {}
 
-jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* name, unsigned int fixture_type, void* ctx) {
+jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* name, unsigned int fixture_type) {
     fixture->name = name;
-    fixture->ctx = ctx;
     fixture->type = fixture_type;
     fixture->parent = 0;
-    fixture->instance = 0;
     fixture->fail = 0;
     fixture->fatal = 0;
     fixture->index = 0xFFFFFFFF;
     fixture->num_tests = 0;
     fixture->first = fixture->last = 1;
     fixture->signum = 0;
-    jc_test_memset(&fixture->c, 0, sizeof(fixture->c));
+    fixture->fixture_setup = 0;
+    fixture->fixture_teardown = 0;
     jc_test_memset(&fixture->stats, 0, sizeof(fixture->stats));
     jc_test_memset(fixture->tests, 0, sizeof(fixture->tests));
     JC_TEST_ASSERT_FN(jc_test_get_state()->num_fixtures < JC_TEST_MAX_NUM_FIXTURES);
     return jc_test_get_state()->fixtures[jc_test_get_state()->num_fixtures++] = fixture;
 }
 
-jc_test_entry* jc_test_add_test_to_fixture(jc_test_fixture* fixture, const char* test_name, jc_test_func test_fn, jc_test_base_class* instance, jc_test_factory_base_interface* factory) {
+jc_test_entry* jc_test_add_test_to_fixture(jc_test_fixture* fixture, const char* test_name, jc_test_base_class* instance, jc_test_factory_base_interface* factory) {
     if (fixture->num_tests >= JC_TEST_MAX_NUM_TESTS_PER_FIXTURE) {
         return 0; // error
     }
     jc_test_entry* test = &fixture->tests[fixture->num_tests++];
     test->name = test_name;
-    test->test = test_fn;
     test->instance = instance;
     test->factory = factory;
     return test;
@@ -1099,22 +940,8 @@ jc_test_fixture* jc_test_find_fixture(const char* name, unsigned int fixture_typ
     return 0;
 }
 
-jc_test_fixture* jc_test_alloc_fixture(const char* name, unsigned int fixture_type, void* ctx) {
-    return jc_test_create_fixture(new jc_test_fixture, name, fixture_type, ctx);
-}
-
-static jc_test_fixture* jc_test_find_or_alloc_fixture(const char* fixture_name, unsigned int fixture_type, void* ctx) {
-    jc_test_fixture* fixture = jc_test_find_fixture(fixture_name, fixture_type);
-    if (!fixture) {
-        fixture = jc_test_alloc_fixture(fixture_name, fixture_type, ctx);
-    }
-    return fixture;
-}
-
-int jc_test_register_test_fn(const char* fixture_name, const char* test_name, jc_test_func test_fn) {
-    jc_test_fixture* fixture = jc_test_find_or_alloc_fixture(fixture_name, JC_TEST_FIXTURE_TYPE_FUNCTION, 0);
-    jc_test_add_test_to_fixture(fixture, test_name, test_fn, 0, 0);
-    return 0;
+jc_test_fixture* jc_test_alloc_fixture(const char* name, unsigned int fixture_type) {
+    return jc_test_create_fixture(new jc_test_fixture, name, fixture_type);
 }
 
 int jc_test_register_class_test(const char* fixture_name, const char* test_name,
@@ -1122,17 +949,12 @@ int jc_test_register_class_test(const char* fixture_name, const char* test_name,
                         jc_test_base_class* instance, unsigned int fixture_type) {
     jc_test_fixture* fixture = jc_test_find_fixture(fixture_name, fixture_type);
     if (!fixture) {
-        fixture = jc_test_alloc_fixture(fixture_name, fixture_type, 0);
-        fixture->cpp.fixture_setup = class_setup;
-        fixture->cpp.fixture_teardown = class_teardown;
+        fixture = jc_test_alloc_fixture(fixture_name, fixture_type);
+        fixture->fixture_setup = class_setup;
+        fixture->fixture_teardown = class_teardown;
     }
-    jc_test_add_test_to_fixture(fixture, test_name, 0, instance, 0);
+    jc_test_add_test_to_fixture(fixture, test_name, instance, 0);
     return 0;
-}
-
-static void jc_test_signal_hook_sigabrt(int signum) {
-    if (jc_test_get_state()->current_fixture)
-        jc_test_get_state()->current_fixture->signum = signum;
 }
 
 static void jc_test_global_cleanup() {
@@ -1142,12 +964,9 @@ static void jc_test_global_cleanup() {
             delete state->fixtures[i]->tests[j].instance;
             delete state->fixtures[i]->tests[j].factory;
         }
-        delete state->fixtures[i]->instance;
         delete state->fixtures[i];
     }
 }
-
-#endif // __cplusplus
 
 void jc_test_set_test_fail(int fatal) {
     jc_test_get_fixture()->fail = JC_TEST_FAIL;
@@ -1174,15 +993,8 @@ static size_t jc_test_snprint_time(char* buffer, size_t buffer_len, jc_test_time
     return JC_TEST_STATIC_CAST(size_t, printed);
 }
 
-#if defined(__cplusplus)
-    #define JC_TEST_INVOKE_MEMBER_FN(INSTANCE, FN) \
-            { \
-                jc_test_base_class* inst = JC_TEST_CAST(jc_test_base_class*, (INSTANCE) ); \
-                jc_test_void_memberfunc fn = JC_TEST_CAST(jc_test_void_memberfunc, (FN) ); \
-                (inst->*fn)(); \
-            }
-            //(((jc_test_base_class*)(INSTANCE)) -> * (_FN) ) ();
-#endif
+#define JC_TEST_INVOKE_MEMBER_FN(INSTANCE, FN) \
+    (JC_TEST_CAST(jc_test_base_class*,INSTANCE) ->* JC_TEST_CAST(jc_test_void_memberfunc,FN)) ()
 
 void jc_test_run_fixture(jc_test_fixture* fixture) {
     jc_test_get_state()->current_fixture = fixture;
@@ -1198,25 +1010,17 @@ void jc_test_run_fixture(jc_test_fixture* fixture) {
     if (fixture->first) {
         JC_TEST_LOGF(fixture, 0, 0, JC_TEST_EVENT_FIXTURE_SETUP, "");
     }
-    if(fixture->type == JC_TEST_FIXTURE_TYPE_FUNCTION) {
-        if (fixture->first && fixture->c.fixture_setup != 0) {
-            fixture->ctx = fixture->c.fixture_setup();
-        }
+
+    if (fixture->first && fixture->fixture_setup != 0) {
+        fixture->fixture_setup();
     }
-    #if defined(__cplusplus)
-    else {
-        if (fixture->first && fixture->cpp.fixture_setup != 0) {
-            fixture->cpp.fixture_setup();
-        }
-        fixture->SetParam();
-    }
-    #endif
 
     for (int count = 0; count < fixture->num_tests; ++count)
     {
         jc_test_entry* test = &fixture->tests[count];
         fixture->fail = JC_TEST_PASS;
         jc_test_get_state()->current_test = test;
+        fixture->SetParam();
 
         JC_TEST_LOGF(fixture, test, 0, JC_TEST_EVENT_TEST_SETUP, "");
 
@@ -1225,30 +1029,14 @@ void jc_test_run_fixture(jc_test_fixture* fixture) {
         jc_test_time_t teststart = 0;
         jc_test_time_t testend = 0;
 
-        jc_test_func fns[3] = { fixture->c.test_setup, test->test, fixture->c.test_teardown };
         jc_test_void_memberfunc cppfns[3] = { &jc_test_base_class::SetUp, &jc_test_base_class::TestBody, &jc_test_base_class::TearDown };
 
-        #if defined(__cplusplus)
-        jc_test_base_class* instance = fixture->instance; // parameterized test
-        if (test->instance) {
-            instance = test->instance;
-        }
-        #endif
-
         for( int i = 0; i < 3; ++i ) {
-            if( (fixture->type == JC_TEST_FIXTURE_TYPE_FUNCTION && !fns[i])) {
-                continue;
-            }
-
             if( i == 1 ) {
                 teststart = JC_TEST_TIMING_FUNC();
             }
 
-#if defined(__cplusplus)
-            JC_TEST_INVOKE_MEMBER_FN(instance, cppfns[i]);
-#else
-            fns[i](fixture->ctx);
-#endif
+            JC_TEST_INVOKE_MEMBER_FN(test->instance, cppfns[i]);
 
             if( i == 1 ) {
                 testend = JC_TEST_TIMING_FUNC();
@@ -1270,18 +1058,9 @@ void jc_test_run_fixture(jc_test_fixture* fixture) {
     }
     jc_test_get_state()->current_test = 0;
 
-    if(fixture->type == JC_TEST_FIXTURE_TYPE_FUNCTION) {
-        if(fixture->last && fixture->c.fixture_teardown != 0) {
-            fixture->c.fixture_teardown(fixture->ctx);
-        }
+    if (fixture->last && fixture->fixture_teardown != 0) {
+        fixture->fixture_teardown();
     }
-    #if defined(__cplusplus)
-    else {
-        if (fixture->last && fixture->cpp.fixture_teardown != 0) {
-            fixture->cpp.fixture_teardown();
-        }
-    }
-    #endif
 
     jc_test_time_t timeend = JC_TEST_TIMING_FUNC();
     fixture->stats.totaltime = timeend - timestart;
@@ -1335,12 +1114,16 @@ jc_test_time_t jc_test_get_time(void) {
 
 #endif
 
-
-#if !defined(__cplusplus)
-static jc_test_state jc_test_global_state = { {0, 0, 0, 0, 0}, 0, 0, 0, {0, 0}, 0, 0, {0}, 0 };
-#else
-static jc_test_state jc_test_global_state;
+#if !defined(JC_TEST_NO_DEATH_TEST)
+#if defined(__clang__) || defined(__GNUC__)
+__attribute__ ((noreturn))
 #endif
+static void jc_test_segfault_sigaction(int, siginfo_t*, void*) {
+    longjmp(jc_test_get_state()->jumpenv, 1);
+}
+#endif
+
+static jc_test_state jc_test_global_state;
 
 jc_test_state* jc_test_get_state() {
     return &jc_test_global_state;
@@ -1351,7 +1134,16 @@ void jc_test_init(int* argc, char** argv) {
     JC_TEST_ATEXIT(jc_test_global_cleanup);
 
 #ifndef JC_TEST_NO_DEATH_TEST
-    signal(SIGABRT, jc_test_signal_hook_sigabrt);
+    struct sigaction handler;
+    jc_test_memset(&handler, 0, sizeof(struct sigaction));
+    handler.sa_sigaction = jc_test_segfault_sigaction;
+    handler.sa_flags = SA_SIGINFO;
+    sigaction(SIGILL, &handler, 0);
+    sigaction(SIGABRT, &handler, 0);
+    sigaction(SIGBUS, &handler, 0);
+    sigaction(SIGFPE, &handler, 0);
+    sigaction(SIGSEGV, &handler, 0);
+    sigaction(SIGPIPE, &handler, 0);
 #endif
     FILE* o = stdout;
     jc_test_global_state.is_a_tty = JC_TEST_ISATTY(JC_TEST_FILENO(o));

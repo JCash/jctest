@@ -35,6 +35,7 @@ function compile_test {
 time compile_test params
 time compile_test typed_test
 time compile_test expect
+time compile_test death
 
 if [ "Darwin" == `uname` ]; then
     echo ""
@@ -48,6 +49,7 @@ if [ "Darwin" == `uname` ]; then
     time compile_test params
     time compile_test typed_test
     time compile_test expect
+    time compile_test death
 fi
 
 $CXX -o ./build/test_example $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS docs/examples/test_example.cpp
