@@ -1137,10 +1137,8 @@ void jc_test_init(int* argc, char** argv) {
     #if defined(_MSC_VER)
     signal(SIGILL, jc_test_signal_handler);
     signal(SIGABRT, jc_test_signal_handler);
-    signal(SIGBUS, jc_test_signal_handler);
     signal(SIGFPE, jc_test_signal_handler);
     signal(SIGSEGV, jc_test_signal_handler);
-    signal(SIGPIPE, jc_test_signal_handler);
     #else
     struct sigaction handler;
     jc_test_memset(&handler, 0, sizeof(struct sigaction));
