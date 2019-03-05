@@ -1,4 +1,4 @@
-echo on
+echo off
 
 if NOT DEFINED VCINSTALLDIR (
     if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
@@ -41,12 +41,20 @@ if NOT DEFINED VCINSTALLDIR (
     echo "No compatible visual studio found! run vcvarsall.bat first!"
 )
 
+python --version 2>NUL
+if errorlevel 1 goto errorNoPython
+set TIMEIT=python %~dp0/timeit.py
+goto hasPython
+:errorNoPython
+set TIMEIT
+:hasPython
+
 mkdir build
 
-cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /D_HAS_EXCEPTIONS=0 /EHsc /W4 /Isrc test/test_params.cpp test/main.cpp /link /out:.\build\test_params.exe
-cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /D_HAS_EXCEPTIONS=0 /EHsc /W4 /Isrc test/test_typed_test.cpp test/main.cpp /link /out:.\build\test_typed_test.exe
-cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /D_HAS_EXCEPTIONS=0 /EHsc /W4 /Isrc test/test_expect.cpp test/main.cpp /link /out:.\build\test_expect.exe
-cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /D_HAS_EXCEPTIONS=0 /EHsc /W4 /Isrc test/test_death.cpp test/main.cpp /link /out:.\build\test_death.exe
+%TIMEIT% cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /D_HAS_EXCEPTIONS=0 /EHsc /W4 /Isrc test/test_params.cpp test/main.cpp /link /out:.\build\test_params.exe
+%TIMEIT% cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /D_HAS_EXCEPTIONS=0 /EHsc /W4 /Isrc test/test_typed_test.cpp test/main.cpp /link /out:.\build\test_typed_test.exe
+%TIMEIT% cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /D_HAS_EXCEPTIONS=0 /EHsc /W4 /Isrc test/test_expect.cpp test/main.cpp /link /out:.\build\test_expect.exe
+%TIMEIT% cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /D_HAS_EXCEPTIONS=0 /EHsc /W4 /Isrc test/test_death.cpp test/main.cpp /link /out:.\build\test_death.exe
 
 del *.obj
 
