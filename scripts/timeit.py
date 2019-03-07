@@ -5,4 +5,4 @@ if __name__ == '__main__':
     p = subprocess.Popen(sys.argv[1:])
     p.wait()
     tend = time.time()
-    print("%s took %f ms" % (sys.argv[1], (tend-tstart)*1000.0) )
+    print("%s took %f ms" % (sys.argv[1], (tend-tstart)*1000.0), 'yellow')

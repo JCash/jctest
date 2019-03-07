@@ -121,11 +121,6 @@ TODOS:
 #ifndef JC_TEST_H
 #define JC_TEST_H
 
-#ifndef JC_TEST_ATEXIT
-    #include <stdlib.h>
-    #define JC_TEST_ATEXIT atexit
-#endif
-
 #ifndef JC_TEST_LOGF
     #include <stdarg.h>
     #include <stdio.h>
@@ -297,7 +292,6 @@ extern void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* te
 #define JC_TEST_CAST(_TYPE_, _EXPR_)            reinterpret_cast< _TYPE_ >( _EXPR_ )
 #define JC_TEST_STATIC_CAST(_TYPE_, _EXPR_)     static_cast< _TYPE_ >( _EXPR_ )
 
-#define JC_TEST_RUN(_NAME_)                     jc_test_run_fixture( & __jc_test_fixture_##_NAME_ )
 #define JC_TEST_RUN_ALL()                       jc_test_run_all_tests(jc_test_get_state())
 
 static inline jc_test_fixture* jc_test_get_fixture() {
@@ -422,39 +416,38 @@ template <typename T> int jc_test_cmp_NEAR(T a, T b, T epsilon, const char* expr
     jc_test_increment_assertions()
 
 #define JC_ASSERT_TEST_BOOLEAN(OP, VALUE, FATAL)                                \
-    {                                                                           \
+    do {                                                                        \
         JC_TEST_ASSERT_SETUP;                                                   \
         if ( jc_test_cmp_##OP (VALUE, #VALUE) == 0 ) {                          \
             jc_test_set_test_fail(FATAL);                                       \
             if (FATAL) { return; }                                              \
         }                                                                       \
-    }
+    } while(0)
 #define JC_ASSERT_TEST_OP(OP, A, B, FATAL)                                      \
-    {                                                                           \
+    do {                                                                        \
         JC_TEST_ASSERT_SETUP;                                                   \
         if ( jc_test_cmp_##OP (A, B, #A, #B) == 0 ) {                           \
             jc_test_set_test_fail(FATAL);                                       \
             if (FATAL) { return; }                                              \
         }                                                                       \
-    }
+    } while(0)
 #define JC_ASSERT_TEST_3OP(OP, A, B, C, FATAL)                                  \
-    {                                                                           \
+    do {                                                                        \
         JC_TEST_ASSERT_SETUP;                                                   \
         if ( jc_test_cmp_##OP (A, B, C, #A, #B, #C) == 0 ) {                    \
             jc_test_set_test_fail(FATAL);                                       \
             if (FATAL) { return; }                                              \
         }                                                                       \
-    }
-
+    } while(0)
 #define JC_TEST_EXPECT_DEATH_OP(STATEMENT, RE, FATAL)                           \
-    {                                                                           \
+    do {                                                                        \
         JC_TEST_ASSERT_SETUP;                                                   \
         if (JC_TEST_SETJMP(jc_test_get_state()->jumpenv) == 0) {                \
             STATEMENT;                                                          \
             jc_test_set_test_fail(FATAL);                                       \
             if (FATAL) { return; }                                              \
         }                                                                       \
-    }
+    } while(0)
 
 #define JC_TEST_ASSERT_TRUE( VALUE )            JC_ASSERT_TEST_BOOLEAN( TRUE, VALUE, 1 )
 #define JC_TEST_ASSERT_FALSE( VALUE )           JC_ASSERT_TEST_BOOLEAN( FALSE, VALUE, 1 )
@@ -1091,7 +1084,11 @@ int jc_test_run_all_tests(jc_test_state* state) {
     }
 
     JC_TEST_LOGF(0, 0, &state->stats, JC_TEST_EVENT_SUMMARY, "");
-    return state->stats.num_fail;
+
+    int num_fail = state->stats.num_fail;
+    jc_test_global_cleanup();
+
+    return num_fail;
 }
 
 #if defined(_MSC_VER)
@@ -1131,7 +1128,6 @@ jc_test_state* jc_test_get_state() {
 
 void jc_test_init(int* argc, char** argv) {
     (void)argc; (void)argv;
-    JC_TEST_ATEXIT(jc_test_global_cleanup);
 
 #ifndef JC_TEST_NO_DEATH_TEST
     #if defined(_MSC_VER)
@@ -1151,8 +1147,11 @@ void jc_test_init(int* argc, char** argv) {
     sigaction(SIGPIPE, &handler, 0);
     #endif
 #endif
+
+    #if !defined(JC_TEST_NO_COLORS)
     FILE* o = stdout;
     jc_test_global_state.is_a_tty = JC_TEST_ISATTY(JC_TEST_FILENO(o));
+    #endif
 }
 
 #endif
