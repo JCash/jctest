@@ -11,8 +11,10 @@ OPT="-g -O2"
 #OPT="-g -O0"
 
 if [ "$USE_ASAN" != "" ]; then
-    ASAN="-fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope -fsanitize=undefined"
-    ASAN_LDFLAGS="-fsanitize=address "
+    if [ "$CXX" != "g++" ]; then
+        ASAN="-fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope -fsanitize=undefined"
+        ASAN_LDFLAGS="-fsanitize=address "
+    fi
 fi
 
 if [ "$STDVERSION" == "" ]; then
