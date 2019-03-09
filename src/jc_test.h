@@ -258,7 +258,6 @@ typedef struct jc_test_state {
     jc_test_fixture*    current_fixture;
     jc_test_fixture*    fixtures[JC_TEST_MAX_NUM_FIXTURES];
     jc_test_stats       stats;
-    fpos_t              stdout_pos; // set at the start of each test
     jmp_buf             jumpenv;    // Set before trying to catch exceptions
     int                 num_fixtures:31;
     int                 is_a_tty:1;
@@ -810,8 +809,6 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
     char buffer[1024];
     char* cursor = buffer;
     const char* end = buffer + sizeof(buffer);
-    const char* pass = jc_test_get_state()->is_a_tty ? JC_TEST_CLR_GREEN "PASS" JC_TEST_CLR_DEFAULT : "PASS";
-    const char* fail = jc_test_get_state()->is_a_tty ? JC_TEST_CLR_RED "FAIL" JC_TEST_CLR_DEFAULT : "FAIL";
 
     if (event == JC_TEST_EVENT_FIXTURE_SETUP) {
         JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "%s%s%s\n", JC_TEST_COL(CYAN), fixture->name, JC_TEST_COL(DEFAULT));
@@ -830,11 +827,10 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
             JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "/%d ", fixture->index);
         }
     } else if (event == JC_TEST_EVENT_TEST_TEARDOWN) {
-        fpos_t stdout_pos;
-        fgetpos(stdout, &stdout_pos);
-        const char* return_char = jc_test_cmp_fpos_t(&stdout_pos, &jc_test_get_state()->stdout_pos) ? "\r" : "\n";
+        const char* pass = jc_test_get_state()->is_a_tty ? JC_TEST_CLR_GREEN "PASS" JC_TEST_CLR_DEFAULT : "PASS";
+        const char* fail = jc_test_get_state()->is_a_tty ? JC_TEST_CLR_RED "FAIL" JC_TEST_CLR_DEFAULT : "FAIL";
 
-        cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "%s%s%s%s", return_char, JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
+        cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "\n%s%s%s", JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
         if (fixture->index != 0xFFFFFFFF) {
             cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "/%d ", fixture->index);
         }
@@ -856,7 +852,7 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
             JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "\n%d tests %sPASSED%s\n", stats->num_pass, JC_TEST_COL(GREEN), JC_TEST_COL(DEFAULT));
     }
     buffer[sizeof(buffer)-1] = 0;
-    JC_TEST_PRINTF("%s", buffer);
+    printf("%s", buffer);
 }
 
 #undef JC_TEST_COL
@@ -1012,8 +1008,6 @@ void jc_test_run_fixture(jc_test_fixture* fixture) {
         fixture->SetParam();
 
         JC_TEST_LOGF(fixture, test, 0, JC_TEST_EVENT_TEST_SETUP, "");
-
-        fgetpos(stdout, &jc_test_get_state()->stdout_pos);
 
         jc_test_time_t teststart = 0;
         jc_test_time_t testend = 0;

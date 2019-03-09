@@ -1,5 +1,4 @@
 
-#include <string.h>
 #include <stdio.h>
 #include "testutil.h"
 
