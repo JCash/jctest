@@ -170,12 +170,13 @@ TODOS:
 // C++0x and above
 #if !defined(_MSC_VER)
 #pragma GCC diagnostic push
-#if __cplusplus >= 199711L
-    #pragma GCC diagnostic ignored "-Wc++98-compat"
-#else
+#if !defined(__GNUC__)
+    #if __cplusplus >= 199711L
+        #pragma GCC diagnostic ignored "-Wc++98-compat"
+    #endif
+    #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -787,12 +788,10 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 
 #if !defined(_MSC_VER)
 #pragma GCC diagnostic push
-#if __cplusplus >= 199711L
-    #pragma GCC diagnostic ignored "-Wc++98-compat"
-#else
+#if !defined(__GNUC__)
+    #pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma GCC diagnostic ignored "-Wglobal-constructors"
 #endif
 
 #define JC_TEST_PRINT_TYPE_FN(TYPE, FORMAT) \
@@ -867,10 +866,12 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
         JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), ")\n");
     } else if (event == JC_TEST_EVENT_ASSERT_FAILED) {
         cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "\n%s%s%s:%d:", JC_TEST_COL(MAGENTA), fixture->filename, JC_TEST_COL(DEFAULT), fixture->line);
-        va_list ap;
-        va_start(ap, format);
-        vsnprintf(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), format, ap);
-        va_end(ap);
+        if (format) {
+            va_list ap;
+            va_start(ap, format);
+            vsnprintf(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), format, ap);
+            va_end(ap);
+        }
     } else if (event == JC_TEST_EVENT_SUMMARY) {
         cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "Ran %d tests, with %d assertions in ", stats->num_tests, stats->num_assertions);
         cursor += jc_test_snprint_time(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), stats->totaltime);
@@ -1021,7 +1022,7 @@ void jc_test_run_fixture(jc_test_fixture* fixture) {
     fixture->stats.totaltime = 0;
     jc_test_time_t timestart = JC_TEST_TIMING_FUNC();
     if (fixture->first) {
-        JC_TEST_LOGF(fixture, 0, 0, JC_TEST_EVENT_FIXTURE_SETUP, "");
+        JC_TEST_LOGF(fixture, 0, 0, JC_TEST_EVENT_FIXTURE_SETUP, 0);
     }
 
     if (fixture->first && fixture->fixture_setup != 0) {
@@ -1035,7 +1036,7 @@ void jc_test_run_fixture(jc_test_fixture* fixture) {
         jc_test_get_state()->current_test = test;
         fixture->SetParam();
 
-        JC_TEST_LOGF(fixture, test, 0, JC_TEST_EVENT_TEST_SETUP, "");
+        JC_TEST_LOGF(fixture, test, 0, JC_TEST_EVENT_TEST_SETUP, 0);
 
         jc_test_time_t teststart = 0;
         jc_test_time_t testend = 0;
@@ -1059,7 +1060,7 @@ void jc_test_run_fixture(jc_test_fixture* fixture) {
         }
 
         jc_test_stats test_stats = {0, 0, 0, 0, testend-teststart};
-        JC_TEST_LOGF(fixture, test, &test_stats, JC_TEST_EVENT_TEST_TEARDOWN, "");
+        JC_TEST_LOGF(fixture, test, &test_stats, JC_TEST_EVENT_TEST_TEARDOWN, 0);
 
         if( fixture->fail == JC_TEST_PASS )
             ++fixture->stats.num_pass;
@@ -1080,7 +1081,7 @@ void jc_test_run_fixture(jc_test_fixture* fixture) {
     }
 
     if (fixture->last) {
-        JC_TEST_LOGF(fixture, 0, &fixture->stats, JC_TEST_EVENT_FIXTURE_TEARDOWN, "");
+        JC_TEST_LOGF(fixture, 0, &fixture->stats, JC_TEST_EVENT_FIXTURE_TEARDOWN, 0);
     }
     jc_test_get_state()->current_fixture = 0;
 }
@@ -1101,7 +1102,7 @@ int jc_test_run_all_tests(jc_test_state* state) {
         }
     }
 
-    JC_TEST_LOGF(0, 0, &state->stats, JC_TEST_EVENT_SUMMARY, "");
+    JC_TEST_LOGF(0, 0, &state->stats, JC_TEST_EVENT_SUMMARY, 0);
 
     int num_fail = state->stats.num_fail;
     jc_test_global_cleanup();
@@ -1154,6 +1155,10 @@ void jc_test_init(int* argc, char** argv) {
     signal(SIGFPE, jc_test_signal_handler);
     signal(SIGSEGV, jc_test_signal_handler);
     #else
+    #if !defined(_MSC_VER) && defined(__clang__)
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wdisabled-macro-expansion"
+    #endif
     struct sigaction handler;
     jc_test_memset(&handler, 0, sizeof(struct sigaction));
     handler.sa_handler = jc_test_signal_handler;
@@ -1163,6 +1168,9 @@ void jc_test_init(int* argc, char** argv) {
     sigaction(SIGFPE, &handler, 0);
     sigaction(SIGSEGV, &handler, 0);
     sigaction(SIGPIPE, &handler, 0);
+    #if !defined(_MSC_VER) && defined(__clang__)
+        #pragma GCC diagnostic pop
+    #endif
     #endif
 #endif
 

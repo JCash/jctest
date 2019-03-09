@@ -26,7 +26,12 @@ if [ "$CXX" == "" ]; then
 fi
 echo Using CXX=$CXX
 
-CXXFLAGS="$CXXFLAGS -std=$STDVERSION -Wall -Weverything -pedantic -Wno-global-constructors -fno-exceptions -Isrc -I. $ASAN $PREPROCESS"
+CXXFLAGS="$CXXFLAGS -std=$STDVERSION -Wall -pedantic -fno-exceptions -Isrc -I. $ASAN $PREPROCESS"
+
+if [ "$CXX" == "clang++" ]; then
+    CXXFLAGS="$CXXFLAGS -Weverything -Wno-global-constructors"
+fi
+
 LDFLAGS="$ASAN_LDFLAGS"
 ARCH=-m64
 
@@ -54,15 +59,20 @@ time compile_test typed_test
 time compile_test expect
 time compile_test death
 
-if [ "Darwin" == `uname` ]; then
+if [ "$TRAVIS_COMPILER" == "" ]; then
     echo ""
     echo "COMPILING WITH GTEST"
 
-    PLATFORM=x86_64-darwin
+    UNAME=`uname | tr '[:upper:]' '[:lower:]'`
+    PLATFORM=x86_64-$UNAME
     GTESTDIR=./test/external/gtest
     PREFIX=gtest
     CXXFLAGS="-Wall -std=c++11 -Wno-deprecated-declarations -Isrc -I. -DUSE_GTEST -I${GTESTDIR}/include"
     LDFLAGS="-L${GTESTDIR}/lib/$PLATFORM -lgtest"
+
+    if [ "$UNAME" == 'linux' ]; then
+        LDFLAGS="$LDFLAGS -lpthread"
+    fi
 
     time compile_test params
     time compile_test typed_test
