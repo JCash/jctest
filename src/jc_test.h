@@ -168,6 +168,7 @@ TODOS:
 #endif
 
 // C++0x and above
+#if !defined(_MSC_VER)
 #pragma GCC diagnostic push
 #if __cplusplus >= 199711L
     #pragma GCC diagnostic ignored "-Wc++98-compat"
@@ -175,7 +176,7 @@ TODOS:
 #endif
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
-
+#endif
 
 #if defined(__GNUC__) || defined(__clang__)
     #define JC_TEST_UNUSED __attribute__ ((unused))
@@ -271,7 +272,7 @@ typedef struct jc_test_state {
     jmp_buf             jumpenv;    // Set before trying to catch exceptions
     int                 num_fixtures:31;
     int                 is_a_tty:1;
-    #if defined(__linux__)
+    #if !defined(__APPLE__)
     int                 _pad;
     #endif
 } jc_test_state;
@@ -775,13 +776,16 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
     #define SCOPED_TRACE                    JC_TEST_SCOPED_TRACE
 #endif
 
+#if !defined(_MSC_VER)
 #pragma GCC diagnostic pop
+#endif
 
 #endif // JC_TEST_H
 
 #ifdef JC_TEST_IMPLEMENTATION
 #undef JC_TEST_IMPLEMENTATION
 
+#if !defined(_MSC_VER)
 #pragma GCC diagnostic push
 #if __cplusplus >= 199711L
     #pragma GCC diagnostic ignored "-Wc++98-compat"
@@ -789,7 +793,7 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 #endif
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
-
+#endif
 
 #define JC_TEST_PRINT_TYPE_FN(TYPE, FORMAT) \
     template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const TYPE value) { \
@@ -1168,5 +1172,7 @@ void jc_test_init(int* argc, char** argv) {
     #endif
 }
 
+#if !defined(_MSC_VER)
 #pragma GCC diagnostic pop
+#endif
 #endif
