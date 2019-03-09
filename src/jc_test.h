@@ -122,25 +122,21 @@ TODOS:
 #define JC_TEST_H
 
 #ifndef JC_TEST_LOGF
-    #include <stdarg.h>
-    #include <stdio.h>
-    // Can be overridden to log in a differnt
+    #include <stdarg.h> //va_list
+    #include <stdio.h>  //snprintf
+    // Can be overridden to log in a different way
     #define JC_TEST_LOGF jc_test_logf
-    #define JC_TEST_PRINTF printf
-#endif
 
-#ifndef JC_TEST_ASSERT_FN
-    #include <assert.h>
-    #define JC_TEST_ASSERT_FN assert
-#endif
-
-#ifndef JC_TEST_SNPRINTF
-    #include <stdio.h>
     #if defined(_MSC_VER)
         #define JC_TEST_SNPRINTF _snprintf
     #else
         #define JC_TEST_SNPRINTF snprintf
     #endif
+#endif
+
+#ifndef JC_TEST_ASSERT_FN
+    #include <assert.h>
+    #define JC_TEST_ASSERT_FN assert
 #endif
 
 #if defined(JC_TEST_NO_COLORS)
