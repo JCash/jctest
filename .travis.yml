@@ -10,6 +10,9 @@ os:
 
 dist: xenial
 
+before_install:
+  - sudo apt-get install -y gcc-multilib g++-multilib
+
 install:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install visualstudio2017-workload-vctools -y; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then (cd ./test/external && ./build_gtest.sh); fi
