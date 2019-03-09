@@ -733,7 +733,7 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
         typedef testfixture<T> TestFixture;                                                                 \
         typedef T TypeParam;                                                                                \
     };                                                                                                      \
-    static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) =                                      \
+    static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) JC_TEST_UNUSED =                       \
             jc_test_register_typed_class_test<                                                              \
                 jc_test_template_sel<JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)>,                          \
                 JC_TEST_MAKE_NAME2(testfixture,Types)>::register_test(#testfixture, #testfn, 0);            \
