@@ -5,12 +5,7 @@
 
 #include <assert.h>
 
-#if __cplusplus >= 199711L
-    #define NULLPTR nullptr
-    #pragma GCC diagnostic ignored "-Wc++98-compat"
-#else
-    #define NULLPTR 0
-#endif
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 
 // To test the testing framework /////////////
 void GlobalTestSetup(); // to silence a warning
@@ -36,7 +31,7 @@ static void call_segv(int* paddr) {
 
 TEST(DeathTest, Test1)
 {
-    EXPECT_DEATH_IF_SUPPORTED(call_segv(NULLPTR),"");
+    EXPECT_DEATH_IF_SUPPORTED(call_segv(0),"");
     EXPECT_DEATH_IF_SUPPORTED(call_abort(false),"");
     EXPECT_TRUE(true);
 }

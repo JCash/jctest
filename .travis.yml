@@ -25,12 +25,19 @@ jobs:
 
     - stage: build
       script: STDVERSION=c++98 ./scripts/compile_clang.sh
+      name: c++98
     - script: STDVERSION=c++0x ./scripts/compile_clang.sh
+      name: c++0x
     - script: STDVERSION=c++03 ./scripts/compile_clang.sh
+      name: c++03
     - script: STDVERSION=c++11 ./scripts/compile_clang.sh
+      name: c++11
     - script: STDVERSION=c++17 ./scripts/compile_clang.sh
+      name: c++17
     - script: STDVERSION=c++2a ./scripts/compile_clang.sh
+      name: c++2a
     - script: STDVERSION=c++98 USE_ASAN=1 ./scripts/compile_clang.sh # the one we wish to run
+      name: c++98 ASAN
 
     - stage: test_windows
       script: ./scripts/run_tests.bat

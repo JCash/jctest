@@ -271,6 +271,9 @@ typedef struct jc_test_state {
     jmp_buf             jumpenv;    // Set before trying to catch exceptions
     int                 num_fixtures:31;
     int                 is_a_tty:1;
+    #if defined(__linux__)
+    int                 _pad;
+    #endif
 } jc_test_state;
 
 // ***************************************************************************************
