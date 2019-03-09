@@ -167,6 +167,16 @@ TODOS:
     #define JC_TEST_SETJMP _setjmp
 #endif
 
+// C++0x and above
+#pragma GCC diagnostic push
+#if __cplusplus >= 199711L
+    #pragma GCC diagnostic ignored "-Wc++98-compat"
+#else
+#endif
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma GCC diagnostic ignored "-Wglobal-constructors"
+
+
 #if defined(__GNUC__) || defined(__clang__)
     #define JC_TEST_UNUSED __attribute__ ((unused))
 #else
@@ -762,10 +772,21 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
     #define SCOPED_TRACE                    JC_TEST_SCOPED_TRACE
 #endif
 
+#pragma GCC diagnostic pop
+
 #endif // JC_TEST_H
 
 #ifdef JC_TEST_IMPLEMENTATION
 #undef JC_TEST_IMPLEMENTATION
+
+#pragma GCC diagnostic push
+#if __cplusplus >= 199711L
+    #pragma GCC diagnostic ignored "-Wc++98-compat"
+#else
+#endif
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma GCC diagnostic ignored "-Wglobal-constructors"
+
 
 #define JC_TEST_PRINT_TYPE_FN(TYPE, FORMAT) \
     template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const TYPE value) { \
@@ -1144,4 +1165,5 @@ void jc_test_init(int* argc, char** argv) {
     #endif
 }
 
+#pragma GCC diagnostic pop
 #endif

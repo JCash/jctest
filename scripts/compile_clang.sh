@@ -5,24 +5,41 @@ if [ ! -e build ]; then
     mkdir -p build
 fi
 
-#OPT=-O3
 OPT="-g -O2"
 #DISASSEMBLY="-S -masm=intel"
 #PREPROCESS="-E"
 #OPT="-g -O0"
-ASAN="-fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope -fsanitize=undefined"
-ASAN_LDFLAGS="-fsanitize=address "
 
-CXXFLAGS="$CXXFLAGS -std=c++98 -Wall -Weverything -pedantic -Wno-global-constructors -fno-exceptions -Isrc -I. $ASAN $PREPROCESS"
+if [ "$USE_ASAN" != "" ]; then
+    ASAN="-fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope -fsanitize=undefined"
+    ASAN_LDFLAGS="-fsanitize=address "
+fi
+
+if [ "$STDVERSION" == "" ]; then
+    STDVERSION=c++98
+fi
+echo Using -std=$STDVERSION
+
+
+if [ "$CXX" == "" ]; then
+    CXX=clang++
+fi
+echo Using CXX=$CXX
+
+CXXFLAGS="$CXXFLAGS -std=$STDVERSION -Wall -Weverything -pedantic -Wno-global-constructors -fno-exceptions -Isrc -I. $ASAN $PREPROCESS"
 LDFLAGS="$ASAN_LDFLAGS"
 ARCH=-m64
-CXX=clang++
+
+
 # CXX=/usr/local/opt/llvm/bin/clang++
+
+# CXX=/Users/mathiaswesterdahl/external/llvm-build/bin/clang++
+# CXXFLAGS="-ftime-trace -DJC_TEST_ASSERT_FN(_X) -DJC_TEST_NO_COLORS $CXXFLAGS"
+
 # SYSROOT="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk"
 
 # Use pedantic flags when compiling jctest tests
 echo "COMPILING WITH JCTEST"
-PLATFORM=x86_64-darwin
 PREFIX=jctest
 
 function compile_test {
@@ -41,6 +58,7 @@ if [ "Darwin" == `uname` ]; then
     echo ""
     echo "COMPILING WITH GTEST"
 
+    PLATFORM=x86_64-darwin
     GTESTDIR=./test/external/gtest
     PREFIX=gtest
     CXXFLAGS="-Wall -std=c++11 -Wno-deprecated-declarations -Isrc -I. -DUSE_GTEST -I${GTESTDIR}/include"
