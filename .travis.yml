@@ -1,15 +1,16 @@
 language: cpp
 compiler:
   - clang
+  - g++
 
 os:
   - linux
   - osx
   - windows
 
-install:
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install visualstudio2017-workload-vctools -y; fi
-  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then (cd ./test/external && ./build_gtest.sh); fi
+# install:
+#   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install visualstudio2017-workload-vctools -y; fi
+#   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then (cd ./test/external && ./build_gtest.sh); fi
 
 jobs:
   include:
