@@ -28,6 +28,12 @@ if [ "$CXX" == "" ]; then
 fi
 echo Using CXX=$CXX
 
+
+if [ "$ARCH" == "" ]; then
+    ARCH=-m64
+fi
+echo Using ARCH=$ARCH
+
 CXXFLAGS="$CXXFLAGS -std=$STDVERSION -Wall -pedantic -fno-exceptions -Isrc -I. $ASAN $PREPROCESS"
 
 if [ "$CXX" == "clang++" ]; then
@@ -35,7 +41,7 @@ if [ "$CXX" == "clang++" ]; then
 fi
 
 LDFLAGS="$ASAN_LDFLAGS"
-ARCH=-m64
+
 
 
 # CXX=/usr/local/opt/llvm/bin/clang++
