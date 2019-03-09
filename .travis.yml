@@ -8,59 +8,21 @@ os:
   - osx
   - windows
 
-# install:
-#   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install visualstudio2017-workload-vctools -y; fi
-#   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then (cd ./test/external && ./build_gtest.sh); fi
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install visualstudio2017-workload-vctools -y; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then (cd ./test/external && ./build_gtest.sh); fi
 
-jobs:
-  include:
-    - stage: install_windows
-      script: choco install visualstudio2017-workload-vctools -y
-
-    - stage: install
-      script: (cd ./test/external && ./build_gtest.sh)
-
-    - stage: build_windows
-      script: ./scripts/compile_cl.bat
-
-    - stage: build
-      script: STDVERSION=c++98 ./scripts/compile_clang.sh
-      name: c++98
-    - script: STDVERSION=c++0x ./scripts/compile_clang.sh
-      name: c++0x
-    - script: STDVERSION=c++03 ./scripts/compile_clang.sh
-      name: c++03
-    - script: STDVERSION=c++11 ./scripts/compile_clang.sh
-      name: c++11
-    - script: STDVERSION=c++17 ./scripts/compile_clang.sh
-      name: c++17
-    - script: STDVERSION=c++2a ./scripts/compile_clang.sh
-      name: c++2a
-    - script: STDVERSION=c++98 USE_ASAN=1 ./scripts/compile_clang.sh # the one we wish to run
-      name: c++98 ASAN
-
-    - stage: test_windows
-      script: ./scripts/run_tests.bat
-
-    - stage: test
-      script: ./scripts/run_tests.sh
-
-stages:
-  - name: install
-    if: os != windows
-  - name: build
-    if: os != windows
-  - name: test
-    if: os != windows
-  - name: install_windows
-    if: os == windows
-  - name: build_windows
-    if: os == windows
-  - name: test_windows
-    if: os == windows
-
-# script:
-#   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ./scripts/compile_cl.bat; fi
-#   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ./scripts/run_tests.bat; fi
-#   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then ./scripts/compile_clang.sh; fi
-#   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then ./scripts/run_tests.sh; fi
+script:
+  # Windows
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ./scripts/compile_cl.bat; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ./scripts/run_tests.bat; fi
+  # Darwin+Linux
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++98 ./scripts/compile_clang.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++0x ./scripts/compile_clang.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++03 ./scripts/compile_clang.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++11 ./scripts/compile_clang.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++17 ./scripts/compile_clang.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++2a ./scripts/compile_clang.sh; fi
+  # the one we wish to run
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++98 USE_ASAN=1 ./scripts/compile_clang.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then ./scripts/run_tests.sh; fi
