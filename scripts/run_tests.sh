@@ -8,7 +8,11 @@ fi
 
 function run_tests {
     local pattern=$1
-    for name in `find build -iname "${pattern}" -perm +111`
+    EXECUTABLE_PATTERN="-perm +111"
+    if [ `uname` != "Darwin" ]; then
+        EXECUTABLE_PATTERN="-executable"
+    fi
+    for name in `find build -iname "${pattern}" $EXECUTABLE_PATTERN`
     do
         echo $name
         time $name
