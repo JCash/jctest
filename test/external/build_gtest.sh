@@ -17,7 +17,7 @@ mkdir -p ${LIB_DIR}
 mkdir -p ${INCLUDE_DIR}
 
 echo "compiling gtest-all.cc"
-clang++ -std=c++11 -O2 -I${GTEST_DIR}/include -I${GTEST_DIR} -pthread -c ${GTEST_DIR}/src/gtest-all.cc
+clang++ -std=c++11 -O2 -fPIC -I${GTEST_DIR}/include -I${GTEST_DIR} -pthread -c ${GTEST_DIR}/src/gtest-all.cc
 if [ -e "${LIB_DIR}/libgtest.a" ]; then
     rm ${LIB_DIR}/libgtest.a
     echo "removed" ${LIB_DIR}/libgtest.a

@@ -682,35 +682,35 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
 #define JC_TEST_MAKE_FUNCTION_NAME(X, Y)        JC_TEST_MAKE_NAME2(X, Y)
 #define JC_TEST_MAKE_UNIQUE_NAME(X, Y, LINE)    JC_TEST_MAKE_NAME3(X, Y, LINE)
 
-#define JC_TEST(testfixture,testfn)                                                                     \
-class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public jc_test_base_class {                         \
-    virtual void TestBody();                                                                            \
-};                                                                                                      \
-static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) = jc_test_register_class_test(         \
-        #testfixture, #testfn, jc_test_base_class::SetUpTestCase, jc_test_base_class::TearDownTestCase,               \
-        new JC_TEST_MAKE_CLASS_NAME(testfixture,testfn), JC_TEST_FIXTURE_TYPE_CLASS);                   \
+#define JC_TEST(testfixture,testfn)                                                                                         \
+class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public jc_test_base_class {                                             \
+    virtual void TestBody();                                                                                                \
+};                                                                                                                          \
+static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) JC_TEST_UNUSED = jc_test_register_class_test(              \
+        #testfixture, #testfn, jc_test_base_class::SetUpTestCase, jc_test_base_class::TearDownTestCase,                     \
+        new JC_TEST_MAKE_CLASS_NAME(testfixture,testfn), JC_TEST_FIXTURE_TYPE_CLASS);                                       \
 void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
 
-#define JC_TEST_F(testfixture,testfn)                                                                       \
-    class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture {                                \
-        virtual void TestBody();                                                                            \
-    };                                                                                                      \
-    static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) = jc_test_register_class_test(         \
-            #testfixture, #testfn, testfixture::SetUpTestCase, testfixture::TearDownTestCase,               \
-            new JC_TEST_MAKE_CLASS_NAME(testfixture,testfn), JC_TEST_FIXTURE_TYPE_CLASS);                   \
+#define JC_TEST_F(testfixture,testfn)                                                                                       \
+    class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture {                                                \
+        virtual void TestBody();                                                                                            \
+    };                                                                                                                      \
+    static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) JC_TEST_UNUSED = jc_test_register_class_test(          \
+            #testfixture, #testfn, testfixture::SetUpTestCase, testfixture::TearDownTestCase,                               \
+            new JC_TEST_MAKE_CLASS_NAME(testfixture,testfn), JC_TEST_FIXTURE_TYPE_CLASS);                                   \
     void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
 
-#define JC_TEST_P(testfixture,testfn)                                                                       \
-    class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture {                                \
-        virtual void TestBody();                                                                            \
-    };                                                                                                      \
-    static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) = jc_test_register_param_class_test(   \
-            #testfixture, #testfn, testfixture::SetUpTestCase, testfixture::TearDownTestCase,               \
-            new jc_test_factory<JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)>());                            \
+#define JC_TEST_P(testfixture,testfn)                                                                                       \
+    class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture {                                                \
+        virtual void TestBody();                                                                                            \
+    };                                                                                                                      \
+    static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) JC_TEST_UNUSED = jc_test_register_param_class_test(    \
+            #testfixture, #testfn, testfixture::SetUpTestCase, testfixture::TearDownTestCase,                               \
+            new jc_test_factory<JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)>());                                            \
     void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
 
-#define JC_TEST_INSTANTIATE_TEST_CASE_P(prefix,testfixture,testvalues)                                      \
-    static int JC_TEST_MAKE_UNIQUE_NAME(prefix,testfixture,__LINE__) =                                      \
+#define JC_TEST_INSTANTIATE_TEST_CASE_P(prefix,testfixture,testvalues)                                                      \
+    static int JC_TEST_MAKE_UNIQUE_NAME(prefix,testfixture,__LINE__) JC_TEST_UNUSED =                                       \
         jc_test_register_param_tests<testfixture::param_t>(#testfixture, #prefix "/" #testfixture, testvalues)
 
 

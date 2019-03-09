@@ -24,7 +24,6 @@ script:
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++03 ./scripts/compile.sh; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++11 ./scripts/compile.sh; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++17 ./scripts/compile.sh; fi
-  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++2a ./scripts/compile.sh; fi
   # the one we wish to run
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++98 USE_ASAN=1 ./scripts/compile.sh; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then ./scripts/run_tests.sh; fi
