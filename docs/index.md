@@ -50,15 +50,21 @@ See [API documentation](./README_API.md)
 * Support a few use cases: TEST, TEST_F, TEST_P, TYPED_TEST, (See API)
 * As few templates as possible
 * As few lines as possible
+* Single header only library
 
 From this, the expected result was:
 
 * Fast compile times
 * Small executable size
+* Less cross compiling for all platforms
 
 ## Benchmarks
 
 [Benchmarks](./README_BENCHMARK.md)
+
+## GTEST
+
+[GTEST](./README_GTEST.md)
 
 ## Alternatives
 

@@ -23,6 +23,11 @@ int GlobalTestTeardown() {
     return fail;
 }
 
+struct Foo
+{
+    Foo(int a) : i(a) { assert(i & 1 && "This should fail"); }
+    int i;
+};
 
 TEST(Assertions, ExpectOk)
 {
@@ -37,6 +42,8 @@ TEST(Assertions, ExpectOk)
     EXPECT_EQ(0u, zero_u);
     EXPECT_EQ(0.0f, zero_f);
     EXPECT_EQ(0.0, zero_d);
+    EXPECT_EQ(0.0f, zero_d);
+    EXPECT_EQ(-0.0, zero_d);
     EXPECT_NE(1, zero_i);
     EXPECT_NE(1u, zero_u);
     EXPECT_NE(1.0f, zero_f);
@@ -44,6 +51,28 @@ TEST(Assertions, ExpectOk)
     EXPECT_NEAR(0.001, zero_d, 0.01);
     EXPECT_STREQ("zero", zero_s);
     EXPECT_STRNE("one", zero_s);
+
+    EXPECT_TRUE(JC_TEST_IS_NULL_LITERAL(0));
+    EXPECT_TRUE(JC_TEST_IS_NULL_LITERAL(NULL));
+    EXPECT_TRUE(JC_TEST_IS_NULL_LITERAL(0U));
+    EXPECT_TRUE(JC_TEST_IS_NULL_LITERAL(0L));
+    EXPECT_FALSE(JC_TEST_IS_NULL_LITERAL(1));
+    EXPECT_FALSE(JC_TEST_IS_NULL_LITERAL(0.0));
+    EXPECT_FALSE(JC_TEST_IS_NULL_LITERAL('a'));
+
+    EXPECT_TRUE(jc_test_is_pointer<char*>::value);
+    EXPECT_FALSE(jc_test_is_pointer<char>::value);
+
+    const char* cow = "cow";
+    EXPECT_STREQ("cow", cow);
+    EXPECT_STRNE(NULL, cow);
+    EXPECT_STRNE(0, cow);
+
+    const char* nullstr = 0;
+    EXPECT_STREQ(NULL, nullstr);
+    EXPECT_STREQ(0, nullstr);
+
+    EXPECT_DEATH_IF_SUPPORTED(Foo f(16), "");
 }
 
 TEST(Assertions, ExpectFail)

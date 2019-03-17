@@ -12,7 +12,7 @@ There are many alternative test frameworks out there
 
 * [utest](https://github.com/evolutional/utest) : Small, Header only, C89
 
-* [doctest](https://github.com/onqtam/doctest) : Small, Medium executable, Header Only, Slow headers, C++11
+* [doctest](https://github.com/onqtam/doctest) : Medium, Medium executable, Header Only, Slow headers, C++11
 
 * [catch2](https://github.com/catchorg/Catch2) : Large, Very large executable, Header Only, Very Slow headers, C++11
 
