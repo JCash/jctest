@@ -189,15 +189,13 @@ TODOS:
     #define JC_TEST_UINT64 uint64_t
 #endif
 
-#define JC_TEST_PASS    0
-#define JC_TEST_FAIL    1
-
 #define JC_TEST_EVENT_FIXTURE_SETUP     0
 #define JC_TEST_EVENT_FIXTURE_TEARDOWN  1
 #define JC_TEST_EVENT_TEST_SETUP        2
 #define JC_TEST_EVENT_TEST_TEARDOWN     3
 #define JC_TEST_EVENT_ASSERT_FAILED     4
 #define JC_TEST_EVENT_SUMMARY           5
+#define JC_TEST_EVENT_GENERIC           6
 
 #ifndef JC_TEST_MAX_NUM_TESTS_PER_FIXTURE
     #define JC_TEST_MAX_NUM_TESTS_PER_FIXTURE 128
@@ -219,6 +217,12 @@ TODOS:
     extern jc_test_time_t jc_test_get_time(void);
 #endif
 
+#if __x86_64__ || __ppc64__ || _WIN64
+    #define JC_TEST_PAD_IF_64BIT(X)   char _pad[X]
+#else
+    #define JC_TEST_PAD_IF_64BIT(X)
+#endif
+
 // Returns the user defined context for the fixture
 typedef void* (*jc_test_fixture_setup_func)();
 
@@ -231,6 +235,9 @@ typedef struct jc_test_entry {
     const char*                     name;
     jc_test_base_class*             instance;
     jc_test_factory_base_interface* factory;    // Factory for parameterized tests
+    unsigned int                    fail:1;
+    unsigned int                    :31;
+    JC_TEST_PAD_IF_64BIT(4);
 } jc_test_entry;
 
 typedef struct jc_test_stats {
@@ -459,10 +466,12 @@ struct jc_test_cmp_eq_helper<true> {
     do {                                                                        \
         JC_TEST_ASSERT_SETUP;                                                   \
         if (JC_TEST_SETJMP(jc_test_get_state()->jumpenv) == 0) {                \
+            JC_TEST_LOGF(jc_test_get_fixture(), jc_test_get_test(), 0, JC_TEST_EVENT_GENERIC, "\njc_test: Death test begin ->\n"); \
             STATEMENT;                                                          \
             JC_TEST_LOGF(jc_test_get_fixture(), jc_test_get_test(), 0, JC_TEST_EVENT_ASSERT_FAILED, "\nExpected this to fail: %s", #STATEMENT ); \
             FAIL_FUNC;                                                          \
         }                                                                       \
+        JC_TEST_LOGF(jc_test_get_fixture(), jc_test_get_test(), 0, JC_TEST_EVENT_GENERIC, "jc_test: <- Death test end\n"); \
     } while(0)
 
 // TEST API Begin -->
@@ -827,7 +836,7 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
         if (fixture->index != 0xFFFFFFFF) {
             cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "/%d ", fixture->index);
         }
-        cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), " %s (", fixture->fail == JC_TEST_PASS ? pass : fail);
+        cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), " %s (", fixture->fail ? fail : pass);
         cursor += jc_test_snprint_time(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), stats->totaltime);
         JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), ")\n");
     } else if (event == JC_TEST_EVENT_ASSERT_FAILED) {
@@ -839,12 +848,32 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
             va_end(ap);
         }
     } else if (event == JC_TEST_EVENT_SUMMARY) {
+        // print failed tests
+        for( int i = 0; stats->num_fail && i < jc_test_get_state()->num_fixtures; ++i )
+        {
+            fixture = jc_test_get_state()->fixtures[i];
+            if (!fixture || fixture->fail)
+                continue;
+            for (int count = 0; count < fixture->num_tests; ++count){
+                test = &fixture->tests[count];
+                if (test->fail) {
+                    cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "%s%s%s.%s%s %sfailed%s\n", JC_TEST_COL(MAGENTA), fixture->name, JC_TEST_COL(DEFAULT), JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(RED), JC_TEST_COL(DEFAULT));
+                }
+            }
+        }
         cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "Ran %d tests, with %d assertions in ", stats->num_tests, stats->num_assertions);
         cursor += jc_test_snprint_time(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), stats->totaltime);
         if( stats->num_fail)
             JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "\n%d tests passed, and %d tests %sFAILED%s\n", stats->num_pass, stats->num_fail, JC_TEST_COL(RED), JC_TEST_COL(DEFAULT));
         else
             JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "\n%d tests %sPASSED%s\n", stats->num_pass, JC_TEST_COL(GREEN), JC_TEST_COL(DEFAULT));
+    } else if (event == JC_TEST_EVENT_GENERIC) {
+        if (format) {
+            va_list ap;
+            va_start(ap, format);
+            vsnprintf(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), format, ap);
+            va_end(ap);
+        }
     }
     buffer[sizeof(buffer)-1] = 0;
     printf("%s", buffer);
@@ -955,6 +984,7 @@ jc_test_entry* jc_test_add_test_to_fixture(jc_test_fixture* fixture, const char*
     test->name = test_name;
     test->instance = instance;
     test->factory = factory;
+    test->fail = 0;
     return test;
 }
 
@@ -995,7 +1025,8 @@ static void jc_test_global_cleanup() {
 }
 
 void jc_test_set_test_fail(int fatal) {
-    jc_test_get_fixture()->fail = JC_TEST_FAIL;
+    jc_test_get_test()->fail = 1;
+    jc_test_get_fixture()->fail = 1;
     jc_test_get_fixture()->fatal |= fatal;
 }
 
@@ -1041,10 +1072,10 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
         fixture->fixture_setup();
     }
 
-    for (int count = 0; count < fixture->num_tests; ++count)
-    {
+    for (int count = 0; count < fixture->num_tests; ++count) {
         jc_test_entry* test = &fixture->tests[count];
-        fixture->fail = JC_TEST_PASS;
+        fixture->fail = 0;
+        test->fail = 0;
         jc_test_get_state()->current_test = test;
         fixture->SetParam();
 
@@ -1074,10 +1105,10 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
         jc_test_stats test_stats = {0, 0, 0, 0, testend-teststart};
         JC_TEST_LOGF(fixture, test, &test_stats, JC_TEST_EVENT_TEST_TEARDOWN, 0);
 
-        if( fixture->fail == JC_TEST_PASS )
-            ++fixture->stats.num_pass;
-        else
+        if( fixture->fail )
             ++fixture->stats.num_fail;
+        else
+            ++fixture->stats.num_pass;
         ++fixture->stats.num_tests;
     }
     jc_test_get_state()->current_test = 0;
