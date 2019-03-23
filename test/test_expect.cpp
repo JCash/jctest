@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include "testutil.h"
 
+#if defined(USE_GTEST)
+    #define JC_TEST_IS_NULL_LITERAL GTEST_IS_NULL_LITERAL_
+#endif
+
 // To test the testing framework /////////////
 void GlobalTestSetup(); // to silence a warning
 void GlobalTestSetup() {
@@ -60,8 +64,10 @@ TEST(Assertions, ExpectOk)
     EXPECT_FALSE(JC_TEST_IS_NULL_LITERAL(0.0));
     EXPECT_FALSE(JC_TEST_IS_NULL_LITERAL('a'));
 
+    #if !defined(USE_GTEST)
     EXPECT_TRUE(jc_test_is_pointer<char*>::value);
     EXPECT_FALSE(jc_test_is_pointer<char>::value);
+    #endif
 
     const char* cow = "cow";
     EXPECT_STREQ("cow", cow);
@@ -72,7 +78,9 @@ TEST(Assertions, ExpectOk)
     EXPECT_STREQ(NULL, nullstr);
     EXPECT_STREQ(0, nullstr);
 
+    printf("EXPECTED ASSERT ->\n");
     EXPECT_DEATH_IF_SUPPORTED(Foo f(16), "");
+    printf("<- END OF EXPECTED ASSERT\n");
 }
 
 TEST(Assertions, ExpectFail)

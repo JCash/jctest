@@ -292,7 +292,7 @@ extern void jc_test_set_test_fail(int fatal);
 extern void jc_test_increment_assertions();
 extern int jc_test_streq(const char* a, const char* b);
 extern void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, const jc_test_stats* stats, int event, const char* format, ...);
-extern bool jc_test_cmp_float_eq(double, double);
+extern int jc_test_cmp_float_eq(double, double);
 extern int jc_test_cmp_STREQ(const char* a, const char* b, const char* exprA, const char* exprB);
 extern int jc_test_cmp_STRNE(const char* a, const char* b, const char* exprA, const char* exprB);
 extern int jc_test_cmp_NEAR(double a, double b, double epsilon, const char* exprA, const char* exprB, const char* exprC);
@@ -384,8 +384,7 @@ template <typename T> int jc_test_cmp_NE(float a, T b, const char* exprA, const 
 }
 
 // The only way to match this function, is with a null literal (since the type is hidden)
-struct _jc_test_null_literal;
-char _jc_test_is_null_literal(_jc_test_null_literal* p);
+char _jc_test_is_null_literal(struct _jc_test_null_literal* p);
 char (&_jc_test_is_null_literal(...))[2];
 #define JC_TEST_IS_NULL_LITERAL(VALUE)          (sizeof(_jc_test_is_null_literal(VALUE)) == 1)
 
@@ -794,14 +793,6 @@ template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const flo
 
 #define JC_TEST_COL(CLR) (jc_test_get_state()->is_a_tty ? JC_TEST_CLR_ ## CLR : "")
 
-static inline int jc_test_cmp_fpos_t(const fpos_t* a, const fpos_t* b) {
-    #if defined(__linux__)
-        return a->__pos == b->__pos;
-    #else
-        return *a == *b;
-    #endif
-}
-
 static size_t jc_test_snprint_time(char* buffer, size_t buffer_len, jc_test_time_t t);
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -924,7 +915,7 @@ static int jc_test_cmp_float_almost_equal(double a, double b) {
     return dist_ulp <= max_ulp;
 }
 
-bool jc_test_cmp_float_eq(double a, double b) {
+int jc_test_cmp_float_eq(double a, double b) {
     return jc_test_cmp_float_almost_equal(a, b);
 }
 
