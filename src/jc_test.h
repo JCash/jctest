@@ -236,13 +236,15 @@ typedef struct jc_test_entry {
     jc_test_base_class*             instance;
     jc_test_factory_base_interface* factory;    // Factory for parameterized tests
     unsigned int                    fail:1;
-    unsigned int                    :31;
+    unsigned int                    skipped:1;
+    unsigned int                    :30;
     JC_TEST_PAD_IF_64BIT(4);
 } jc_test_entry;
 
 typedef struct jc_test_stats {
     int num_pass;
-    int num_fail;
+    int num_fail:16;
+    int num_skipped:16;
     int num_assertions;
     int num_tests;
     jc_test_time_t totaltime;
@@ -327,7 +329,7 @@ template <typename T1, typename T2>
 static inline void jc_test_log_failure(T1 a, T2 b, const char* exprA, const char* exprB, const char* op) {
     char bufferA[64]; jc_test_print_value(bufferA, sizeof(bufferA), a);
     char bufferB[64]; jc_test_print_value(bufferB, sizeof(bufferB), b);
-    JC_TEST_LOGF(jc_test_get_fixture(), jc_test_get_test(), 0, JC_TEST_EVENT_ASSERT_FAILED, "\nExpected: (%s) %s (%s), actual: %s vs %s", exprA, op, exprB, bufferA, bufferB);
+    JC_TEST_LOGF(jc_test_get_fixture(), jc_test_get_test(), 0, JC_TEST_EVENT_ASSERT_FAILED, "\nExpected: (%s) %s (%s), actual: %s vs %s\n", exprA, op, exprB, bufferA, bufferB);
 }
 
 template <typename T>
@@ -477,6 +479,8 @@ struct jc_test_cmp_eq_helper<true> {
 // TEST API Begin -->
 
 #define JC_TEST_RUN_ALL()               jc_test_run_all_tests(jc_test_get_state())
+
+#define SKIP()                          { jc_test_set_test_skipped(); return; }
 
 #define ASSERT_TRUE( VALUE )            JC_ASSERT_TEST_BOOLEAN( TRUE, VALUE, JC_TEST_FATAL_FAILURE )
 #define ASSERT_FALSE( VALUE )           JC_ASSERT_TEST_BOOLEAN( FALSE, VALUE, JC_TEST_FATAL_FAILURE )
@@ -831,12 +835,13 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
     } else if (event == JC_TEST_EVENT_TEST_TEARDOWN) {
         const char* pass = jc_test_get_state()->is_a_tty ? JC_TEST_CLR_GREEN "PASS" JC_TEST_CLR_DEFAULT : "PASS";
         const char* fail = jc_test_get_state()->is_a_tty ? JC_TEST_CLR_RED "FAIL" JC_TEST_CLR_DEFAULT : "FAIL";
+        const char* skipped = jc_test_get_state()->is_a_tty ? JC_TEST_CLR_MAGENTA "SKIPPED" JC_TEST_CLR_DEFAULT : "SKIPPED";
 
         cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "\n%s%s%s", JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
         if (fixture->index != 0xFFFFFFFF) {
             cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "/%d ", fixture->index);
         }
-        cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), " %s (", fixture->fail ? fail : pass);
+        cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), " %s (", test->fail ? fail : (test->skipped ? skipped : pass));
         cursor += jc_test_snprint_time(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), stats->totaltime);
         JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), ")\n");
     } else if (event == JC_TEST_EVENT_ASSERT_FAILED) {
@@ -864,9 +869,9 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
         cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "Ran %d tests, with %d assertions in ", stats->num_tests, stats->num_assertions);
         cursor += jc_test_snprint_time(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), stats->totaltime);
         if( stats->num_fail)
-            JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "\n%d tests passed, and %d tests %sFAILED%s\n", stats->num_pass, stats->num_fail, JC_TEST_COL(RED), JC_TEST_COL(DEFAULT));
+            JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "\n%d tests passed, %d skipped and %d tests %sFAILED%s\n", stats->num_pass, stats->num_skipped, stats->num_fail, JC_TEST_COL(RED), JC_TEST_COL(DEFAULT));
         else
-            JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "\n%d tests %sPASSED%s\n", stats->num_pass, JC_TEST_COL(GREEN), JC_TEST_COL(DEFAULT));
+            JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "\n%d tests %sPASSED%s and %d skipped\n", stats->num_pass, JC_TEST_COL(GREEN), JC_TEST_COL(DEFAULT), stats->num_skipped);
     } else if (event == JC_TEST_EVENT_GENERIC) {
         if (format) {
             va_list ap;
@@ -985,6 +990,7 @@ jc_test_entry* jc_test_add_test_to_fixture(jc_test_fixture* fixture, const char*
     test->instance = instance;
     test->factory = factory;
     test->fail = 0;
+    test->skipped = 0;
     return test;
 }
 
@@ -1028,6 +1034,10 @@ void jc_test_set_test_fail(int fatal) {
     jc_test_get_test()->fail = 1;
     jc_test_get_fixture()->fail = 1;
     jc_test_get_fixture()->fatal |= fatal;
+}
+
+void jc_test_set_test_skipped() {
+    jc_test_get_test()->skipped = 1;
 }
 
 void jc_test_increment_assertions() {
@@ -1102,11 +1112,13 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
             }
         }
 
-        jc_test_stats test_stats = {0, 0, 0, 0, testend-teststart};
+        jc_test_stats test_stats = {0, 0, 0, 0, 0, testend-teststart};
         JC_TEST_LOGF(fixture, test, &test_stats, JC_TEST_EVENT_TEST_TEARDOWN, 0);
 
-        if( fixture->fail )
+        if( test->fail )
             ++fixture->stats.num_fail;
+        else if ( test->skipped )
+            ++fixture->stats.num_skipped;
         else
             ++fixture->stats.num_pass;
         ++fixture->stats.num_tests;
@@ -1140,6 +1152,7 @@ int jc_test_run_all_tests(jc_test_state* state) {
             state->stats.num_assertions += state->fixtures[i]->stats.num_assertions;
             state->stats.num_pass += state->fixtures[i]->stats.num_pass;
             state->stats.num_fail += state->fixtures[i]->stats.num_fail;
+            state->stats.num_skipped += state->fixtures[i]->stats.num_skipped;
             state->stats.num_tests += state->fixtures[i]->stats.num_tests;
             state->stats.totaltime += state->fixtures[i]->stats.totaltime;
         }
