@@ -277,9 +277,12 @@ typedef struct jc_test_state {
     jc_test_fixture*    current_fixture;
     jc_test_fixture*    fixtures[JC_TEST_MAX_NUM_FIXTURES];
     jc_test_stats       stats;
+    #if !defined(JC_TEST_NO_DEATH_TEST)
     jmp_buf             jumpenv;    // Set before trying to catch exceptions
-    int                 num_fixtures:31;
+    #endif
+    int                 num_fixtures:30;
     int                 is_a_tty:1;
+    int                 is_jmp_set:1;
     #if !defined(__APPLE__)
     int                 _pad;
     #endif
@@ -298,6 +301,7 @@ extern int jc_test_run_all_tests(jc_test_state* state);
 
 extern jc_test_state* jc_test_get_state();
 extern void jc_test_set_test_fail(int fatal);
+extern void jc_test_set_test_skipped();
 extern void jc_test_increment_assertions();
 extern int jc_test_streq(const char* a, const char* b);
 extern void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, const jc_test_stats* stats, int event, const char* format, ...);
@@ -467,6 +471,7 @@ struct jc_test_cmp_eq_helper<true> {
 #define JC_ASSERT_TEST_DEATH_OP(STATEMENT, RE, FAIL_FUNC)                       \
     do {                                                                        \
         JC_TEST_ASSERT_SETUP;                                                   \
+        jc_test_get_state()->is_jmp_set = 1;                                    \
         if (JC_TEST_SETJMP(jc_test_get_state()->jumpenv) == 0) {                \
             JC_TEST_LOGF(jc_test_get_fixture(), jc_test_get_test(), 0, JC_TEST_EVENT_GENERIC, "\njc_test: Death test begin ->\n"); \
             STATEMENT;                                                          \
@@ -1192,11 +1197,14 @@ jc_test_time_t jc_test_get_time(void) {
 #endif
 
 #if !defined(JC_TEST_NO_DEATH_TEST)
-#if defined(__clang__) || defined(__GNUC__)
-__attribute__ ((noreturn))
-#endif
+// #if defined(__clang__) || defined(__GNUC__)
+// __attribute__ ((noreturn))
+// #endif
 static void jc_test_signal_handler(int) {
-    longjmp(jc_test_get_state()->jumpenv, 1);
+    if (jc_test_get_state()->is_jmp_set) {
+        jc_test_get_state()->is_jmp_set = 0;
+        longjmp(jc_test_get_state()->jumpenv, 1);
+    }
 }
 #endif
 
@@ -1233,6 +1241,7 @@ void jc_test_init(int* argc, char** argv) {
         #pragma GCC diagnostic pop
     #endif
     #endif
+    jc_test_global_state.is_jmp_set = 0;
 #endif
 
     #if !defined(JC_TEST_NO_COLORS)
