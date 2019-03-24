@@ -664,6 +664,11 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
     jc_test_fixture* first_fixture = 0;
     while (!values->Empty()) {
         jc_test_fixture* prototype_fixture = jc_test_find_fixture(prototype_fixture_name, JC_TEST_FIXTURE_TYPE_PARAMS_CLASS);
+        if (!prototype_fixture) {
+            JC_TEST_LOGF(0, 0, 0, JC_TEST_EVENT_GENERIC, "Couldn't find fixture of name %s\n", prototype_fixture_name);
+            JC_TEST_ASSERT_FN(prototype_fixture != 0);
+            return 0;
+        }
         JC_TEST_ASSERT_FN(prototype_fixture->type == JC_TEST_FIXTURE_TYPE_PARAMS_CLASS);
 
         // Allocate a new fixture, and create the test class
