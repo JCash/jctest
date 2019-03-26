@@ -303,6 +303,8 @@ extern jc_test_state* jc_test_get_state();
 extern void jc_test_set_test_fail(int fatal);
 extern void jc_test_set_test_skipped();
 extern void jc_test_increment_assertions();
+extern void jc_test_set_signal_handler();
+extern void jc_test_unset_signal_handler();
 extern int jc_test_streq(const char* a, const char* b);
 extern void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, const jc_test_stats* stats, int event, const char* format, ...);
 extern int jc_test_cmp_float_eq(double, double);
@@ -471,13 +473,16 @@ struct jc_test_cmp_eq_helper<true> {
 #define JC_ASSERT_TEST_DEATH_OP(STATEMENT, RE, FAIL_FUNC)                       \
     do {                                                                        \
         JC_TEST_ASSERT_SETUP;                                                   \
-        jc_test_get_state()->is_jmp_set = 1;                                    \
         if (JC_TEST_SETJMP(jc_test_get_state()->jumpenv) == 0) {                \
+            jc_test_set_signal_handler();                                       \
+            jc_test_get_state()->is_jmp_set = 1;                                \
             JC_TEST_LOGF(jc_test_get_fixture(), jc_test_get_test(), 0, JC_TEST_EVENT_GENERIC, "\njc_test: Death test begin ->\n"); \
             STATEMENT;                                                          \
             JC_TEST_LOGF(jc_test_get_fixture(), jc_test_get_test(), 0, JC_TEST_EVENT_ASSERT_FAILED, "\nExpected this to fail: %s", #STATEMENT ); \
+            jc_test_unset_signal_handler();                                     \
             FAIL_FUNC;                                                          \
         }                                                                       \
+        jc_test_unset_signal_handler();                                         \
         JC_TEST_LOGF(jc_test_get_fixture(), jc_test_get_test(), 0, JC_TEST_EVENT_GENERIC, "jc_test: <- Death test end\n"); \
     } while(0)
 
@@ -1197,15 +1202,59 @@ jc_test_time_t jc_test_get_time(void) {
 #endif
 
 #if !defined(JC_TEST_NO_DEATH_TEST)
-// #if defined(__clang__) || defined(__GNUC__)
-// __attribute__ ((noreturn))
-// #endif
+
 static void jc_test_signal_handler(int) {
     if (jc_test_get_state()->is_jmp_set) {
         jc_test_get_state()->is_jmp_set = 0;
         longjmp(jc_test_get_state()->jumpenv, 1);
     }
 }
+
+#if defined(_MSC_VER)
+    typedef void (*jc_test_signal_handler_fn)(int);
+    jc_test_signal_handler_fn g_signal_handlers[4];
+    void jc_test_set_signal_handler() {
+        g_signal_handlers[0] = signal(SIGILL, jc_test_signal_handler);
+        g_signal_handlers[1] = signal(SIGABRT, jc_test_signal_handler);
+        g_signal_handlers[2] = signal(SIGFPE, jc_test_signal_handler);
+        g_signal_handlers[3] = signal(SIGSEGV, jc_test_signal_handler);
+    }
+    void jc_test_unset_signal_handler() {
+        signal(SIGILL, g_signal_handlers[0]);
+        signal(SIGABRT, g_signal_handlers[1]);
+        signal(SIGFPE, g_signal_handlers[2]);
+        signal(SIGSEGV, g_signal_handlers[3]);
+    }
+#else
+    static struct sigaction g_signal_handlers[6];
+
+    void jc_test_set_signal_handler() {
+        #if !defined(_MSC_VER) && defined(__clang__)
+            #pragma GCC diagnostic push
+            #pragma GCC diagnostic ignored "-Wdisabled-macro-expansion"
+        #endif
+        struct sigaction handler;
+        jc_test_memset(&handler, 0, sizeof(struct sigaction));
+        handler.sa_handler = jc_test_signal_handler;
+        sigaction(SIGILL, &handler, &g_signal_handlers[0]);
+        sigaction(SIGABRT, &handler, &g_signal_handlers[1]);
+        sigaction(SIGBUS, &handler, &g_signal_handlers[2]);
+        sigaction(SIGFPE, &handler, &g_signal_handlers[3]);
+        sigaction(SIGSEGV, &handler, &g_signal_handlers[4]);
+        sigaction(SIGPIPE, &handler, &g_signal_handlers[5]);
+        #if !defined(_MSC_VER) && defined(__clang__)
+            #pragma GCC diagnostic pop
+        #endif
+    }
+    void jc_test_unset_signal_handler() {
+        sigaction(SIGILL, &g_signal_handlers[0], 0);
+        sigaction(SIGABRT, &g_signal_handlers[1], 0);
+        sigaction(SIGBUS, &g_signal_handlers[2], 0);
+        sigaction(SIGFPE, &g_signal_handlers[3], 0);
+        sigaction(SIGSEGV, &g_signal_handlers[4], 0);
+        sigaction(SIGPIPE, &g_signal_handlers[5], 0);
+    }
+#endif
 #endif
 
 static jc_test_state jc_test_global_state;
@@ -1216,38 +1265,11 @@ jc_test_state* jc_test_get_state() {
 
 void jc_test_init(int* argc, char** argv) {
     (void)argc; (void)argv;
-
-#ifndef JC_TEST_NO_DEATH_TEST
-    #if defined(_MSC_VER)
-    signal(SIGILL, jc_test_signal_handler);
-    signal(SIGABRT, jc_test_signal_handler);
-    signal(SIGFPE, jc_test_signal_handler);
-    signal(SIGSEGV, jc_test_signal_handler);
-    #else
-    #if !defined(_MSC_VER) && defined(__clang__)
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wdisabled-macro-expansion"
-    #endif
-    struct sigaction handler;
-    jc_test_memset(&handler, 0, sizeof(struct sigaction));
-    handler.sa_handler = jc_test_signal_handler;
-    sigaction(SIGILL, &handler, 0);
-    sigaction(SIGABRT, &handler, 0);
-    sigaction(SIGBUS, &handler, 0);
-    sigaction(SIGFPE, &handler, 0);
-    sigaction(SIGSEGV, &handler, 0);
-    sigaction(SIGPIPE, &handler, 0);
-    #if !defined(_MSC_VER) && defined(__clang__)
-        #pragma GCC diagnostic pop
-    #endif
-    #endif
-    jc_test_global_state.is_jmp_set = 0;
-#endif
-
     #if !defined(JC_TEST_NO_COLORS)
     FILE* o = stdout;
     jc_test_global_state.is_a_tty = JC_TEST_ISATTY(JC_TEST_FILENO(o));
     #endif
+    jc_test_global_state.is_jmp_set = 0;
 }
 
 #if !defined(_MSC_VER)
