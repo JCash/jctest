@@ -137,6 +137,11 @@ extern void jc_test_init(int* argc, char** argv);
     #define JC_TEST_ASSERT_FN assert
 #endif
 
+#ifndef JC_TEST_EXIT
+    #include <stdlib.h>
+    #define JC_TEST_EXIT exit
+#endif
+
 #if defined(JC_TEST_NO_COLORS)
     #define JC_TEST_ISATTY(_X) 0U
 #else
@@ -1315,7 +1320,7 @@ static int jc_test_parse_commandline(int* argc, char** argv) {
 void jc_test_init(int* argc, char** argv) {
     if (jc_test_parse_commandline(argc, argv)) {
         jc_test_usage();
-        exit(1);
+        JC_TEST_EXIT(1);
     }
     #if !defined(JC_TEST_NO_COLORS)
     FILE* o = stdout;
