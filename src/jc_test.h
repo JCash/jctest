@@ -5,14 +5,12 @@
  *
  * BRIEF:
  *
- *      A single header C/C++ test framework in <900 loc
- *      Made sure to compile with hardest warning/error levels possible
+ *      A single header only C/C++ test framework in <1kloc
+ *      Made sure to compile with highest warning/error levels possible
  *
  * HISTORY:
  *
- *      0.3     2019-01-19  Added GTEST-like C++ interface
- *      0.2     2016-12-29  Added stdbool.h. Some C99 compile warnings
- *      0.1                 Initial version
+ *      0.1     2019-01-19  Added GTEST-like C++ interface
  *
  * LICENSE:
  *
@@ -65,7 +63,7 @@ TEST(FixtureName, TestName) {
 }
 
 int main(int argc, char** argv) {
-    jc_test_init(int* argc, char** argv); // may modify the command line
+    jc_test_init(&argc, argv); // may modify the command line
     return JC_TEST_RUN_ALL();
 }
 
@@ -105,26 +103,28 @@ TEST_P(MyParamTest, IsEven) {
 INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
 */
 
-
-/*
-WIP!
-This new GTEST-like api needs a lot of testing
-TODOS:
- * SCOPED_TRACE
- * Handle input parameters (e.g. --jctest_filter=FooBar*)
- * Support ASSERT_NO_FATAL_FAILURE (or similar)
-
-*/
-
 #ifndef JC_TEST_H
 #define JC_TEST_H
 
+// ***************************************************************************************
+// PUBLIC functions
+
+// May modify the argument list, to remove the test specific arguments
+extern void jc_test_init(int* argc, char** argv);
+
+// Use JC_TEST_RUN_ALL() to launch all registered tests
+
+// ***************************************************************************************
+
+// Can be used to override the logging entirely (e.g. for writing html output)
 #ifndef JC_TEST_LOGF
     #include <stdarg.h> //va_list
-    #include <stdio.h>  //snprintf
     // Can be overridden to log in a different way
     #define JC_TEST_LOGF jc_test_logf
+#endif
 
+#ifndef JC_TEST_SNPRINTF
+    #include <stdio.h>  //snprintf
     #if defined(_MSC_VER)
         #define JC_TEST_SNPRINTF _snprintf
     #else
@@ -138,7 +138,7 @@ TODOS:
 #endif
 
 #if defined(JC_TEST_NO_COLORS)
-    #define JC_TEST_ISATTY(_X) 0
+    #define JC_TEST_ISATTY(_X) 0U
 #else
     #ifndef JC_TEST_FILENO
         #include <stdio.h> // fileno
@@ -151,10 +151,10 @@ TODOS:
     #ifndef JC_TEST_ISATTY
         #if defined(_MSC_VER)
             #include <io.h>
-            #define JC_TEST_ISATTY(_X) _isatty(_X)
+            #define JC_TEST_ISATTY(_X) _isatty(_X) ? 1U : 0U
         #else
             #include <unistd.h>
-            #define JC_TEST_ISATTY(_X) isatty(_X)
+            #define JC_TEST_ISATTY(_X) isatty(_X) ? 1U : 0U
         #endif
     #endif
 #endif
@@ -280,26 +280,19 @@ typedef struct jc_test_state {
     #if !defined(JC_TEST_NO_DEATH_TEST)
     jmp_buf             jumpenv;    // Set before trying to catch exceptions
     #endif
-    int                 num_fixtures:30;
-    int                 is_a_tty:1;
-    int                 is_jmp_set:1;
-    #if !defined(__APPLE__)
-    int                 _pad;
-    #endif
+    int                 num_fixtures:31;
+    unsigned int        is_a_tty:1;
+    // #if defined(__APPLE__)
+    // int                 _pad;
+    // #endif
 } jc_test_state;
-
-// ***************************************************************************************
-// PUBLIC functions
-
-// May modify the argument list, to remove the test specific arguments
-extern void jc_test_init(int* argc, char** argv);
-
-extern int jc_test_run_all_tests(jc_test_state* state);
 
 // ***************************************************************************************
 // Private functions
 
 extern jc_test_state* jc_test_get_state();
+extern int jc_test_run_all_tests(jc_test_state* state);
+extern void jc_test_exit(); // called by jc_test_run_all_tests
 extern void jc_test_set_test_fail(int fatal);
 extern void jc_test_set_test_skipped();
 extern void jc_test_increment_assertions();
@@ -475,7 +468,6 @@ struct jc_test_cmp_eq_helper<true> {
         JC_TEST_ASSERT_SETUP;                                                   \
         if (JC_TEST_SETJMP(jc_test_get_state()->jumpenv) == 0) {                \
             jc_test_set_signal_handler();                                       \
-            jc_test_get_state()->is_jmp_set = 1;                                \
             JC_TEST_LOGF(jc_test_get_fixture(), jc_test_get_test(), 0, JC_TEST_EVENT_GENERIC, "\njc_test: Death test begin ->\n"); \
             STATEMENT;                                                          \
             JC_TEST_LOGF(jc_test_get_fixture(), jc_test_get_test(), 0, JC_TEST_EVENT_ASSERT_FAILED, "\nExpected this to fail: %s", #STATEMENT ); \
@@ -503,7 +495,7 @@ struct jc_test_cmp_eq_helper<true> {
 #define ASSERT_STREQ( A, B )            JC_ASSERT_TEST_OP( STREQ, A, B, JC_TEST_FATAL_FAILURE )
 #define ASSERT_STRNE( A, B )            JC_ASSERT_TEST_OP( STRNE, A, B, JC_TEST_FATAL_FAILURE )
 #define ASSERT_NEAR( A, B, EPS )        JC_ASSERT_TEST_3OP( NEAR, A, B, EPS, JC_TEST_FATAL_FAILURE )
-#define ASSERT_DEATH_IF_SUPPORTED(S, RE) JC_ASSERT_TEST_DEATH_OP(S, RE, JC_TEST_FATAL_FAILURE )
+#define ASSERT_DEATH_IF_SUPPORTED(S, RE) JC_ASSERT_TEST_DEATH_OP( S, RE, JC_TEST_FATAL_FAILURE )
 
 #define EXPECT_TRUE( VALUE )            JC_ASSERT_TEST_BOOLEAN( TRUE, VALUE, JC_TEST_NON_FATAL_FAILURE )
 #define EXPECT_FALSE( VALUE )           JC_ASSERT_TEST_BOOLEAN( FALSE, VALUE, JC_TEST_NON_FATAL_FAILURE )
@@ -923,6 +915,23 @@ int jc_test_streq(const char* a, const char* b) {
     return (*a - *b) == 0 ? 1 : 0;
 }
 
+static inline int jc_test_compare_str(const char* a, const char* b) {
+    while(*a && *b) {
+        if (*a != *b) return 0;
+        ++a; ++b;
+    }
+    return *b == 0;
+}
+
+static const char* jc_test_strstr(const char* a, const char* b) {
+    while (*a) {
+        if (*a == *b && jc_test_compare_str(a, b))
+            return a;
+        ++a;
+    }
+    return 0;
+}
+
 int jc_test_cmp_NEAR(double a, double b, double epsilon, const char* exprA, const char* exprB, const char* exprC) {
     double diff = a > b ? a - b : b - a;
     if (diff <= epsilon) return 1;
@@ -1034,7 +1043,7 @@ int jc_test_register_class_test(const char* fixture_name, const char* test_name,
     return 0;
 }
 
-static void jc_test_global_cleanup() {
+void jc_test_exit() {
     jc_test_state* state = jc_test_get_state();
     for (int i = 0; i < state->num_fixtures; ++i) {
         for (int j = 0; j < state->fixtures[i]->num_tests; ++j) {
@@ -1101,34 +1110,36 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
         jc_test_entry* test = &fixture->tests[count];
         fixture->fail = 0;
         test->fail = 0;
-        jc_test_get_state()->current_test = test;
-        fixture->SetParam();
+        if (!test->skipped) {
+            jc_test_get_state()->current_test = test;
+            fixture->SetParam();
 
-        JC_TEST_LOGF(fixture, test, 0, JC_TEST_EVENT_TEST_SETUP, 0);
+            JC_TEST_LOGF(fixture, test, 0, JC_TEST_EVENT_TEST_SETUP, 0);
 
-        jc_test_time_t teststart = 0;
-        jc_test_time_t testend = 0;
+            jc_test_time_t teststart = 0;
+            jc_test_time_t testend = 0;
 
-        jc_test_void_memberfunc cppfns[3] = { &jc_test_base_class::SetUp, &jc_test_base_class::TestBody, &jc_test_base_class::TearDown };
+            jc_test_void_memberfunc cppfns[3] = { &jc_test_base_class::SetUp, &jc_test_base_class::TestBody, &jc_test_base_class::TearDown };
 
-        for( int i = 0; i < 3; ++i ) {
-            if( i == 1 ) {
-                teststart = JC_TEST_TIMING_FUNC();
+            for( int i = 0; i < 3; ++i ) {
+                if( i == 1 ) {
+                    teststart = JC_TEST_TIMING_FUNC();
+                }
+
+                JC_TEST_INVOKE_MEMBER_FN(test->instance, cppfns[i]);
+
+                if( i == 1 ) {
+                    testend = JC_TEST_TIMING_FUNC();
+                }
+
+                if( fixture->fatal ) {
+                    break;
+                }
             }
 
-            JC_TEST_INVOKE_MEMBER_FN(test->instance, cppfns[i]);
-
-            if( i == 1 ) {
-                testend = JC_TEST_TIMING_FUNC();
-            }
-
-            if( fixture->fatal ) {
-                break;
-            }
+            jc_test_stats test_stats = {0, 0, 0, 0, 0, testend-teststart};
+            JC_TEST_LOGF(fixture, test, &test_stats, JC_TEST_EVENT_TEST_TEARDOWN, 0);
         }
-
-        jc_test_stats test_stats = {0, 0, 0, 0, 0, testend-teststart};
-        JC_TEST_LOGF(fixture, test, &test_stats, JC_TEST_EVENT_TEST_TEARDOWN, 0);
 
         if( test->fail )
             ++fixture->stats.num_fail;
@@ -1176,8 +1187,7 @@ int jc_test_run_all_tests(jc_test_state* state) {
     JC_TEST_LOGF(0, 0, &state->stats, JC_TEST_EVENT_SUMMARY, 0);
 
     int num_fail = state->stats.num_fail;
-    jc_test_global_cleanup();
-
+    jc_test_exit();
     return num_fail;
 }
 
@@ -1202,12 +1212,11 @@ jc_test_time_t jc_test_get_time(void) {
 #endif
 
 #if !defined(JC_TEST_NO_DEATH_TEST)
-
+#if defined(__clang__) || defined(__GNUC__)
+__attribute__ ((noreturn))
+#endif
 static void jc_test_signal_handler(int) {
-    if (jc_test_get_state()->is_jmp_set) {
-        jc_test_get_state()->is_jmp_set = 0;
-        longjmp(jc_test_get_state()->jumpenv, 1);
-    }
+    longjmp(jc_test_get_state()->jumpenv, 1);
 }
 
 #if defined(_MSC_VER)
@@ -1263,13 +1272,55 @@ jc_test_state* jc_test_get_state() {
     return &jc_test_global_state;
 }
 
+static void jc_test_usage() {
+    JC_TEST_LOGF(0, 0, 0, JC_TEST_EVENT_GENERIC, "jc_test options:\n");
+    JC_TEST_LOGF(0, 0, 0, JC_TEST_EVENT_GENERIC, "\t--test-filter <pattern>  (e.g. --test-filter MathFuncs.Multiply/1)\n");
+}
+
+static void jc_test_disable_tests(jc_test_state* state, const char* pattern) {
+    for (int i = 0; i < state->num_fixtures; ++i) {
+        jc_test_fixture* fixture = state->fixtures[i];
+        for (int j = 0; j < fixture->num_tests; ++j) {
+            char name_buffer[256];
+            if (fixture->index >= 0)
+                JC_TEST_SNPRINTF(name_buffer, sizeof(name_buffer), "%s.%s/%d", fixture->name, fixture->tests[j].name, fixture->index);
+            else
+                JC_TEST_SNPRINTF(name_buffer, sizeof(name_buffer), "%s.%s", fixture->name, fixture->tests[j].name);
+            if (jc_test_strstr(name_buffer, pattern) == 0)
+                fixture->tests[j].skipped = 1;
+        }
+    }
+}
+
+// checks for jctest specific command line arguments: e.g. "--test-filter Foo"
+static int jc_test_parse_commandline(int* argc, char** argv) {
+    int count=0;
+    for (int i = 0; i < *argc; ++i) {
+        const char* arg = argv[i];
+        if (jc_test_streq(arg, "--test-filter")) {
+            if (i+1>=*argc) return 1;
+            const char* pattern = argv[i+1];
+            for(int j = i+2; j < *argc; ++j) {
+                argv[j-2] = argv[j];
+            }
+            *argc -= 2;
+            jc_test_disable_tests(jc_test_get_state(), pattern);
+        } else {
+            ++count;
+        }
+    }
+    return 0;
+}
+
 void jc_test_init(int* argc, char** argv) {
-    (void)argc; (void)argv;
+    if (jc_test_parse_commandline(argc, argv)) {
+        jc_test_usage();
+        exit(1);
+    }
     #if !defined(JC_TEST_NO_COLORS)
     FILE* o = stdout;
     jc_test_global_state.is_a_tty = JC_TEST_ISATTY(JC_TEST_FILENO(o));
     #endif
-    jc_test_global_state.is_jmp_set = 0;
 }
 
 #if !defined(_MSC_VER)

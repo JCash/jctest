@@ -4,7 +4,7 @@ nav_order: 3
 
 # Assertions
 
-There are two type of assertions:
+There are two main type of assertions:
 
 * ASSERT_* - fatal asserts
 * EXPECT_* - non fatal asserts
@@ -18,7 +18,9 @@ and the value to test is on the right.
 
 Below is a full list of assertions
 
-## ASSERT_*
+## ASSERT_* | EXPECT_*
+
+The `ASSERT_*` macros are fatal, the `EXPECT_*`macros are non fatal.
 
 Boolean assertions:
 
@@ -35,21 +37,23 @@ Value A vs B checks. E.g. int, float, double or any type that has the correct op
 * ASSERT_GE(expected, value) -> >=
 * ASSERT_NEAR(expected, value, epsilon) -> abs(expected - value) < epsilon
 
-String assertions:
+## String assertions:
 
 * ASSERT_STREQ(expected, value) -> Tests two null terminated strings for equality
 * ASSERT_STRNE(expected, value) -> Tests two null terminated strings for inequality
 
-## EXPECT_*
+## Floating point assertions
 
-See the list under ASSERT_*
-Only difference is that these tests aren't fatal.
-
-# Floating point assertions
-
-## ASSERT_EQ, ASSERT_NE
+### ASSERT_EQ, ASSERT_NE
 
 In this framework the comparison is done by comparing the bits in each float number.
 
-## ASSERT_NEAR
+### ASSERT_NEAR( A, B, EPSILON )
 
+Asserts that `fabs(b - a) <= epsilon`
+
+## ASSERT_DEATH_IF_SUPPORTED( STATEMENT, STRING )
+
+Tests that the `STATEMENT` causes a signal error (e.g SIGABORT)
+
+*NOTE: The STRING argument is there to make the transition from GTEST easier. It is not used in this framework*
