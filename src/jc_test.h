@@ -50,11 +50,9 @@
  *
  *
  * USAGE:
-
-// Use case 1:
+ *      For more use cases, see end of document
 
 // Smallest test case
-
 #define JC_TEST_IMPLEMENTATION
 #include <jc_test.h>
 
@@ -63,58 +61,98 @@ TEST(FixtureName, TestName) {
 }
 
 int main(int argc, char** argv) {
-    jc_test_init(&argc, argv); // may modify the command line
-    return JC_TEST_RUN_ALL();
+    jc_test_init(&argc, argv);
+    return jc_test_run_all();
 }
-
-// Use case 2:
-
-// Test fixtures are good if you wish to call code before or after the test or fixture itself.
-
-struct MyTest : public jc_test_base_class {
- static void SetUpTestCase()      {...};
- static void TearDownTestCase()   {...};
- virtual void SetUp()             {...};
- virtual void TearDown()          {...};
-};
-
-TEST_F(MyTest, TestName) {
- ASSERT_EQ(4, 2*2);
-}
-
-// Use case 3:
-
-// Parameterized tests are good if you wish to call a test case with different parameters
-
-struct MyParamTest : public jc_test_params_class<ParamType> {
-    static void SetUpTestCase()      {...};
-    static void TearDownTestCase()   {...};
-    virtual void SetUp()             {...};
-    virtual void TearDown()          {...};
-    static const ParamType&          GetParam(); // New param for each test iteration
-};
-
-TEST_P(MyParamTest, IsEven) {
-    ParamType value = GetParam();
-    ASSERT_EQ(0, value & 1);
-}
-
-// Creates a new fixture for each test param
-INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
-*/
+ */
 
 #ifndef JC_TEST_H
 #define JC_TEST_H
 
 // ***************************************************************************************
-// PUBLIC functions
+// PUBLIC API
 
 // May modify the argument list, to remove the test specific arguments
 extern void jc_test_init(int* argc, char** argv);
 
-// Use JC_TEST_RUN_ALL() to launch all registered tests
+// Runs all registered tests
+extern int jc_test_run_all();
+
+// The standard test class
+struct jc_test_base_class {
+    virtual ~jc_test_base_class();
+    static void SetUpTestCase() {}      // The UserClass::SetUpTestCase is called before each test case runs
+    static void TearDownTestCase() {}   // The UserClass::TearDownTestCase is called after all tests have run
+    virtual void SetUp();               // Called before each test
+    virtual void TearDown();            // Called after each test
+    virtual void TestBody() = 0;        // Implemented by TEST_F and TEST_P
+private:
+    struct Setup_should_be_spelled_SetUp {};
+    virtual Setup_should_be_spelled_SetUp* Setup() { return 0; } // Trick from GTEST to make sure users don't accidentally misspell the function
+};
+
+// A parameterized test class, to use with TEST_P and INSTANTIATE_TEST_CASE_P
+template<typename ParamType>
+struct jc_test_params_class : public jc_test_base_class {
+    typedef ParamType param_t;
+    jc_test_params_class() {}
+    static const ParamType&    GetParam()                           { return *param; }
+    static void                SetParam(const ParamType* _param)    { param = _param; }
+    static const ParamType* param;
+};
 
 // ***************************************************************************************
+// TEST API
+
+// Basic test
+// #define TEST(testfixture,testfn)
+//
+// Basic tests using a user defined fixture class (jc_test_base_class)
+// #define TEST_F(testfixture,testfn)
+//
+// Parameterized tests using a user defined fixture class (jc_test_params_class<T>)
+// #define TEST_P(testfixture,testfn)
+//
+// Instantiation of parameterisaed test
+// #define INSTANTIATE_TEST_CASE_P(prefix,testfixture,testvalues)
+
+// ***************************************************************************************
+// ASSERTION API
+
+// #define SKIP()                           Skips the test
+
+// Fatal failures
+// #define ASSERT_TRUE( VALUE )             value
+// #define ASSERT_FALSE( VALUE )            !value
+// #define ASSERT_EQ( A, B )                A == B
+// #define ASSERT_NE( A, B )                A != B
+// #define ASSERT_LT( A, B )                A <  B
+// #define ASSERT_GT( A, B )                A >  B
+// #define ASSERT_LE( A, B )                A <= B
+// #define ASSERT_GE( A, B )                A >= B
+// #define ASSERT_STREQ( A, B )
+// #define ASSERT_STRNE( A, B )
+// #define ASSERT_NEAR( A, B, EPSILON )     abs(a - b) < epsilon
+// #define ASSERT_DEATH_IF_SUPPORTED(S, RE)
+
+// #define EXPECT_TRUE( VALUE )             value
+// #define EXPECT_FALSE( VALUE )            !value
+// #define EXPECT_EQ( A, B )                A == B
+// #define EXPECT_NE( A, B )                A != B
+// #define EXPECT_LT( A, B )                A <  B
+// #define EXPECT_GT( A, B )                A >  B
+// #define EXPECT_LE( A, B )                A <= B
+// #define EXPECT_GE( A, B )                A >= B
+// #define EXPECT_STREQ( A, B )
+// #define EXPECT_STRNE( A, B )
+// #define EXPECT_NEAR( A, B, EPS )
+// #define EXPECT_DEATH_IF_SUPPORTED(S, RE)
+
+// #define SCOPED_TRACE(_MSG)               // nop
+
+
+// ***************************************************************************************
+// Possible modifications for the included files
 
 // Can be used to override the logging entirely (e.g. for writing html output)
 #ifndef JC_TEST_LOGF
@@ -175,6 +213,7 @@ extern void jc_test_init(int* argc, char** argv);
 #pragma GCC diagnostic push
 #if !defined(__GNUC__)
     #if __cplusplus >= 199711L
+        // Silencing them made the code unreadable, so I opted to disable them instead
         #pragma GCC diagnostic ignored "-Wc++98-compat"
     #endif
 #endif
@@ -231,7 +270,6 @@ extern void jc_test_init(int* argc, char** argv);
 // Returns the user defined context for the fixture
 typedef void* (*jc_test_fixture_setup_func)();
 
-struct jc_test_base_class;
 struct jc_test_factory_base_interface;
 typedef void (*jc_test_void_staticfunc)();
 typedef void (jc_test_base_class::*jc_test_void_memberfunc)();
@@ -296,8 +334,7 @@ typedef struct jc_test_state {
 // Private functions
 
 extern jc_test_state* jc_test_get_state();
-extern int jc_test_run_all_tests(jc_test_state* state);
-extern void jc_test_exit(); // called by jc_test_run_all_tests
+extern void jc_test_exit(); // called by jc_test_run_all
 extern void jc_test_set_test_fail(int fatal);
 extern void jc_test_set_test_skipped();
 extern void jc_test_increment_assertions();
@@ -485,8 +522,6 @@ struct jc_test_cmp_eq_helper<true> {
 
 // TEST API Begin -->
 
-#define JC_TEST_RUN_ALL()               jc_test_run_all_tests(jc_test_get_state())
-
 #define SKIP()                          { jc_test_set_test_skipped(); return; }
 
 #define ASSERT_TRUE( VALUE )            JC_ASSERT_TEST_BOOLEAN( TRUE, VALUE, JC_TEST_FATAL_FAILURE )
@@ -515,19 +550,7 @@ struct jc_test_cmp_eq_helper<true> {
 #define EXPECT_NEAR( A, B, EPS )        JC_ASSERT_TEST_3OP( NEAR, A, B, EPS, JC_TEST_NON_FATAL_FAILURE )
 #define EXPECT_DEATH_IF_SUPPORTED(S, RE) JC_ASSERT_TEST_DEATH_OP(S, RE, JC_TEST_NON_FATAL_FAILURE )
 
-#define SCOPED_TRACE(_MSG)
-
-struct jc_test_base_class {
-    virtual ~jc_test_base_class();
-    static void SetUpTestCase() {}      // The UserClass::SetUpTestCase is called before each test case runs
-    static void TearDownTestCase() {}   // The UserClass::TearDownTestCase is called after all tests have run
-    virtual void SetUp();               // Called before each test
-    virtual void TearDown();            // Called after each test
-    virtual void TestBody() = 0;        // Implemented by TEST_F and TEST_P
-private:
-    struct Setup_should_be_spelled_SetUp {};
-    virtual Setup_should_be_spelled_SetUp* Setup() { return 0; } // Trick from GTEST to make sure users don't accidentally misspell the function
-};
+#define SCOPED_TRACE(_MSG)  // nop
 
 template<typename T>
 struct jc_test_value_iterator {
@@ -556,14 +579,6 @@ template<typename T, size_t N> jc_test_array_iterator<T>* jc_test_values_in(cons
     return jc_test_values_in(arr, arr+N);
 }
 
-template<typename ParamType>
-struct jc_test_params_class : public jc_test_base_class {
-    typedef ParamType param_t;
-    jc_test_params_class() {}
-    static const ParamType&    GetParam()                           { return *param; }
-    static void                SetParam(const ParamType* _param)    { param = _param; }
-    static const ParamType* param;
-};
 template<typename ParamType> const ParamType* jc_test_params_class<ParamType>::param = 0;
 
 template<typename ParamType>
@@ -718,7 +733,7 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
 #define JC_TEST_MAKE_FUNCTION_NAME(X, Y)        JC_TEST_MAKE_NAME2(X, Y)
 #define JC_TEST_MAKE_UNIQUE_NAME(X, Y, LINE)    JC_TEST_MAKE_NAME3(X, Y, LINE)
 
-#define TEST(testfixture,testfn)                                                                                         \
+#define TEST(testfixture,testfn)                                                                                            \
 class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public jc_test_base_class {                                             \
     virtual void TestBody();                                                                                                \
 };                                                                                                                          \
@@ -727,7 +742,7 @@ static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) JC_TEST_UNUSED 
         new JC_TEST_MAKE_CLASS_NAME(testfixture,testfn), JC_TEST_FIXTURE_TYPE_CLASS);                                       \
 void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
 
-#define TEST_F(testfixture,testfn)                                                                                       \
+#define TEST_F(testfixture,testfn)                                                                                          \
     class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture {                                                \
         virtual void TestBody();                                                                                            \
     };                                                                                                                      \
@@ -736,7 +751,7 @@ void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
             new JC_TEST_MAKE_CLASS_NAME(testfixture,testfn), JC_TEST_FIXTURE_TYPE_CLASS);                                   \
     void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
 
-#define TEST_P(testfixture,testfn)                                                                                       \
+#define TEST_P(testfixture,testfn)                                                                                          \
     class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture {                                                \
         virtual void TestBody();                                                                                            \
     };                                                                                                                      \
@@ -745,7 +760,7 @@ void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
             new jc_test_factory<JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)>());                                            \
     void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
 
-#define INSTANTIATE_TEST_CASE_P(prefix,testfixture,testvalues)                                                      \
+#define INSTANTIATE_TEST_CASE_P(prefix,testfixture,testvalues)                                                              \
     static int JC_TEST_MAKE_UNIQUE_NAME(prefix,testfixture,__LINE__) JC_TEST_UNUSED =                                       \
         jc_test_register_param_tests<testfixture::param_t>(#testfixture, #prefix "/" #testfixture, testvalues)
 
@@ -760,10 +775,10 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
     };
 };
 
-#define TYPED_TEST_SUITE(testfixture,testtypes)                                                     \
+#define TYPED_TEST_CASE(testfixture,testtypes)                                                             \
     typedef jc_test_typed_list<testtypes>::type JC_TEST_MAKE_NAME2(testfixture,Types)
 
-#define TYPED_TEST(testfixture,testfn)                                                              \
+#define TYPED_TEST(testfixture,testfn)                                                                      \
     template<typename T> class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture<T> {        \
         virtual void TestBody();                                                                            \
         typedef testfixture<T> TestFixture;                                                                 \
@@ -812,10 +827,8 @@ template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const flo
 #define JC_TEST_CLR_RED     "\x1B[31m"
 #define JC_TEST_CLR_GREEN   "\x1B[32m"
 #define JC_TEST_CLR_YELLOW  "\x1B[33m"
-#define JC_TEST_CLR_BLUE    "\x1B[34m"
 #define JC_TEST_CLR_MAGENTA "\x1B[35m"
 #define JC_TEST_CLR_CYAN    "\x1B[36m"
-#define JC_TEST_CLR_WHITE   "\x1B[37m"
 
 #define JC_TEST_COL(CLR) (jc_test_get_state()->is_a_tty ? JC_TEST_CLR_ ## CLR : "")
 
@@ -1173,30 +1186,6 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
     jc_test_get_state()->current_fixture = 0;
 }
 
-int jc_test_run_all_tests(jc_test_state* state) {
-    state->stats.totaltime = 0;
-    for( int i = 0; i < state->num_fixtures; ++i )
-    {
-        if( state->fixtures[i] )
-        {
-            jc_test_run_fixture( state->fixtures[i] );
-
-            state->stats.num_assertions += state->fixtures[i]->stats.num_assertions;
-            state->stats.num_pass += state->fixtures[i]->stats.num_pass;
-            state->stats.num_fail += state->fixtures[i]->stats.num_fail;
-            state->stats.num_skipped += state->fixtures[i]->stats.num_skipped;
-            state->stats.num_tests += state->fixtures[i]->stats.num_tests;
-            state->stats.totaltime += state->fixtures[i]->stats.totaltime;
-        }
-    }
-
-    JC_TEST_LOGF(0, 0, &state->stats, JC_TEST_EVENT_SUMMARY, 0);
-
-    int num_fail = state->stats.num_fail;
-    jc_test_exit();
-    return num_fail;
-}
-
 #if defined(_MSC_VER)
 
 jc_test_time_t jc_test_get_time(void) {
@@ -1318,6 +1307,31 @@ static int jc_test_parse_commandline(int* argc, char** argv) {
     return 0;
 }
 
+int jc_test_run_all() {
+    jc_test_state* state = jc_test_get_state();
+    state->stats.totaltime = 0;
+    for( int i = 0; i < state->num_fixtures; ++i )
+    {
+        if( state->fixtures[i] )
+        {
+            jc_test_run_fixture( state->fixtures[i] );
+
+            state->stats.num_assertions += state->fixtures[i]->stats.num_assertions;
+            state->stats.num_pass += state->fixtures[i]->stats.num_pass;
+            state->stats.num_fail += state->fixtures[i]->stats.num_fail;
+            state->stats.num_skipped += state->fixtures[i]->stats.num_skipped;
+            state->stats.num_tests += state->fixtures[i]->stats.num_tests;
+            state->stats.totaltime += state->fixtures[i]->stats.totaltime;
+        }
+    }
+
+    JC_TEST_LOGF(0, 0, &state->stats, JC_TEST_EVENT_SUMMARY, 0);
+
+    int num_fail = state->stats.num_fail;
+    jc_test_exit();
+    return num_fail;
+}
+
 void jc_test_init(int* argc, char** argv) {
     if (jc_test_parse_commandline(argc, argv)) {
         jc_test_usage();
@@ -1333,3 +1347,42 @@ void jc_test_init(int* argc, char** argv) {
 #pragma GCC diagnostic pop
 #endif
 #endif
+
+
+/*
+
+// Use case 2:
+
+// Test fixtures are good if you wish to call code before or after the test or fixture itself.
+
+struct MyTest : public jc_test_base_class {
+ static void SetUpTestCase()      {...};
+ static void TearDownTestCase()   {...};
+ virtual void SetUp()             {...};
+ virtual void TearDown()          {...};
+};
+
+TEST_F(MyTest, TestName) {
+ ASSERT_EQ(4, 2*2);
+}
+
+// Use case 3:
+
+// Parameterized tests are good if you wish to call a test case with different parameters
+
+struct MyParamTest : public jc_test_params_class<ParamType> {
+    static void SetUpTestCase()      {...};
+    static void TearDownTestCase()   {...};
+    virtual void SetUp()             {...};
+    virtual void TearDown()          {...};
+    static const ParamType&          GetParam(); // New param for each test iteration
+};
+
+TEST_P(MyParamTest, IsEven) {
+    ParamType value = GetParam();
+    ASSERT_EQ(0, value & 1);
+}
+
+// Creates a new fixture for each test param
+INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
+*/

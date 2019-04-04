@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 #else
     GlobalTestSetup();
     jc_test_init(&argc, argv);
-    int ret = JC_TEST_RUN_ALL();
+    int ret = jc_test_run_all();
 
     ret = GlobalTestTeardown();
     if (ret != 0) {

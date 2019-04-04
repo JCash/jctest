@@ -35,7 +35,7 @@ struct TestClass2 {
     typedef jc_test_type2<TestClass1, TestClass2> TestTypes;
 #endif
 
-TYPED_TEST_SUITE(TypedTest, TestTypes);
+TYPED_TEST_CASE(TypedTest, TestTypes);
 
 //////////////////////////////////////////////
 

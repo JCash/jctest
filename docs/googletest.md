@@ -16,7 +16,7 @@ While `jc_test` is designed to be a replacement for gtest,
 the base classes are named differently, so you need some setup to make it work.
 
 The major goal with this software was to see if it was possible to decrease the compilation
-times when compiling tests. See [./benchmarks.md](the benchmarks) for the results.
+times when compiling tests. See [the benchmarks](./benchmarks.md) for the results.
 
 A secondary goal was to keep the code reasonably small, in order to make it into a single header only library.
 As such, it wouldn't be necessary to cross compile the testing framework for many different target platforms.
@@ -33,9 +33,13 @@ The classes correspond like so:
 
     ::testing::ValuesIn -> jc_test_values_in
 
+    ::testing::Types<T1>                -> jc_test_type1<T1>
+    ::testing::Types<T1, T2>            -> jc_test_type2<T1, T2>
+    ::testing::Types<T1, T2, T3>        -> jc_test_type3<T1, T2, T3>
+    ::testing::Types<T1, T2, T3, T4>    -> jc_test_type4<T1, T2, T3, T4>
+
 ## ASSERT_DEATH_IF_SUPPORTED
 
 `jc_test` is using a signal handler to catch errors such as SIGABRT.
 The application is not forked, and the output from assert() is output in the log.
 
-##

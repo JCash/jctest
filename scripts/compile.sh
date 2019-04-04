@@ -75,7 +75,8 @@ if [ "$TRAVIS_COMPILER" == "" ]; then
     PLATFORM=x86_64-$UNAME
     GTESTDIR=./test/external/gtest
     PREFIX=gtest
-    CXXFLAGS="-Wall -std=c++11 -Wno-deprecated-declarations -Isrc -I. -DUSE_GTEST -I${GTESTDIR}/include"
+    #PREPROCESS="-E"
+    CXXFLAGS="-Wall -std=c++11 -Wno-deprecated-declarations -Isrc -I. -DUSE_GTEST -I${GTESTDIR}/include $PREPROCESS"
     LDFLAGS="-L${GTESTDIR}/lib/$PLATFORM -lgtest"
 
     if [ "$UNAME" == 'linux' ]; then
