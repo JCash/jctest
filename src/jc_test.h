@@ -619,18 +619,19 @@ struct jc_test_type0 {};
 
 template<typename T1>
 struct jc_test_type1 {
-    typedef T1 head;
-    typedef jc_test_type0       tail;
+    typedef T1 head; typedef jc_test_type0 tail;
 };
 template<typename T1, typename T2>
 struct jc_test_type2 {
-    typedef T2 head;
-    typedef jc_test_type1<T1>   tail;
+    typedef T2 head; typedef jc_test_type1<T1> tail;
 };
 template<typename T1, typename T2, typename T3>
 struct jc_test_type3 {
-    typedef T3 head;
-    typedef jc_test_type2<T1, T2>   tail;
+    typedef T3 head; typedef jc_test_type2<T1, T2> tail;
+};
+template<typename T1, typename T2, typename T3, typename T4>
+struct jc_test_type4 {
+    typedef T4 head; typedef jc_test_type3<T1, T2, T3> tail;
 };
 
 template <typename BaseClassSelector, typename TypeList>

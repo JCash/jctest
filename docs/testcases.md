@@ -2,7 +2,7 @@
 nav_order: 2
 ---
 
-# C++ API
+# C++ API - Test Cases
 
 ## Test Fixtures
 
@@ -56,8 +56,8 @@ INSTANTIATE_TEST_CASE_P(HighNumbers, MyParamTest, jc_test_values_in(high_values)
 
 ### TYPED_TEST + INSTANTIATE_TEST_CASE_P
 
-If you wish to use a different base class to use with your tests, you can do so with too.
-
+If you wish to use a different base class to use with your tests, you can do so.
+You can specify up to 4 classes via the constructs `jc_test_type1` ... `jc_test_type4`
 
 ```cpp
 // First, create the classes you wish to test:
@@ -96,7 +96,6 @@ Only used in conjunction with `TEST_P`
 
 This class implements a function `GetParam()` which is used to get the current parameter value.
 
-
 ```cpp
 template <typename ParamType>
 jc_test_params_class {
@@ -108,7 +107,25 @@ jc_test_params_class {
 
 ### Command line options
 
-TBD
+#### `--test-filter <substring>`
 
-### Environment variables
+If the substring matches part of the full test name, the test will be included.
+The non matching tests will be skipped.
+
+The complete name isn't written out, but is pieced together from the `fixture name`, `test name` and the `test number`. E.g.:
+
+    FirstParamsTest/ParamsTest.Test/0
+    FirstParamsTest/ParamsTest.Test/1
+    SecondParamsTest/ParamsTest.Test/0
+    SecondParamsTest/ParamsTest.Test/1
+
+The option `--test-filter Second` will match:
+
+    SecondParamsTest/ParamsTest.Test/0
+    SecondParamsTest/ParamsTest.Test/1
+
+The option `--test-filter Test/0` will match:
+
+    FirstParamsTest/ParamsTest.Test/0
+    SecondParamsTest/ParamsTest.Test/0
 

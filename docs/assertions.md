@@ -2,7 +2,7 @@
 nav_order: 3
 ---
 
-# Assertions
+# C++ API - Assertions
 
 There are two main type of assertions:
 

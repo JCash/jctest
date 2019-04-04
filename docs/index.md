@@ -5,8 +5,8 @@ nav_order: 0
 
 # jctest
 
-A C/C++ header only test library implementing a GTEST-like API.
-The library was created with compile time, run time, code size and executable size in mind.
+A C++ single header only test library implementing a GTEST-like API.
+The library was build as a light weight replacement for googletest.
 
 ## Example usage
 
