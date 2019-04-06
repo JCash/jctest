@@ -40,6 +40,10 @@ if [ "$CXX" == "clang++" ]; then
     CXXFLAGS="$CXXFLAGS -Weverything -Wno-global-constructors"
 fi
 
+if [ "$CXX" != "c++98" ]; then
+    CXXFLAGS="$CXXFLAGS -Wno-zero-as-null-pointer-constant"
+fi
+
 LDFLAGS="$ASAN_LDFLAGS"
 
 
