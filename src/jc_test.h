@@ -261,8 +261,8 @@ struct jc_test_params_class : public jc_test_base_class {
     extern jc_test_time_t jc_test_get_time(void);
 #endif
 
-#if __x86_64__ || __ppc64__ || _WIN64
-    #define JC_TEST_PAD_IF_64BIT(X)   char _pad[X]
+#if defined(__x86_64__) || defined(__ppc64__) || defined(_WIN64)
+    #define JC_TEST_PAD_IF_64BIT(X)   char _pad[X];
 #else
     #define JC_TEST_PAD_IF_64BIT(X)
 #endif
@@ -281,7 +281,7 @@ typedef struct jc_test_entry {
     unsigned int                    fail:1;
     unsigned int                    skipped:1;
     unsigned int                    :30;
-    JC_TEST_PAD_IF_64BIT(4);
+    JC_TEST_PAD_IF_64BIT(4)
 } jc_test_entry;
 
 typedef struct jc_test_stats {
@@ -325,9 +325,7 @@ typedef struct jc_test_state {
     #endif
     int                 num_fixtures:31;
     unsigned int        is_a_tty:1;
-    // #if defined(__APPLE__)
-    // int                 _pad;
-    // #endif
+    JC_TEST_PAD_IF_64BIT(4)
 } jc_test_state;
 
 // ***************************************************************************************
@@ -1277,7 +1275,7 @@ static void jc_test_disable_tests(jc_test_state* state, const char* pattern) {
         jc_test_fixture* fixture = state->fixtures[i];
         for (int j = 0; j < fixture->num_tests; ++j) {
             char name_buffer[256];
-            if (fixture->index >= 0)
+            if (fixture->index >= 0xFFFFFFFF)
                 JC_TEST_SNPRINTF(name_buffer, sizeof(name_buffer), "%s.%s/%d", fixture->name, fixture->tests[j].name, fixture->index);
             else
                 JC_TEST_SNPRINTF(name_buffer, sizeof(name_buffer), "%s.%s", fixture->name, fixture->tests[j].name);
