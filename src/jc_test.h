@@ -261,12 +261,6 @@ struct jc_test_params_class : public jc_test_base_class {
     extern jc_test_time_t jc_test_get_time(void);
 #endif
 
-#if defined(__x86_64__) || defined(__ppc64__) || defined(_WIN64)
-    #define JC_TEST_PAD_IF_64BIT(X)   char _pad[X];
-#else
-    #define JC_TEST_PAD_IF_64BIT(X)
-#endif
-
 // Returns the user defined context for the fixture
 typedef void* (*jc_test_fixture_setup_func)();
 
@@ -281,7 +275,9 @@ typedef struct jc_test_entry {
     unsigned int                    fail:1;
     unsigned int                    skipped:1;
     unsigned int                    :30;
-    JC_TEST_PAD_IF_64BIT(4)
+    #if defined(__x86_64__) || defined(__ppc64__) || defined(_WIN64)
+    unsigned int :32;
+    #else
 } jc_test_entry;
 
 typedef struct jc_test_stats {
@@ -322,10 +318,12 @@ typedef struct jc_test_state {
     jc_test_stats       stats;
     #if !defined(JC_TEST_NO_DEATH_TEST)
     jmp_buf             jumpenv;    // Set before trying to catch exceptions
+    #if defined(__linux__)
+    unsigned int _pad;
+    #endif
     #endif
     int                 num_fixtures:31;
     unsigned int        is_a_tty:1;
-    JC_TEST_PAD_IF_64BIT(4)
 } jc_test_state;
 
 // ***************************************************************************************
