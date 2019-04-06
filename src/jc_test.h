@@ -277,7 +277,7 @@ typedef struct jc_test_entry {
     unsigned int                    :30;
     #if defined(__x86_64__) || defined(__ppc64__) || defined(_WIN64)
     unsigned int :32;
-    #else
+    #endif
 } jc_test_entry;
 
 typedef struct jc_test_stats {
