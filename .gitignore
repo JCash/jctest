@@ -3,6 +3,7 @@ test/external/gtest/**
 
 docs/Gemfile.lock
 docs/_site/**
+*Thumbs.db
 
 # Prerequisites
 *.d

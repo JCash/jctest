@@ -4,7 +4,7 @@ nav_order: 3
 
 # Benchmarks
 
-# Feature comparisons
+## Feature comparisons
 
 | Feature vs Impl        | jc_test |  gtest  | greatest |  utest  | doctest |  catch2 |
 |-----------------------:|---------|---------|----------|---------|---------|---------|
@@ -23,3 +23,37 @@ nav_order: 3
 1. * Needs -Wno-global-constructors
 1. ** Counting code lines in C/C++ files using cloc
 1. *** A minimal test example. "clang++ -O2". Picking the fastest time.
+
+### Minimal test example
+
+A minimal test example was written specifically for each framework.
+You can find them in the [jctest/test/comparisons](https://github.com/JCash/jctest/tree/master/test/comparisons) folder
+
+```cpp
+TEST(MyTest, Multiply) {
+    ASSERT_EQ(4, 2*2);
+}
+
+TEST(MyTest, Division) {
+    ASSERT_EQ(2, 4/2);
+}
+
+int main(int argc, char *argv[])
+{
+    jc_test_init(&argc, argv);
+    return jc_test_run_all();
+}
+```
+
+## Real life examples
+
+Here's a comparison between the two test frameworks when building the Defold game engine tests.
+We see a decrease of the compile time, ending up at ~54% of the original time.
+
+![benchmark_enginetests.png](./examples/benchmark_enginetests.png)
+
+The footprint on disc is also important, as it takes up both space but also affects writing/reading times.
+In this scenario the file sizes ended up at ~45% of the original sizes.
+
+![benchmark_enginetests.png](./examples/benchmark_enginetestsizes.png)
+
