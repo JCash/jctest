@@ -1,8 +1,8 @@
 ---
-nav_order: 3
+nav_order: 2
 ---
 
-# C++ API - Assertions
+# API - Assertions
 
 There are two main type of assertions:
 

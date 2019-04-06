@@ -1,8 +1,8 @@
 ---
-nav_order: 2
+nav_order: 1
 ---
 
-# C++ API - Test Cases
+# API - Test Cases
 
 ## Test Fixtures
 
@@ -10,12 +10,19 @@ nav_order: 2
 
 Tests a single function.
 
+```cpp
+TEST(MyTest, TestName) {
+    ASSERT_EQ(4, 2*2);
+    ASSERT_STREQ("a", "b");
+}
+```
+
+
 ### TEST_F(FixtureName, TestName)
 
 Uses a base class:
 
 ```cpp
-// a comment
 struct MyTest : public jc_test_base_class {
     static void SetUpTestCase()     {};
     static void TearDownTestCase()  {};
@@ -112,7 +119,7 @@ jc_test_params_class {
 If the substring matches part of the full test name, the test will be included.
 The non matching tests will be skipped.
 
-The complete name isn't written out, but is pieced together from the `fixture name`, `test name` and the `test number`. E.g.:
+The complete name isn't written out during the tests, but is pieced together from the `fixture name`, `test name` and the `test number`. E.g.:
 
     FirstParamsTest/ParamsTest.Test/0
     FirstParamsTest/ParamsTest.Test/1

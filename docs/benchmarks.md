@@ -27,7 +27,10 @@ nav_order: 3
 ### Minimal test example
 
 A minimal test example was written specifically for each framework.
-You can find them in the [jctest/test/comparisons](https://github.com/JCash/jctest/tree/master/test/comparisons) folder
+You can find them in the [jctest/test/comparisons](https://github.com/JCash/jctest/tree/master/test/comparisons) folder.
+
+Comparisons are done using no configurations of the testing framework.
+Also, since the goal was to eliminate a precompiled library, the header only version was chosen where available.
 
 ```cpp
 TEST(MyTest, Multiply) {

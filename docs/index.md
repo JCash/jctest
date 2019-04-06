@@ -6,7 +6,7 @@ nav_order: 0
 # jctest
 
 A C++ single header only test library implementing a GTEST-like API.
-The library was build as a light weight replacement for googletest.
+The library was build as a lightweight replacement for googletest.
 
 ## Example usage
 
@@ -42,7 +42,7 @@ You can find more examples in the [API documentation](./README_API.md) and also 
 
 ## API
 
-See [API documentation](./README_API.md)
+See [test cases](./testcases.md) and [test assertions](./assertions.md)
 
 ## Goals
 
@@ -60,12 +60,5 @@ From this, the expected result was:
 
 ## Benchmarks
 
-[Benchmarks](./README_BENCHMARK.md)
+[Benchmarks](./benchmarks.md)
 
-## GTEST
-
-[GTEST](./README_GTEST.md)
-
-## Alternatives
-
-[Test Framework alternatives](./README_ALTERNATIVES.md)
