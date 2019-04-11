@@ -312,18 +312,19 @@ typedef struct jc_test_fixture {
 } jc_test_fixture;
 
 typedef struct jc_test_state {
+    #if !defined(JC_TEST_NO_DEATH_TEST)
+    jmp_buf             jumpenv;    // Set before trying to catch exceptions
+    // remove padding warning due to jmp_buf struct alignment
+    unsigned char _pad[sizeof(jmp_buf)+sizeof(void*) - (sizeof(jmp_buf)/sizeof(void*))*sizeof(void*)];
+    #endif
+
     jc_test_entry*      current_test;
     jc_test_fixture*    current_fixture;
     jc_test_fixture*    fixtures[JC_TEST_MAX_NUM_FIXTURES];
     jc_test_stats       stats;
-    #if !defined(JC_TEST_NO_DEATH_TEST)
-    jmp_buf             jumpenv;    // Set before trying to catch exceptions
-    #if defined(__linux__)
-    unsigned int _pad;
-    #endif
-    #endif
     int                 num_fixtures:31;
     unsigned int        is_a_tty:1;
+    unsigned int        :32;
 } jc_test_state;
 
 // ***************************************************************************************
