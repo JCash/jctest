@@ -130,10 +130,10 @@ struct jc_test_params_class : public jc_test_base_class {
 // #define ASSERT_GT( A, B )                A >  B
 // #define ASSERT_LE( A, B )                A <= B
 // #define ASSERT_GE( A, B )                A >= B
-// #define ASSERT_STREQ( A, B )
-// #define ASSERT_STRNE( A, B )
+// #define ASSERT_STREQ( A, B )             strcmp(A,B) == 0
+// #define ASSERT_STRNE( A, B )             strcmp(A,B) != 0
 // #define ASSERT_NEAR( A, B, EPSILON )     abs(a - b) < epsilon
-// #define ASSERT_DEATH_IF_SUPPORTED(S, RE)
+// #define ASSERT_DEATH(S, RE)
 
 // #define EXPECT_TRUE( VALUE )             value
 // #define EXPECT_FALSE( VALUE )            !value
@@ -143,10 +143,10 @@ struct jc_test_params_class : public jc_test_base_class {
 // #define EXPECT_GT( A, B )                A >  B
 // #define EXPECT_LE( A, B )                A <= B
 // #define EXPECT_GE( A, B )                A >= B
-// #define EXPECT_STREQ( A, B )
-// #define EXPECT_STRNE( A, B )
-// #define EXPECT_NEAR( A, B, EPS )
-// #define EXPECT_DEATH_IF_SUPPORTED(S, RE)
+// #define EXPECT_STREQ( A, B )             strcmp(A,B) == 0
+// #define EXPECT_STRNE( A, B )             strcmp(A,B) != 0
+// #define EXPECT_NEAR( A, B, EPS )         abs(a - b) < epsilon
+// #define EXPECT_DEATH(S, RE)
 
 // #define SCOPED_TRACE(_MSG)               // nop
 
@@ -532,7 +532,7 @@ struct jc_test_cmp_eq_helper<true> {
 #define ASSERT_STREQ( A, B )            JC_ASSERT_TEST_OP( STREQ, A, B, JC_TEST_FATAL_FAILURE )
 #define ASSERT_STRNE( A, B )            JC_ASSERT_TEST_OP( STRNE, A, B, JC_TEST_FATAL_FAILURE )
 #define ASSERT_NEAR( A, B, EPS )        JC_ASSERT_TEST_3OP( NEAR, A, B, EPS, JC_TEST_FATAL_FAILURE )
-#define ASSERT_DEATH_IF_SUPPORTED(S, RE) JC_ASSERT_TEST_DEATH_OP( S, RE, JC_TEST_FATAL_FAILURE )
+#define ASSERT_DEATH(S, RE)             JC_ASSERT_TEST_DEATH_OP( S, RE, JC_TEST_FATAL_FAILURE )
 
 #define EXPECT_TRUE( VALUE )            JC_ASSERT_TEST_BOOLEAN( TRUE, VALUE, JC_TEST_NON_FATAL_FAILURE )
 #define EXPECT_FALSE( VALUE )           JC_ASSERT_TEST_BOOLEAN( FALSE, VALUE, JC_TEST_NON_FATAL_FAILURE )
@@ -545,7 +545,7 @@ struct jc_test_cmp_eq_helper<true> {
 #define EXPECT_STREQ( A, B )            JC_ASSERT_TEST_OP( STREQ, A, B, JC_TEST_NON_FATAL_FAILURE )
 #define EXPECT_STRNE( A, B )            JC_ASSERT_TEST_OP( STRNE, A, B, JC_TEST_NON_FATAL_FAILURE )
 #define EXPECT_NEAR( A, B, EPS )        JC_ASSERT_TEST_3OP( NEAR, A, B, EPS, JC_TEST_NON_FATAL_FAILURE )
-#define EXPECT_DEATH_IF_SUPPORTED(S, RE) JC_ASSERT_TEST_DEATH_OP(S, RE, JC_TEST_NON_FATAL_FAILURE )
+#define EXPECT_DEATH(S, RE)             JC_ASSERT_TEST_DEATH_OP(S, RE, JC_TEST_NON_FATAL_FAILURE )
 
 #define SCOPED_TRACE(_MSG)  // nop
 

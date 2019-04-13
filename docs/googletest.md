@@ -38,8 +38,15 @@ The classes correspond like so:
     ::testing::Types<T1, T2, T3>        -> jc_test_type3<T1, T2, T3>
     ::testing::Types<T1, T2, T3, T4>    -> jc_test_type4<T1, T2, T3, T4>
 
-## ASSERT_DEATH_IF_SUPPORTED
+## ASSERT_DEATH
 
 `jc_test` is using a signal handler to catch errors such as SIGABRT.
 The application is not forked, and the output from assert() is output in the log.
 
+It also does not check if it's supported, hence the rename from `ASSERT_DEATH_IF_SUPPORTED`
+
+## INSTANTIATE_TYPED_TEST_CASE
+
+Instead of supporting the TYPED_TEST_CASE, with heavy templates, there's instead `INSTANTIATE_TYPED_TEST_CASE`. It works the same way but simply takes one type at a time.
+
+The name INSTANTIATE_TYPED_TEST_CASE is also more in line with the name and design of INSTANTIATE_TEST_CASE.

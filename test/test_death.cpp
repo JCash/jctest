@@ -1,4 +1,5 @@
 
+
 #include <string.h>
 #include <stdio.h>
 #include "testutil.h"
@@ -31,8 +32,8 @@ static void call_segv(int* paddr) {
 
 TEST(DeathTest, Test1)
 {
-    EXPECT_DEATH_IF_SUPPORTED(call_segv(0),"");
-    EXPECT_DEATH_IF_SUPPORTED(call_abort(false),"");
+    EXPECT_DEATH(call_segv(0),"");
+    EXPECT_DEATH(call_abort(false),"");
     EXPECT_TRUE(true);
 }
 

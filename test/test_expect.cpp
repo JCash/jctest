@@ -79,7 +79,7 @@ TEST(Assertions, ExpectOk)
     EXPECT_STREQ(0, nullstr);
 
     printf("EXPECTED ASSERT ->\n");
-    EXPECT_DEATH_IF_SUPPORTED(Foo f(16), "");
+    EXPECT_DEATH(Foo f(16), "");
     printf("<- END OF EXPECTED ASSERT\n");
 }
 

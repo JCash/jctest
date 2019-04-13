@@ -52,7 +52,7 @@ See [test cases](./testcases.md) and [test assertions](./assertions.md)
 * As few lines as possible
 * Single header only library
 
-From this, the expected result was:
+From this, the expected result is:
 
 * Fast compile times
 * Small executable size
