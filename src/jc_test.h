@@ -1217,7 +1217,7 @@ static void jc_test_signal_handler(int) {
     longjmp(jc_test_get_state()->jumpenv, 1);
 }
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW32__)
     typedef void (*jc_test_signal_handler_fn)(int);
     jc_test_signal_handler_fn g_signal_handlers[4];
     void jc_test_set_signal_handler() {
