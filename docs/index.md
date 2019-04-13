@@ -26,7 +26,7 @@ TEST(MyTest, Division) {
 int main(int argc, char *argv[]) {
     jc_test_init(&argc, argv);
     // ... Do your test initialization
-    return JC_TEST_RUN_ALL();
+    return jc_test_run_all();
 }
 ```
 
