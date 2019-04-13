@@ -64,6 +64,12 @@ TEST(Assertions, ExpectOk)
     EXPECT_FALSE(JC_TEST_IS_NULL_LITERAL(0.0));
     EXPECT_FALSE(JC_TEST_IS_NULL_LITERAL('a'));
 
+    // float/double checks
+    const float twothirds_f = 2.0f/3.0f;
+    EXPECT_EQ(twothirds_f, 1.0f - 1.0f/3.0f );
+    const double twothirds_d = 2.0/3.0;
+    EXPECT_EQ(twothirds_d, 1.0 - 1.0/3.0 );
+
     #if !defined(USE_GTEST)
     EXPECT_TRUE(jc_test_is_pointer<char*>::value);
     EXPECT_FALSE(jc_test_is_pointer<char>::value);

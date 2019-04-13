@@ -10,6 +10,7 @@
  *
  * HISTORY:
  *
+ *      0.2     2019-04-14  Fixed ASSERT_EQ for single precision floats
  *      0.1     2019-01-19  Added GTEST-like C++ interface
  *
  * LICENSE:
@@ -231,6 +232,7 @@ struct jc_test_params_class : public jc_test_base_class {
 #if !defined(JC_TEST_UINT64)
     #include <stdint.h>
     #define JC_TEST_UINT64 uint64_t
+    #define JC_TEST_UINT32 uint32_t
 #endif
 
 #define JC_TEST_EVENT_FIXTURE_SETUP     0
@@ -339,7 +341,8 @@ extern void jc_test_set_signal_handler();
 extern void jc_test_unset_signal_handler();
 extern int jc_test_streq(const char* a, const char* b);
 extern void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, const jc_test_stats* stats, int event, const char* format, ...);
-extern int jc_test_cmp_float_eq(double, double);
+extern int jc_test_cmp_double_eq(double, double);
+extern int jc_test_cmp_float_eq(float, float);
 extern int jc_test_cmp_STREQ(const char* a, const char* b, const char* exprA, const char* exprB);
 extern int jc_test_cmp_STRNE(const char* a, const char* b, const char* exprA, const char* exprB);
 extern int jc_test_cmp_NEAR(double a, double b, double epsilon, const char* exprA, const char* exprB, const char* exprC);
@@ -409,23 +412,23 @@ JC_TEST_COMPARE_FUNC(GE, >=)
 JC_TEST_COMPARE_FUNC(GT, >)
 
 template <typename T> int jc_test_cmp_EQ(double a, T b, const char* exprA, const char* exprB) {
-    if (jc_test_cmp_float_eq(JC_TEST_STATIC_CAST(double, a), JC_TEST_STATIC_CAST(double, b))) return 1;
+    if (jc_test_cmp_double_eq(a, JC_TEST_STATIC_CAST(double, b))) return 1;
     jc_test_log_failure(a, b, exprA, exprB, "==");
     return 0;
 }
 template <typename T> int jc_test_cmp_EQ(float a, T b, const char* exprA, const char* exprB) {
-    if (jc_test_cmp_float_eq(JC_TEST_STATIC_CAST(double, a), JC_TEST_STATIC_CAST(double, b))) return 1;
+    if (jc_test_cmp_float_eq(a, JC_TEST_STATIC_CAST(float, b))) return 1;
     jc_test_log_failure(a, b, exprA, exprB, "==");
     return 0;
 }
 
 template <typename T> int jc_test_cmp_NE(double a, T b, const char* exprA, const char* exprB) {
-    if (!jc_test_cmp_float_eq(JC_TEST_STATIC_CAST(double, a), JC_TEST_STATIC_CAST(double, b))) return 1;
+    if (!jc_test_cmp_double_eq(a, JC_TEST_STATIC_CAST(double, b))) return 1;
     jc_test_log_failure(a, b, exprA, exprB, "!=");
     return 0;
 }
 template <typename T> int jc_test_cmp_NE(float a, T b, const char* exprA, const char* exprB) {
-    if (!jc_test_cmp_float_eq(JC_TEST_STATIC_CAST(double, a), JC_TEST_STATIC_CAST(double, b))) return 1;
+    if (!jc_test_cmp_float_eq(a, JC_TEST_STATIC_CAST(float, b))) return 1;
     jc_test_log_failure(a, b, exprA, exprB, "!=");
     return 0;
 }
@@ -972,27 +975,30 @@ int jc_test_cmp_STRNE(const char* a, const char* b, const char* exprA, const cha
 }
 
 // http://en.wikipedia.org/wiki/Signed_number_representations
-static JC_TEST_UINT64 jc_test_float_to_biased(JC_TEST_UINT64 bits) {
-    const JC_TEST_UINT64 sign_bit = JC_TEST_STATIC_CAST(JC_TEST_UINT64, 1) << (8*sizeof(double) - 1);
+template <typename IntType>
+static inline IntType jc_test_float_to_biased(IntType bits) {
+    const IntType sign_bit = JC_TEST_STATIC_CAST(IntType, 1) << (8*sizeof(IntType) - 1);
     return (sign_bit & bits) ? ~bits + 1 : bits | sign_bit;
 }
 
-// https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition
-static int jc_test_cmp_float_almost_equal(double a, double b) {
+template <typename FloatType, typename IntType>
+static int jc_test_cmp_float_almost_equal(FloatType a, FloatType b) {
     static const int max_ulp = 4;
     union {
-        double f; JC_TEST_UINT64 i;
+        FloatType f; IntType i;
     } ua, ub; ua.f = a; ub.f = b;
-    JC_TEST_UINT64 biased_a = jc_test_float_to_biased(ua.i);
-    JC_TEST_UINT64 biased_b = jc_test_float_to_biased(ub.i);
-    JC_TEST_UINT64 dist_ulp = (biased_a > biased_b) ? (biased_a - biased_b) : (biased_b - biased_a);
+    IntType biased_a = jc_test_float_to_biased<IntType>(ua.i);
+    IntType biased_b = jc_test_float_to_biased<IntType>(ub.i);
+    IntType dist_ulp = (biased_a > biased_b) ? (biased_a - biased_b) : (biased_b - biased_a);
     return dist_ulp <= max_ulp;
 }
 
-int jc_test_cmp_float_eq(double a, double b) {
-    return jc_test_cmp_float_almost_equal(a, b);
+int jc_test_cmp_double_eq(double a, double b) {
+    return jc_test_cmp_float_almost_equal<double, JC_TEST_UINT64>(a, b);
 }
-
+int jc_test_cmp_float_eq(float a, float b) {
+    return jc_test_cmp_float_almost_equal<float, JC_TEST_UINT32>(a, b);
+}
 
 jc_test_factory_base_interface::~jc_test_factory_base_interface() {}
 
