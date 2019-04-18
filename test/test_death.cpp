@@ -6,7 +6,9 @@
 
 #include <assert.h>
 
+#if !defined(_MSC_VER)
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif
 
 // To test the testing framework /////////////
 void GlobalTestSetup(); // to silence a warning

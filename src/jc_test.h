@@ -206,7 +206,11 @@ struct jc_test_params_class : public jc_test_base_class {
 #ifndef JC_TEST_NO_DEATH_TEST
     #include <signal.h>
     #include <setjmp.h> // longjmp
+#if defined(__EMSCRIPTEN__)
+    #define JC_TEST_SETJMP setjmp
+#else
     #define JC_TEST_SETJMP _setjmp
+#endif
 #endif
 
 // C++0x and above
@@ -505,6 +509,7 @@ struct jc_test_cmp_eq_helper<true> {
             FAIL_FUNC;                                                          \
         }                                                                       \
     } while(0)
+#if !defined(JC_TEST_NO_DEATH_TEST)
 #define JC_ASSERT_TEST_DEATH_OP(STATEMENT, RE, FAIL_FUNC)                       \
     do {                                                                        \
         JC_TEST_ASSERT_SETUP;                                                   \
@@ -519,6 +524,9 @@ struct jc_test_cmp_eq_helper<true> {
         jc_test_unset_signal_handler();                                         \
         JC_TEST_LOGF(jc_test_get_fixture(), jc_test_get_test(), 0, JC_TEST_EVENT_GENERIC, "jc_test: <- Death test end\n"); \
     } while(0)
+#else
+#define JC_ASSERT_TEST_DEATH_OP(STATEMENT, RE, FAIL_FUNC)
+#endif
 
 // TEST API Begin -->
 
