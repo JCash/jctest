@@ -271,11 +271,11 @@ typedef struct jc_test_entry {
     const char*                     name;
     jc_test_base_class*             instance;
     jc_test_factory_base_interface* factory;    // Factory for parameterized tests
-    unsigned int                    fail:1;
-    unsigned int                    skipped:1;
-    unsigned int                    :30;
+    JC_TEST_UINT32                  fail:1;
+    JC_TEST_UINT32                  skipped:1;
+    JC_TEST_UINT32                  :30;
     #if defined(__x86_64__) || defined(__ppc64__) || defined(_WIN64)
-    unsigned int :32;
+    JC_TEST_UINT32                  :32;
     #endif
 } jc_test_entry;
 
@@ -716,8 +716,11 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
         jc_test_entry* prev = 0;
         while (prototype_test) {
             jc_test_entry* test = new jc_test_entry;
+            test->next = 0;
             test->name = prototype_test->name;
             test->factory = 0;
+            test->fail = 0;
+            test->skipped = 0;
 
             jc_test_factory_interface<ParamType>* factory = JC_TEST_CAST(jc_test_factory_interface<ParamType>*, prototype_test->factory);
             factory->SetParam(fixture->param);
