@@ -10,6 +10,10 @@
  *
  * HISTORY:
  *
+ *      0.3     2019-04-25  Ansi colors for Win32
+ *                          Msys2 + Cygwin support
+ *                          setjmp fix for Emscripten
+ *                          Removed limit on number of tests
  *      0.2     2019-04-14  Fixed ASSERT_EQ for single precision floats
  *      0.1     2019-01-19  Added GTEST-like C++ interface
  *

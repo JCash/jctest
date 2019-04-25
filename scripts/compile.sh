@@ -5,13 +5,6 @@ if [ ! -e build ]; then
     mkdir -p build
 fi
 
-STDFAMILY=c++
-
-unameOut="$(uname -s)"
-case "${unameOut}" in
-    CYGWIN*)    STDFAMILY=gnu++;;
-esac
-
 OPT="-g -O2"
 #DISASSEMBLY="-S -masm=intel"
 #PREPROCESS="-E"
@@ -25,7 +18,7 @@ if [ "$USE_ASAN" != "" ]; then
 fi
 
 if [ "$STDVERSION" == "" ]; then
-    STDVERSION=${STDFAMILY}98
+    STDVERSION=c++98
 fi
 echo Using -std=$STDVERSION
 
