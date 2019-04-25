@@ -1389,7 +1389,7 @@ void jc_test_init(int* argc, char** argv) {
     }
     #if !defined(JC_TEST_NO_COLORS)
     FILE* o = stdout;
-    g_test_global_state->is_a_tty = JC_TEST_ISATTY(JC_TEST_FILENO(o));
+    jc_test_get_state()->is_a_tty = JC_TEST_ISATTY(JC_TEST_FILENO(o));
     #endif
 }
 

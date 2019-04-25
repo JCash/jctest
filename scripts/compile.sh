@@ -70,6 +70,7 @@ time compile_test params
 time compile_test typed_test
 time compile_test expect
 time compile_test death
+time compile_test empty
 
 if [ "$TRAVIS_COMPILER" == "" ]; then
     echo ""
