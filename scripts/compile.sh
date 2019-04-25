@@ -5,12 +5,6 @@ if [ ! -e build ]; then
     mkdir -p build
 fi
 
-unameOut="$(uname -s)"
-case "${unameOut}" in
-    CYGWIN*)    CXXFLAGS="$CXXFLAGS -mwin32";;
-    #MINGW*)     ;;
-esac
-
 OPT="-g -O2"
 #DISASSEMBLY="-S -masm=intel"
 #PREPROCESS="-E"
@@ -33,6 +27,7 @@ if [ "$CXX" == "" ]; then
     CXX=clang++
 fi
 echo Using CXX=$CXX
+$CXX --version
 
 
 if [ "$ARCH" == "" ]; then
