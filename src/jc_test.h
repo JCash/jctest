@@ -181,32 +181,10 @@ struct jc_test_params_class : public jc_test_base_class {
     #define JC_TEST_EXIT exit
 #endif
 
-#if defined(JC_TEST_NO_COLORS)
-    #define JC_TEST_ISATTY(_X) 0U
-#else
-    #ifndef JC_TEST_FILENO
-        #include <stdio.h> // fileno
-        #if defined(_MSC_VER)
-            #define JC_TEST_FILENO _fileno
-        #else
-            #define JC_TEST_FILENO fileno
-        #endif
-    #endif
-    #ifndef JC_TEST_ISATTY
-        #if defined(_MSC_VER)
-            #include <io.h>
-            #define JC_TEST_ISATTY(_X) _isatty(_X) ? 1U : 0U
-        #else
-            #include <unistd.h>
-            #define JC_TEST_ISATTY(_X) isatty(_X) ? 1U : 0U
-        #endif
-    #endif
-#endif
-
 #ifndef JC_TEST_NO_DEATH_TEST
     #include <signal.h>
-    #include <setjmp.h> // longjmp
-#if defined(__EMSCRIPTEN__)
+    #include <setjmp.h> // setjmp+longjmp
+#if defined(__EMSCRIPTEN__) || defined(__MINGW32__)
     #define JC_TEST_SETJMP setjmp
 #else
     #define JC_TEST_SETJMP _setjmp
@@ -248,11 +226,6 @@ struct jc_test_params_class : public jc_test_base_class {
 #define JC_TEST_EVENT_GENERIC           6
 
 #ifndef JC_TEST_TIMING_FUNC
-    #if defined(_MSC_VER)
-        #include <Windows.h>
-    #else
-        #include <sys/time.h>
-    #endif
     #define JC_TEST_TIMING_FUNC jc_test_get_time // returns micro seconds
 
     typedef unsigned long jc_test_time_t;
@@ -1232,24 +1205,22 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
     jc_test_get_state()->current_fixture = 0;
 }
 
-#if defined(_MSC_VER)
-
-jc_test_time_t jc_test_get_time(void) {
-    LARGE_INTEGER tickPerSecond;
-    LARGE_INTEGER tick;
-    QueryPerformanceFrequency(&tickPerSecond);
-    QueryPerformanceCounter(&tick);
-    return JC_TEST_STATIC_CAST(jc_test_time_t, tick.QuadPart / (tickPerSecond.QuadPart / 1000000));
-}
-
+#if defined(_WIN32)
+    #include <Windows.h>
+    jc_test_time_t jc_test_get_time(void) {
+        LARGE_INTEGER tickPerSecond;
+        LARGE_INTEGER tick;
+        QueryPerformanceFrequency(&tickPerSecond);
+        QueryPerformanceCounter(&tick);
+        return JC_TEST_STATIC_CAST(jc_test_time_t, tick.QuadPart / (tickPerSecond.QuadPart / 1000000));
+    }
 #else
-
-jc_test_time_t jc_test_get_time(void) {
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    return JC_TEST_STATIC_CAST(jc_test_time_t, tv.tv_sec) * 1000000U + JC_TEST_STATIC_CAST(jc_test_time_t, tv.tv_usec);
-}
-
+    #include <sys/time.h>
+    jc_test_time_t jc_test_get_time(void) {
+        struct timeval tv;
+        gettimeofday(&tv, 0);
+        return JC_TEST_STATIC_CAST(jc_test_time_t, tv.tv_sec) * 1000000U + JC_TEST_STATIC_CAST(jc_test_time_t, tv.tv_usec);
+    }
 #endif
 
 #if !defined(JC_TEST_NO_DEATH_TEST)
@@ -1260,7 +1231,7 @@ static void jc_test_signal_handler(int) {
     longjmp(jc_test_get_state()->jumpenv, 1);
 }
 
-#if defined(_MSC_VER)
+#if defined(_WIN32) || defined(__CYGWIN__)
     typedef void (*jc_test_signal_handler_fn)(int);
     jc_test_signal_handler_fn g_signal_handlers[4];
     void jc_test_set_signal_handler() {
@@ -1382,15 +1353,80 @@ int jc_test_run_all() {
     return num_fail;
 }
 
+#if defined(JC_TEST_NO_COLORS)
+    #define JC_TEST_ISATTY(_X) 0U
+#else
+#ifndef JC_TEST_ISATTY
+
+#if defined(__CYGWIN__) || !defined(_WIN32)
+    #include <unistd.h> // isatty
+#else // _WIN32
+    #include <io.h>     // _isatty
+    #include <string.h>
+    #include <Windows.h>
+#endif
+
+#if !defined(_WIN32)
+    #define JC_TEST_ISATTY(_X) isatty(_X) ? 1U : 0U
+#else
+    #define JC_TEST_ISATTY(_X) (_isatty(_X) || jctest_cyg_isatty(_X)) ? 1U : 0U
+
+    #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+        #define ENABLE_VIRTUAL_TERMINAL_PROCESSING  0x0004
+    #endif
+
+    // credit: https://github.com/ggreer/the_silver_searcher/pull/1146/files
+
+    // Cygwin/msys2 pty is a pipe with the following format (H: hex-digit, N: 0-9):
+    // '\{cygwin,msys}-HHHHHHHHHHHHHHHH-ptyN-{from,to}-master'
+    static int jctest_cyg_isatty(int fd) {
+    // The API here needs Vista or later SDK (WINVER 0x0600 or higher), and the
+    // binary won't run on XP - unless NO_CYGTTY is defined (which disables it).
+    // It's not impossible to make it work on XP, but not worth jumping through
+    // the hoops, especially after msys2 and Cygwin dropped XP support in 2016.
+    #if WINVER < 0x0600
+        (void)fd;
+        return 0;
+    #else
+        HANDLE h = (HANDLE)_get_osfhandle(fd);
+        if ((h == INVALID_HANDLE_VALUE) || (GetFileType(h) != FILE_TYPE_PIPE))
+            return 0;
+
+    #define INFOSIZE (sizeof(FILE_NAME_INFO) + sizeof(WCHAR) * MAX_PATH)
+        char buf[INFOSIZE + sizeof(WCHAR)]; // +1 WCHAR for our '\0'
+        if (!GetFileInformationByHandleEx(h, FileNameInfo, buf, INFOSIZE))
+            return 0;
+
+        FILE_NAME_INFO *info = (FILE_NAME_INFO *)buf;
+        WCHAR *n = info->FileName; // no \0 from the API. We reserved extra char.
+        n[info->FileNameLength / sizeof(WCHAR)] = 0;
+        return ((wcsstr(n, L"\\msys-") == n) || (wcsstr(n, L"\\cygwin-") == n)) && wcsstr(n, L"-pty") && (wcsstr(n, L"-from-master") || wcsstr(n, L"-to-master"));
+    #endif // WINVER
+    }
+#endif // _WIN32
+#endif // JC_TEST_ISATTY
+#endif // JC_TEST_NO_COLORS
+
 void jc_test_init(int* argc, char** argv) {
     if (jc_test_parse_commandline(argc, argv)) {
         jc_test_usage();
         JC_TEST_EXIT(1);
     }
+
+    jc_test_get_state()->is_a_tty = JC_TEST_ISATTY(1);
+
     #if !defined(JC_TEST_NO_COLORS)
-    FILE* o = stdout;
-    jc_test_get_state()->is_a_tty = JC_TEST_ISATTY(JC_TEST_FILENO(o));
+    #if defined(_WIN32)
+    // Try enabling ANSI escape sequence support on Windows 10 terminals.
+    if (jc_test_get_state()->is_a_tty) {
+        DWORD mode;
+        HANDLE console_ = GetStdHandle(STD_OUTPUT_HANDLE);
+        if (GetConsoleMode(console_, &mode)) {
+            SetConsoleMode(console_, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        }
+    }
     #endif
+    #endif // JC_TEST_NO_COLORS
 }
 
 #if !defined(_MSC_VER)
