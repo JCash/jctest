@@ -55,6 +55,7 @@ mkdir build
 %TIMEIT% cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /D_HAS_EXCEPTIONS=0 /EHsc /W4 /wd4611 /Isrc test/test_typed_test.cpp test/main.cpp /link /out:.\build\test_typed_test.exe
 %TIMEIT% cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /D_HAS_EXCEPTIONS=0 /EHsc /W4 /wd4611 /Isrc test/test_expect.cpp test/main.cpp /link /out:.\build\test_expect.exe
 %TIMEIT% cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /D_HAS_EXCEPTIONS=0 /EHsc /W4 /wd4611 /Isrc test/test_death.cpp test/main.cpp /link /out:.\build\test_death.exe
+%TIMEIT% cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /D_HAS_EXCEPTIONS=0 /EHsc /W4 /wd4611 /Isrc test/test_empty.cpp test/main.cpp /link /out:.\build\test_empty.exe
 
 del *.obj
 
