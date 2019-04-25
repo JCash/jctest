@@ -205,8 +205,8 @@ struct jc_test_params_class : public jc_test_base_class {
 
 #ifndef JC_TEST_NO_DEATH_TEST
     #include <signal.h>
-    #include <setjmp.h> // longjmp
-#if defined(__EMSCRIPTEN__)
+    #include <setjmp.h> // setjmp+longjmp
+#if defined(__EMSCRIPTEN__) || defined(__MINGW32__)
     #define JC_TEST_SETJMP setjmp
 #else
     #define JC_TEST_SETJMP _setjmp
@@ -1260,7 +1260,7 @@ static void jc_test_signal_handler(int) {
     longjmp(jc_test_get_state()->jumpenv, 1);
 }
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__)
     typedef void (*jc_test_signal_handler_fn)(int);
     jc_test_signal_handler_fn g_signal_handlers[4];
     void jc_test_set_signal_handler() {
