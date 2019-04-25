@@ -14,9 +14,9 @@ nav_order: 4
 | -Wall                  |   yes   |   yes   |    no    |   no    |   yes   |   yes   |
 | -Weverything           |   yes   |    no   |    no    |   no    |   yes   |    no   |
 | -pedantic              |   yes*  |    no   |    no    |   no    |   yes   |    no   |
-| Lines of Code**        |  ~1000  |  10000+ |   <1000  |  <400   |  4000+  |  11000+ |
-| Size of program***     |  23272  |  414608 |   19228  |  18280  |  146348 |  829572 |
-| Compile time***        |  203ms  |  600ms  |   141ms  |   86ms  |  1890ms | 10662ms |
+| Lines of Code**        |  ~1100  |  10000+ |   <1000  |  <400   |  4000+  |  11000+ |
+| Size of program***     |  27292  |  414608 |   19228  |  18280  |  146348 |  829572 |
+| Compile time***        |  227ms  |  600ms  |   141ms  |   86ms  |  1890ms | 10662ms |
 | Run time***            |    3ms  |    3ms  |    6ms   |    5ms  |    3ms  |   4ms   |
 
 

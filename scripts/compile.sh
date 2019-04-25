@@ -27,6 +27,7 @@ if [ "$CXX" == "" ]; then
     CXX=clang++
 fi
 echo Using CXX=$CXX
+$CXX --version
 
 
 if [ "$ARCH" == "" ]; then
@@ -44,7 +45,7 @@ if [ "$CXX" != "c++98" ]; then
     CXXFLAGS="$CXXFLAGS -Wno-zero-as-null-pointer-constant"
 fi
 
-LDFLAGS="$ASAN_LDFLAGS"
+LDFLAGS="$LDFLAGS $ASAN_LDFLAGS"
 
 
 
@@ -70,6 +71,7 @@ time compile_test params
 time compile_test typed_test
 time compile_test expect
 time compile_test death
+time compile_test empty
 
 if [ "$TRAVIS_COMPILER" == "" ]; then
     echo ""

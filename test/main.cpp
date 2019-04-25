@@ -21,6 +21,8 @@ int main(int argc, char **argv)
     ret = GlobalTestTeardown();
     if (ret != 0) {
         printf("Test verification failed\n");
+    } else {
+        printf("Test verification OK\n");
     }
     return ret;
 #endif
