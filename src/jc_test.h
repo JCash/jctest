@@ -247,14 +247,6 @@ struct jc_test_params_class : public jc_test_base_class {
 #define JC_TEST_EVENT_SUMMARY           5
 #define JC_TEST_EVENT_GENERIC           6
 
-#ifndef JC_TEST_MAX_NUM_TESTS_PER_FIXTURE
-    #define JC_TEST_MAX_NUM_TESTS_PER_FIXTURE 128
-#endif
-
-#ifndef JC_TEST_MAX_NUM_FIXTURES
-    #define JC_TEST_MAX_NUM_FIXTURES 256
-#endif
-
 #ifndef JC_TEST_TIMING_FUNC
     #if defined(_MSC_VER)
         #include <Windows.h>
@@ -275,14 +267,15 @@ typedef void (*jc_test_void_staticfunc)();
 typedef void (jc_test_base_class::*jc_test_void_memberfunc)();
 
 typedef struct jc_test_entry {
+    jc_test_entry*                  next;       // linked list
     const char*                     name;
     jc_test_base_class*             instance;
     jc_test_factory_base_interface* factory;    // Factory for parameterized tests
-    unsigned int                    fail:1;
-    unsigned int                    skipped:1;
-    unsigned int                    :30;
+    JC_TEST_UINT32                  fail:1;
+    JC_TEST_UINT32                  skipped:1;
+    JC_TEST_UINT32                  :30;
     #if defined(__x86_64__) || defined(__ppc64__) || defined(_WIN64)
-    unsigned int :32;
+    JC_TEST_UINT32                  :32;
     #endif
 } jc_test_entry;
 
@@ -298,6 +291,8 @@ typedef struct jc_test_stats {
 typedef struct jc_test_fixture {
     virtual ~jc_test_fixture();
     virtual void SetParam();
+    jc_test_fixture*            next;       // linked list
+    jc_test_entry*              tests;      // linked list
     const char*                 name;       // The name of the fixture
     const char*                 filename;   // The filename of the current ASSERT/EXPECT
     struct jc_test_fixture*     parent;     // In case of parameterized tests, this points to the first test
@@ -314,7 +309,6 @@ typedef struct jc_test_fixture {
     int                         line:16;    // The line of the current ASSERT/EXPECT
     int                         _pad:8;
     int                         num_tests;
-    jc_test_entry               tests[JC_TEST_MAX_NUM_TESTS_PER_FIXTURE];
 } jc_test_fixture;
 
 typedef struct jc_test_state {
@@ -326,7 +320,7 @@ typedef struct jc_test_state {
 
     jc_test_entry*      current_test;
     jc_test_fixture*    current_fixture;
-    jc_test_fixture*    fixtures[JC_TEST_MAX_NUM_FIXTURES];
+    jc_test_fixture*    fixtures;
     jc_test_stats       stats;
     int                 num_fixtures:31;
     unsigned int        is_a_tty:1;
@@ -717,14 +711,31 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
         fixture->fixture_teardown = prototype_fixture->fixture_teardown;
 
         fixture->num_tests = prototype_fixture->num_tests;
-        for (int i = 0; i < fixture->num_tests; ++i) {
-            fixture->tests[i].name = prototype_fixture->tests[i].name;
-            fixture->tests[i].factory = 0;
+        jc_test_entry* prototype_test = prototype_fixture->tests;
+        jc_test_entry* first = 0;
+        jc_test_entry* prev = 0;
+        while (prototype_test) {
+            jc_test_entry* test = new jc_test_entry;
+            test->next = 0;
+            test->name = prototype_test->name;
+            test->factory = 0;
+            test->fail = 0;
+            test->skipped = 0;
 
-            jc_test_factory_interface<ParamType>* factory = JC_TEST_CAST(jc_test_factory_interface<ParamType>*, prototype_fixture->tests[i].factory);
+            jc_test_factory_interface<ParamType>* factory = JC_TEST_CAST(jc_test_factory_interface<ParamType>*, prototype_test->factory);
             factory->SetParam(fixture->param);
-            fixture->tests[i].instance = factory->New();
+            test->instance = factory->New();
+
+            if (!first) {
+                first = test;
+                prev = test;
+            } else {
+                prev->next = test;
+                prev = test;
+            }
+            prototype_test = prototype_test->next;
         }
+        fixture->tests = first;
 
         values->Advance();
 
@@ -888,17 +899,19 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
         }
     } else if (event == JC_TEST_EVENT_SUMMARY) {
         // print failed tests
-        for( int i = 0; stats->num_fail && i < jc_test_get_state()->num_fixtures; ++i )
+        fixture = jc_test_get_state()->fixtures;
+        while (stats->num_fail && fixture)
         {
-            fixture = jc_test_get_state()->fixtures[i];
-            if (!fixture || fixture->fail)
-                continue;
-            for (int count = 0; count < fixture->num_tests; ++count){
-                test = &fixture->tests[count];
-                if (test->fail) {
-                    cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "%s%s%s.%s%s %sfailed%s\n", JC_TEST_COL(MAGENTA), fixture->name, JC_TEST_COL(DEFAULT), JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(RED), JC_TEST_COL(DEFAULT));
+            if (!fixture->fail) {
+                test = fixture->tests;
+                while(test) {
+                    if (test->fail) {
+                        cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "%s%s%s.%s%s %sfailed%s\n", JC_TEST_COL(MAGENTA), fixture->name, JC_TEST_COL(DEFAULT), JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(RED), JC_TEST_COL(DEFAULT));
+                    }
+                    test = test->next;
                 }
             }
+            fixture = fixture->next;
         }
         cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "Ran %d tests, with %d assertions in ", stats->num_tests, stats->num_assertions);
         cursor += jc_test_snprint_time(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), stats->totaltime);
@@ -1018,6 +1031,8 @@ void jc_test_base_class::SetUp() {}
 void jc_test_base_class::TearDown() {}
 
 jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* name, unsigned int fixture_type) {
+    fixture->next = 0;
+    fixture->tests = 0;
     fixture->name = name;
     fixture->type = fixture_type;
     fixture->parent = 0;
@@ -1030,28 +1045,40 @@ jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* na
     fixture->fixture_setup = 0;
     fixture->fixture_teardown = 0;
     jc_test_memset(&fixture->stats, 0, sizeof(fixture->stats));
-    jc_test_memset(fixture->tests, 0, sizeof(fixture->tests));
-    JC_TEST_ASSERT_FN(jc_test_get_state()->num_fixtures < JC_TEST_MAX_NUM_FIXTURES);
-    return jc_test_get_state()->fixtures[jc_test_get_state()->num_fixtures++] = fixture;
+    jc_test_get_state()->num_fixtures++;
+    jc_test_fixture* prev = jc_test_get_state()->fixtures;
+    if (!prev) jc_test_get_state()->fixtures = fixture;
+    else {
+        while (prev->next) prev = prev->next;
+        prev->next = fixture;
+    }
+    return fixture;
 }
 
 jc_test_entry* jc_test_add_test_to_fixture(jc_test_fixture* fixture, const char* test_name, jc_test_base_class* instance, jc_test_factory_base_interface* factory) {
-    if (fixture->num_tests >= JC_TEST_MAX_NUM_TESTS_PER_FIXTURE) {
-        return 0; // error
-    }
-    jc_test_entry* test = &fixture->tests[fixture->num_tests++];
+    jc_test_entry* test = new jc_test_entry;
+    test->next = 0;
     test->name = test_name;
     test->instance = instance;
     test->factory = factory;
     test->fail = 0;
     test->skipped = 0;
+    jc_test_entry* prev = fixture->tests;
+    if (!prev) fixture->tests = test;
+    else {
+        while(prev->next) prev = prev->next;
+        prev->next = test;
+    }
+    fixture->num_tests++;
     return test;
 }
 
 jc_test_fixture* jc_test_find_fixture(const char* name, unsigned int fixture_type) {
-    for( int i = 0; i < jc_test_get_state()->num_fixtures; ++i) {
-        if (jc_test_get_state()->fixtures[i]->type == fixture_type && jc_test_streq(jc_test_get_state()->fixtures[i]->name, name))
-            return jc_test_get_state()->fixtures[i];
+    jc_test_fixture* fixture = jc_test_get_state()->fixtures;
+    while (fixture) {
+        if (fixture->type == fixture_type && jc_test_streq(fixture->name, name))
+            return fixture;
+        fixture = fixture->next;
     }
     return 0;
 }
@@ -1075,12 +1102,19 @@ int jc_test_register_class_test(const char* fixture_name, const char* test_name,
 
 void jc_test_exit() {
     jc_test_state* state = jc_test_get_state();
-    for (int i = 0; i < state->num_fixtures; ++i) {
-        for (int j = 0; j < state->fixtures[i]->num_tests; ++j) {
-            delete state->fixtures[i]->tests[j].instance;
-            delete state->fixtures[i]->tests[j].factory;
+    jc_test_fixture* fixture = state->fixtures;
+    while (fixture) {
+        jc_test_entry* test = fixture->tests;
+        while (test) {
+            delete test->instance;
+            delete test->factory;
+            jc_test_entry* tmp_test = test;
+            test = test->next;
+            delete tmp_test;
         }
-        delete state->fixtures[i];
+        jc_test_fixture* tmp_fixture = fixture;
+        fixture = fixture->next;
+        delete tmp_fixture;
     }
 }
 
@@ -1136,8 +1170,8 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
         fixture->fixture_setup();
     }
 
-    for (int count = 0; count < fixture->num_tests; ++count) {
-        jc_test_entry* test = &fixture->tests[count];
+    jc_test_entry* test = fixture->tests;
+    while (test) {
         fixture->fail = 0;
         test->fail = 0;
         if (!test->skipped) {
@@ -1178,6 +1212,7 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
         else
             ++fixture->stats.num_pass;
         ++fixture->stats.num_tests;
+        test = test->next;
     }
     jc_test_get_state()->current_test = 0;
 
@@ -1272,10 +1307,14 @@ static void jc_test_signal_handler(int) {
 #endif
 #endif
 
-static jc_test_state jc_test_global_state;
+static jc_test_state* g_test_global_state = 0;
 
 jc_test_state* jc_test_get_state() {
-    return &jc_test_global_state;
+    if (!g_test_global_state) {
+        g_test_global_state = new jc_test_state;
+        jc_test_memset(g_test_global_state, 0, sizeof(jc_test_state));
+    }
+    return g_test_global_state;
 }
 
 static void jc_test_usage() {
@@ -1284,17 +1323,20 @@ static void jc_test_usage() {
 }
 
 static void jc_test_disable_tests(jc_test_state* state, const char* pattern) {
-    for (int i = 0; i < state->num_fixtures; ++i) {
-        jc_test_fixture* fixture = state->fixtures[i];
-        for (int j = 0; j < fixture->num_tests; ++j) {
+    jc_test_fixture* fixture = state->fixtures;
+    while (fixture) {
+        jc_test_entry* test = fixture->tests;
+        while (test) {
             char name_buffer[256];
             if (fixture->index >= 0xFFFFFFFF)
-                JC_TEST_SNPRINTF(name_buffer, sizeof(name_buffer), "%s.%s/%d", fixture->name, fixture->tests[j].name, fixture->index);
+                JC_TEST_SNPRINTF(name_buffer, sizeof(name_buffer), "%s.%s/%d", fixture->name, test->name, fixture->index);
             else
-                JC_TEST_SNPRINTF(name_buffer, sizeof(name_buffer), "%s.%s", fixture->name, fixture->tests[j].name);
+                JC_TEST_SNPRINTF(name_buffer, sizeof(name_buffer), "%s.%s", fixture->name, test->name);
             if (jc_test_strstr(name_buffer, pattern) == 0)
-                fixture->tests[j].skipped = 1;
+                test->skipped = 1;
+            test = test->next;
         }
+        fixture = fixture->next;
     }
 }
 
@@ -1321,19 +1363,16 @@ static int jc_test_parse_commandline(int* argc, char** argv) {
 int jc_test_run_all() {
     jc_test_state* state = jc_test_get_state();
     state->stats.totaltime = 0;
-    for( int i = 0; i < state->num_fixtures; ++i )
-    {
-        if( state->fixtures[i] )
-        {
-            jc_test_run_fixture( state->fixtures[i] );
-
-            state->stats.num_assertions += state->fixtures[i]->stats.num_assertions;
-            state->stats.num_pass += state->fixtures[i]->stats.num_pass;
-            state->stats.num_fail += state->fixtures[i]->stats.num_fail;
-            state->stats.num_skipped += state->fixtures[i]->stats.num_skipped;
-            state->stats.num_tests += state->fixtures[i]->stats.num_tests;
-            state->stats.totaltime += state->fixtures[i]->stats.totaltime;
-        }
+    jc_test_fixture* fixture = state->fixtures;
+    while (fixture) {
+        jc_test_run_fixture( fixture );
+        state->stats.num_assertions += fixture->stats.num_assertions;
+        state->stats.num_pass += fixture->stats.num_pass;
+        state->stats.num_fail += fixture->stats.num_fail;
+        state->stats.num_skipped += fixture->stats.num_skipped;
+        state->stats.num_tests += fixture->stats.num_tests;
+        state->stats.totaltime += fixture->stats.totaltime;
+        fixture = fixture->next;
     }
 
     JC_TEST_LOGF(0, 0, &state->stats, JC_TEST_EVENT_SUMMARY, 0);
@@ -1350,7 +1389,7 @@ void jc_test_init(int* argc, char** argv) {
     }
     #if !defined(JC_TEST_NO_COLORS)
     FILE* o = stdout;
-    jc_test_global_state.is_a_tty = JC_TEST_ISATTY(JC_TEST_FILENO(o));
+    g_test_global_state->is_a_tty = JC_TEST_ISATTY(JC_TEST_FILENO(o));
     #endif
 }
 
