@@ -52,7 +52,7 @@ In this framework the comparison is done by comparing the bits in each float num
 
 Asserts that `fabs(b - a) <= epsilon`
 
-## ASSERT_DEATH_IF_SUPPORTED( STATEMENT, STRING )
+## ASSERT_DEATH( STATEMENT, STRING )
 
 Tests that the `STATEMENT` causes a signal error (e.g SIGABORT)
 
