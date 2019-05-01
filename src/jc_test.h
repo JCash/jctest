@@ -5,7 +5,7 @@
  *
  * BRIEF:
  *
- *      A single header only C/C++ test framework in <1kloc
+ *      A small, single header only C++-98 test framework
  *      Made sure to compile with highest warning/error levels possible
  *
  * HISTORY:
