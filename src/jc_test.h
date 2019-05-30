@@ -1016,6 +1016,7 @@ jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* na
     fixture->parent = 0;
     fixture->fail = 0;
     fixture->fatal = 0;
+    fixture->skipped = 0;
     fixture->index = 0xFFFFFFFF;
     fixture->num_tests = 0;
     fixture->first = fixture->last = 1;
