@@ -10,7 +10,13 @@ The library was build as a lightweight replacement for googletest.
 
 ## Example usage
 
+An example where all tests pass
 ![test_example.png](./examples/test_example.png)
+
+And example how the failing tests look
+![test_example.png](./examples/test_example_fail.png)
+
+## A tiny example
 
 ```c++
 #define JC_TEST_IMPLEMENTATION
