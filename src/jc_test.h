@@ -276,11 +276,12 @@ typedef struct jc_test_fixture {
     jc_test_void_staticfunc     fixture_setup;
     jc_test_void_staticfunc     fixture_teardown;
     jc_test_stats               stats;
-    unsigned int                fail:27;
+    unsigned int                fail:26;
     unsigned int                type:2;     // 0: function, 1: class, 2: params class, 3: params instance
     unsigned int                first:1;    // If it's the first in a range of fixtures
     unsigned int                last:1;     // If it's the last in a range of fixtures
     unsigned int                fatal:1;    // If set, it aborts the test
+    unsigned int                skipped:1;  // All tests are skipped, we skip the whole fixture
     unsigned int                index;      // the index of the param in the original params array
     int                         signum:8;   // If we're checking for a signal
     int                         line:16;    // The line of the current ASSERT/EXPECT
@@ -1137,7 +1138,12 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
 
     jc_test_memset(&fixture->stats, 0, sizeof(fixture->stats));
 
-    fixture->stats.totaltime = 0;
+
+    if (fixture->skipped) {
+        fixture->stats.num_skipped += fixture->num_tests;
+        return;
+    }
+
     jc_test_time_t timestart = JC_TEST_TIMING_FUNC();
     if (fixture->first) {
         JC_TEST_LOGF(fixture, 0, 0, JC_TEST_EVENT_FIXTURE_SETUP, 0);
@@ -1180,17 +1186,15 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
 
             jc_test_stats test_stats = {0, 0, 0, 0, 0, testend-teststart};
             JC_TEST_LOGF(fixture, test, &test_stats, JC_TEST_EVENT_TEST_TEARDOWN, 0);
+
+            fixture->stats.num_fail += test->fail ? 1 : 0;
         }
 
-        if( test->fail )
-            ++fixture->stats.num_fail;
-        else if ( test->skipped )
-            ++fixture->stats.num_skipped;
-        else
-            ++fixture->stats.num_pass;
-        ++fixture->stats.num_tests;
+        fixture->stats.num_skipped += test->skipped ? 1 : 0;
         test = test->next;
     }
+    fixture->stats.num_tests = fixture->num_tests - fixture->stats.num_skipped;
+    fixture->stats.num_pass = fixture->stats.num_tests - fixture->stats.num_fail;
     jc_test_get_state()->current_test = 0;
 
     if (fixture->last && fixture->fixture_teardown != 0) {
@@ -1301,16 +1305,19 @@ static void jc_test_disable_tests(jc_test_state* state, const char* pattern) {
     jc_test_fixture* fixture = state->fixtures;
     while (fixture) {
         jc_test_entry* test = fixture->tests;
+        int num_skipped = 0;
         while (test) {
             char name_buffer[256];
-            if (fixture->index >= 0xFFFFFFFF)
+            if (fixture->index != 0xFFFFFFFF)
                 JC_TEST_SNPRINTF(name_buffer, sizeof(name_buffer), "%s.%s/%d", fixture->name, test->name, fixture->index);
             else
                 JC_TEST_SNPRINTF(name_buffer, sizeof(name_buffer), "%s.%s", fixture->name, test->name);
             if (jc_test_strstr(name_buffer, pattern) == 0)
                 test->skipped = 1;
+            num_skipped += test->skipped;
             test = test->next;
         }
+        fixture->skipped = num_skipped == fixture->num_tests ? 1 : 0;
         fixture = fixture->next;
     }
 }

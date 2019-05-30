@@ -1,9 +1,11 @@
 **/build/**
-test/external/gtest/**
+test/external/gtest*/**
 
 docs/Gemfile.lock
 docs/_site/**
 *Thumbs.db
+.DS_Store
+.bash_history
 
 # Prerequisites
 *.d
