@@ -9,6 +9,9 @@ if [ ! -e "${BUILD}" ]; then
     mkdir -p ${BUILD}
 fi
 
+echo "Compiling 'snow'"
+time clang -O2 -std=c99 -o ${BUILD}/test_snow -I${EXTERNAL}/snow -DSNOW_ENABLED -Wall test_snow.c
+
 echo "Compiling 'greatest'"
 time clang -O2 -std=c89 -o ${BUILD}/test_greatest -I${EXTERNAL}/greatest test_greatest.c
 

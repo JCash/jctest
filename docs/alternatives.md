@@ -17,6 +17,8 @@ See [benchmarks](./benchmarks.md) for performance comparisons.
 
 * [catch2](https://github.com/catchorg/Catch2) : Header Only, C++11
 
+* [snow 2](https://github.com/mortie/snow) : Very small, Single header only, C99/C11
+
 
 ## Special notes
 
@@ -30,4 +32,5 @@ See [benchmarks](./benchmarks.md) for performance comparisons.
 
 * greatest and utest are quite alike in the setup and testing.
 
-* doctest and catch2 has a similar code style (BDD?)
+* doctest, catch2 and snow has a similar code style (BDD?)
+

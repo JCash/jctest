@@ -5,11 +5,13 @@
  *
  * BRIEF:
  *
- *      A single header only C/C++ test framework in <1kloc
+ *      A small, single header only C++-98 test framework
  *      Made sure to compile with highest warning/error levels possible
  *
  * HISTORY:
  *
+ *      0.4     2019-08-03  Fix for outputting 64 bit integer values upo error
+ *                          Skipping tests now doesn't output extraneous info
  *      0.3     2019-04-25  Ansi colors for Win32
  *                          Msys2 + Cygwin support
  *                          setjmp fix for Emscripten
@@ -215,10 +217,8 @@ struct jc_test_params_class : public jc_test_base_class {
     #define JC_TEST_UNUSED
 #endif
 
-#if !defined(JC_TEST_UINT64)
+#if !defined(JC_TEST_NO_STDINT_H)
     #include <stdint.h>
-    #define JC_TEST_UINT64 uint64_t
-    #define JC_TEST_UINT32 uint32_t
 #endif
 
 #define JC_TEST_EVENT_FIXTURE_SETUP     0
@@ -244,15 +244,15 @@ typedef void (*jc_test_void_staticfunc)();
 typedef void (jc_test_base_class::*jc_test_void_memberfunc)();
 
 typedef struct jc_test_entry {
-    jc_test_entry*                  next;       // linked list
-    const char*                     name;
-    jc_test_base_class*             instance;
+    jc_test_entry*            next;       // linked list
+    const char*               name;
+    jc_test_base_class*       instance;
     jc_test_factory_base_interface* factory;    // Factory for parameterized tests
-    JC_TEST_UINT32                  fail:1;
-    JC_TEST_UINT32                  skipped:1;
-    JC_TEST_UINT32                  :30;
+    uint32_t                  fail:1;
+    uint32_t                  skipped:1;
+    uint32_t                  :30;
     #if defined(__x86_64__) || defined(__ppc64__) || defined(_WIN64)
-    JC_TEST_UINT32                  :32;
+    uint32_t                  :32;
     #endif
 } jc_test_entry;
 
@@ -276,11 +276,12 @@ typedef struct jc_test_fixture {
     jc_test_void_staticfunc     fixture_setup;
     jc_test_void_staticfunc     fixture_teardown;
     jc_test_stats               stats;
-    unsigned int                fail:27;
+    unsigned int                fail:26;
     unsigned int                type:2;     // 0: function, 1: class, 2: params class, 3: params instance
     unsigned int                first:1;    // If it's the first in a range of fixtures
     unsigned int                last:1;     // If it's the last in a range of fixtures
     unsigned int                fatal:1;    // If set, it aborts the test
+    unsigned int                skipped:1;  // All tests are skipped, we skip the whole fixture
     unsigned int                index;      // the index of the param in the original params array
     int                         signum:8;   // If we're checking for a signal
     int                         line:16;    // The line of the current ASSERT/EXPECT
@@ -335,10 +336,13 @@ template <typename T> char* jc_test_print_value(char* buffer, size_t, const T) {
     buffer[0] = '?'; buffer[1] = 0;
     return buffer+2;
 }
+
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const double value);
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const float value);
-template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const int value);
-template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const unsigned int value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const int32_t value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const uint32_t value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const int64_t value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const uint64_t value);
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const char* value);
 
 template <typename T1, typename T2>
@@ -810,10 +814,13 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
         return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, FORMAT, value); \
     }
 
-JC_TEST_PRINT_TYPE_FN(double, "%f")
-JC_TEST_PRINT_TYPE_FN(int, "%d")
-JC_TEST_PRINT_TYPE_FN(unsigned int, "%u")
-JC_TEST_PRINT_TYPE_FN(char*, "%s")
+// Note that you have to add the corresponding declaration above too
+JC_TEST_PRINT_TYPE_FN(double,   "%f")
+JC_TEST_PRINT_TYPE_FN(int32_t,  "%d")
+JC_TEST_PRINT_TYPE_FN(uint32_t, "%u")
+JC_TEST_PRINT_TYPE_FN(uint64_t, "%llu")
+JC_TEST_PRINT_TYPE_FN(int64_t,  "%lld")
+JC_TEST_PRINT_TYPE_FN(char*,    "%s")
 
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const float value) {
     return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "%f", JC_TEST_STATIC_CAST(double, value));
@@ -992,10 +999,10 @@ static int jc_test_cmp_float_almost_equal(FloatType a, FloatType b) {
 }
 
 int jc_test_cmp_double_eq(double a, double b) {
-    return jc_test_cmp_float_almost_equal<double, JC_TEST_UINT64>(a, b);
+    return jc_test_cmp_float_almost_equal<double, uint64_t>(a, b);
 }
 int jc_test_cmp_float_eq(float a, float b) {
-    return jc_test_cmp_float_almost_equal<float, JC_TEST_UINT32>(a, b);
+    return jc_test_cmp_float_almost_equal<float, uint32_t>(a, b);
 }
 
 jc_test_factory_base_interface::~jc_test_factory_base_interface() {}
@@ -1015,6 +1022,7 @@ jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* na
     fixture->parent = 0;
     fixture->fail = 0;
     fixture->fatal = 0;
+    fixture->skipped = 0;
     fixture->index = 0xFFFFFFFF;
     fixture->num_tests = 0;
     fixture->first = fixture->last = 1;
@@ -1137,7 +1145,12 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
 
     jc_test_memset(&fixture->stats, 0, sizeof(fixture->stats));
 
-    fixture->stats.totaltime = 0;
+
+    if (fixture->skipped) {
+        fixture->stats.num_skipped += fixture->num_tests;
+        return;
+    }
+
     jc_test_time_t timestart = JC_TEST_TIMING_FUNC();
     if (fixture->first) {
         JC_TEST_LOGF(fixture, 0, 0, JC_TEST_EVENT_FIXTURE_SETUP, 0);
@@ -1180,17 +1193,15 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
 
             jc_test_stats test_stats = {0, 0, 0, 0, 0, testend-teststart};
             JC_TEST_LOGF(fixture, test, &test_stats, JC_TEST_EVENT_TEST_TEARDOWN, 0);
+
+            fixture->stats.num_fail += test->fail ? 1 : 0;
         }
 
-        if( test->fail )
-            ++fixture->stats.num_fail;
-        else if ( test->skipped )
-            ++fixture->stats.num_skipped;
-        else
-            ++fixture->stats.num_pass;
-        ++fixture->stats.num_tests;
+        fixture->stats.num_skipped += test->skipped ? 1 : 0;
         test = test->next;
     }
+    fixture->stats.num_tests = fixture->num_tests - fixture->stats.num_skipped;
+    fixture->stats.num_pass = fixture->stats.num_tests - fixture->stats.num_fail;
     jc_test_get_state()->current_test = 0;
 
     if (fixture->last && fixture->fixture_teardown != 0) {
@@ -1301,16 +1312,19 @@ static void jc_test_disable_tests(jc_test_state* state, const char* pattern) {
     jc_test_fixture* fixture = state->fixtures;
     while (fixture) {
         jc_test_entry* test = fixture->tests;
+        int num_skipped = 0;
         while (test) {
             char name_buffer[256];
-            if (fixture->index >= 0xFFFFFFFF)
+            if (fixture->index != 0xFFFFFFFF)
                 JC_TEST_SNPRINTF(name_buffer, sizeof(name_buffer), "%s.%s/%d", fixture->name, test->name, fixture->index);
             else
                 JC_TEST_SNPRINTF(name_buffer, sizeof(name_buffer), "%s.%s", fixture->name, test->name);
             if (jc_test_strstr(name_buffer, pattern) == 0)
                 test->skipped = 1;
+            num_skipped += test->skipped;
             test = test->next;
         }
+        fixture->skipped = num_skipped == fixture->num_tests ? 1 : 0;
         fixture = fixture->next;
     }
 }
