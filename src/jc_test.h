@@ -10,6 +10,8 @@
  *
  * HISTORY:
  *
+ *      0.4     2019-08-03  Fix for outputting 64 bit integer values upo error
+ *                          Skipping tests now doesn't output extraneous info
  *      0.3     2019-04-25  Ansi colors for Win32
  *                          Msys2 + Cygwin support
  *                          setjmp fix for Emscripten
