@@ -215,10 +215,8 @@ struct jc_test_params_class : public jc_test_base_class {
     #define JC_TEST_UNUSED
 #endif
 
-#if !defined(JC_TEST_UINT64)
+#if !defined(JC_TEST_NO_STDINT_H)
     #include <stdint.h>
-    #define JC_TEST_UINT64 uint64_t
-    #define JC_TEST_UINT32 uint32_t
 #endif
 
 #define JC_TEST_EVENT_FIXTURE_SETUP     0
@@ -244,15 +242,15 @@ typedef void (*jc_test_void_staticfunc)();
 typedef void (jc_test_base_class::*jc_test_void_memberfunc)();
 
 typedef struct jc_test_entry {
-    jc_test_entry*                  next;       // linked list
-    const char*                     name;
-    jc_test_base_class*             instance;
+    jc_test_entry*            next;       // linked list
+    const char*               name;
+    jc_test_base_class*       instance;
     jc_test_factory_base_interface* factory;    // Factory for parameterized tests
-    JC_TEST_UINT32                  fail:1;
-    JC_TEST_UINT32                  skipped:1;
-    JC_TEST_UINT32                  :30;
+    uint32_t                  fail:1;
+    uint32_t                  skipped:1;
+    uint32_t                  :30;
     #if defined(__x86_64__) || defined(__ppc64__) || defined(_WIN64)
-    JC_TEST_UINT32                  :32;
+    uint32_t                  :32;
     #endif
 } jc_test_entry;
 
@@ -336,10 +334,13 @@ template <typename T> char* jc_test_print_value(char* buffer, size_t, const T) {
     buffer[0] = '?'; buffer[1] = 0;
     return buffer+2;
 }
+
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const double value);
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const float value);
-template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const int value);
-template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const unsigned int value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const int32_t value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const uint32_t value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const int64_t value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const uint64_t value);
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const char* value);
 
 template <typename T1, typename T2>
@@ -811,10 +812,13 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
         return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, FORMAT, value); \
     }
 
-JC_TEST_PRINT_TYPE_FN(double, "%f")
-JC_TEST_PRINT_TYPE_FN(int, "%d")
-JC_TEST_PRINT_TYPE_FN(unsigned int, "%u")
-JC_TEST_PRINT_TYPE_FN(char*, "%s")
+// Note that you have to add the corresponding declaration above too
+JC_TEST_PRINT_TYPE_FN(double,   "%f")
+JC_TEST_PRINT_TYPE_FN(int32_t,  "%d")
+JC_TEST_PRINT_TYPE_FN(uint32_t, "%u")
+JC_TEST_PRINT_TYPE_FN(uint64_t, "%llu")
+JC_TEST_PRINT_TYPE_FN(int64_t,  "%lld")
+JC_TEST_PRINT_TYPE_FN(char*,    "%s")
 
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const float value) {
     return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "%f", JC_TEST_STATIC_CAST(double, value));
@@ -993,10 +997,10 @@ static int jc_test_cmp_float_almost_equal(FloatType a, FloatType b) {
 }
 
 int jc_test_cmp_double_eq(double a, double b) {
-    return jc_test_cmp_float_almost_equal<double, JC_TEST_UINT64>(a, b);
+    return jc_test_cmp_float_almost_equal<double, uint64_t>(a, b);
 }
 int jc_test_cmp_float_eq(float a, float b) {
-    return jc_test_cmp_float_almost_equal<float, JC_TEST_UINT32>(a, b);
+    return jc_test_cmp_float_almost_equal<float, uint32_t>(a, b);
 }
 
 jc_test_factory_base_interface::~jc_test_factory_base_interface() {}
