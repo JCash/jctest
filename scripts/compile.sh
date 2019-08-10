@@ -35,7 +35,7 @@ if [ "$ARCH" == "" ]; then
 fi
 echo Using ARCH=$ARCH
 
-CXXFLAGS="$CXXFLAGS -std=$STDVERSION -Wall -pedantic -fno-exceptions -Isrc -I. $ASAN $PREPROCESS"
+CXXFLAGS="$CXXFLAGS -std=$STDVERSION -Wall -pedantic -fno-exceptions -Werror=format -Isrc -I. $ASAN $PREPROCESS"
 
 if [ "$CXX" == "clang++" ]; then
     CXXFLAGS="$CXXFLAGS -Weverything -Wno-global-constructors"

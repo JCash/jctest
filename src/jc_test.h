@@ -221,6 +221,16 @@ struct jc_test_params_class : public jc_test_base_class {
     #include <stdint.h>
 #endif
 
+#if !defined(JC_FMT_U64)
+    #if defined(__linux__)
+        #define JC_FMT_U64 "%lu"
+        #define JC_FMT_I64 "%ld"
+    #else
+        #define JC_FMT_U64 "%llu"
+        #define JC_FMT_I64 "%lld"
+    #endif
+#endif
+
 #define JC_TEST_EVENT_FIXTURE_SETUP     0
 #define JC_TEST_EVENT_FIXTURE_TEARDOWN  1
 #define JC_TEST_EVENT_TEST_SETUP        2
@@ -818,8 +828,8 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 JC_TEST_PRINT_TYPE_FN(double,   "%f")
 JC_TEST_PRINT_TYPE_FN(int32_t,  "%d")
 JC_TEST_PRINT_TYPE_FN(uint32_t, "%u")
-JC_TEST_PRINT_TYPE_FN(uint64_t, "%llu")
-JC_TEST_PRINT_TYPE_FN(int64_t,  "%lld")
+JC_TEST_PRINT_TYPE_FN(uint64_t, JC_FMT_U64)
+JC_TEST_PRINT_TYPE_FN(int64_t,  JC_FMT_I64)
 JC_TEST_PRINT_TYPE_FN(char*,    "%s")
 
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const float value) {
