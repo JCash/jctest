@@ -222,7 +222,7 @@ struct jc_test_params_class : public jc_test_base_class {
 #endif
 
 #if !defined(JC_FMT_U64)
-    #if defined(__linux__)
+    #if defined(__linux__) && (defined(__x86_64__) || defined(__ppc64__))
         #define JC_FMT_U64 "%lu"
         #define JC_FMT_I64 "%ld"
     #else
