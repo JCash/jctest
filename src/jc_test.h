@@ -10,7 +10,7 @@
  *
  * HISTORY:
  *
- *      0.4     2019-08-03  Fix for outputting 64 bit integer values upo error
+ *      0.4     2019-08-10  Fix for outputting 64 bit integer values upon error
  *                          Skipping tests now doesn't output extraneous info
  *      0.3     2019-04-25  Ansi colors for Win32
  *                          Msys2 + Cygwin support
@@ -222,13 +222,18 @@ struct jc_test_params_class : public jc_test_base_class {
 #endif
 
 #if !defined(JC_FMT_U64)
-    #if defined(__GNUC__) && !defined(__clang__) && __cplusplus == 199711L
-        // For some reason GCC would always warn about the format not working in c++98 (it does though)
-        #pragma GCC diagnostic ignored "-Wformat"
+    #if defined(__ANDROID__)
+        #define JC_FMT_U64 "%llu"
+        #define JC_FMT_I64 "%lld"
+    #else
+        #if __cplusplus == 199711L && (defined(__GNUC__) && !defined(__clang__))
+            // For some reason GCC would always warn about the format not working in c++98 (it does though)
+            #pragma GCC diagnostic ignored "-Wformat"
+        #endif
+        #include <inttypes.h>
+        #define JC_FMT_U64 "%" PRIu64
+        #define JC_FMT_I64 "%" PRId64
     #endif
-    #include <inttypes.h>
-    #define JC_FMT_U64 "%" PRIu64
-    #define JC_FMT_I64 "%" PRId64
 #endif
 
 #define JC_TEST_EVENT_FIXTURE_SETUP     0
@@ -816,7 +821,7 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
         #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
     #endif
 
-    #if defined(__GNUC__) && !defined(__clang__) && __cplusplus == 199711L
+    #if (__cplusplus == 199711L && (defined(__GNUC__) && !defined(__clang__)))
         #pragma GCC diagnostic ignored "-Wformat"
     #endif
 #endif
