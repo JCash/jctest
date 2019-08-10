@@ -221,6 +221,16 @@ struct jc_test_params_class : public jc_test_base_class {
     #include <stdint.h>
 #endif
 
+#if !defined(JC_FMT_U64)
+    #if defined(__GNUC__) && !defined(__clang__) && __cplusplus == 199711L
+        // For some reason GCC would always warn about the format not working in c++98 (it does though)
+        #pragma GCC diagnostic ignored "-Wformat"
+    #endif
+    #include <inttypes.h>
+    #define JC_FMT_U64 "%" PRIu64
+    #define JC_FMT_I64 "%" PRId64
+#endif
+
 #define JC_TEST_EVENT_FIXTURE_SETUP     0
 #define JC_TEST_EVENT_FIXTURE_TEARDOWN  1
 #define JC_TEST_EVENT_TEST_SETUP        2
@@ -801,12 +811,14 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 #undef JC_TEST_IMPLEMENTATION
 
 #if !defined(_MSC_VER)
-#pragma GCC diagnostic push
-#if !defined(__GNUC__)
-#endif
-#if __cplusplus >= 201103L
-    #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif
+    #pragma GCC diagnostic push
+    #if __cplusplus >= 201103L
+        #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+    #endif
+
+    #if defined(__GNUC__) && !defined(__clang__) && __cplusplus == 199711L
+        #pragma GCC diagnostic ignored "-Wformat"
+    #endif
 #endif
 
 #define JC_TEST_PRINT_TYPE_FN(TYPE, FORMAT) \
@@ -818,8 +830,8 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 JC_TEST_PRINT_TYPE_FN(double,   "%f")
 JC_TEST_PRINT_TYPE_FN(int32_t,  "%d")
 JC_TEST_PRINT_TYPE_FN(uint32_t, "%u")
-JC_TEST_PRINT_TYPE_FN(uint64_t, "%llu")
-JC_TEST_PRINT_TYPE_FN(int64_t,  "%lld")
+JC_TEST_PRINT_TYPE_FN(uint64_t, JC_FMT_U64)
+JC_TEST_PRINT_TYPE_FN(int64_t,  JC_FMT_I64)
 JC_TEST_PRINT_TYPE_FN(char*,    "%s")
 
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const float value) {
