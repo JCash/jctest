@@ -1009,6 +1009,13 @@ template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const flo
 
 static size_t jc_test_snprint_time(char* buffer, size_t buffer_len, jc_test_time_t t);
 
+static int jc_get_formatted_test_name(char* buffer, size_t buffer_len, const jc_test_fixture* fixture, const jc_test_entry* test) {
+    if (fixture->index != 0xFFFFFFFF)
+        return JC_TEST_SNPRINTF(buffer, buffer_len, "%s%s%s.%s%s%s/%d", JC_TEST_COL(CYAN), fixture->name, JC_TEST_COL(DEFAULT), JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT), fixture->index);
+    else
+        return JC_TEST_SNPRINTF(buffer, buffer_len, "%s%s%s.%s%s%s", JC_TEST_COL(CYAN), fixture->name, JC_TEST_COL(DEFAULT), JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
+}
+
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__ ((format (printf, 5, 6)))
 #endif
@@ -1058,11 +1065,12 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
         fixture = jc_test_get_state()->fixtures;
         while (stats->num_fail && fixture)
         {
-            if (!fixture->fail) {
+            if (fixture->fail) {
                 test = fixture->tests;
                 while(test) {
                     if (test->fail) {
-                        cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "%s%s%s.%s%s %sfailed%s\n", JC_TEST_COL(MAGENTA), fixture->name, JC_TEST_COL(DEFAULT), JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(RED), JC_TEST_COL(DEFAULT));
+                        cursor += jc_get_formatted_test_name(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), fixture, test);
+                        cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), " %sfailed%s\n", JC_TEST_COL(RED), JC_TEST_COL(DEFAULT));
                     }
                     test = test->next;
                 }
@@ -1332,9 +1340,10 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
         fixture->fixture_setup();
     }
 
+    fixture->fail = 0;
+
     jc_test_entry* test = fixture->tests;
     while (test) {
-        fixture->fail = 0;
         test->fail = 0;
         if (!test->skipped) {
             jc_test_get_state()->current_test = test;
@@ -1487,10 +1496,7 @@ static void jc_test_disable_tests(jc_test_state* state, const char* pattern) {
         int num_skipped = 0;
         while (test) {
             char name_buffer[256];
-            if (fixture->index != 0xFFFFFFFF)
-                JC_TEST_SNPRINTF(name_buffer, sizeof(name_buffer), "%s.%s/%d", fixture->name, test->name, fixture->index);
-            else
-                JC_TEST_SNPRINTF(name_buffer, sizeof(name_buffer), "%s.%s", fixture->name, test->name);
+            jc_get_formatted_test_name(name_buffer, sizeof(name_buffer), fixture, test);
             if (jc_test_strstr(name_buffer, pattern) == 0)
                 test->skipped = 1;
             num_skipped += test->skipped;
