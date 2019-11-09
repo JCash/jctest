@@ -33,6 +33,12 @@ struct Foo
     int i;
 };
 
+enum TestEnum
+{
+    TESTENUM_OK,
+    TESTENUM_VALUE1
+};
+
 TEST(Assertions, ExpectOk)
 {
     const int           zero_i = 0;
@@ -40,8 +46,8 @@ TEST(Assertions, ExpectOk)
     const float         zero_f = 0.0f;
     const double        zero_d = 0.0;
     const char*         zero_s = "zero";
-    const uint64_t              zero_u64 = 0u;
-    const int64_t               zero_i64 = 0;
+    const uint64_t      zero_u64 = 0u;
+    const int64_t       zero_i64 = 0;
     EXPECT_TRUE(0 == zero_i);
     EXPECT_FALSE(0 != zero_i);
     EXPECT_EQ(0, zero_i);
@@ -87,6 +93,11 @@ TEST(Assertions, ExpectOk)
     const char* nullstr = 0;
     EXPECT_STREQ(NULL, nullstr);
     EXPECT_STREQ(0, nullstr);
+#if __cplusplus > 199711L
+    EXPECT_EQ(nullptr, nullstr);
+#endif
+
+    EXPECT_EQ(TESTENUM_OK, zero_i);
 
     printf("EXPECTED ASSERT ->\n");
     EXPECT_DEATH(Foo f(16), "");
@@ -118,6 +129,10 @@ TEST(Assertions, ExpectFail)
     EXPECT_NEAR(0.001, zero_d, 0.01);
     EXPECT_STREQ("zero", zero_s);
     EXPECT_STRNE("one", zero_s);
+#if __cplusplus > 199711L
+    EXPECT_EQ(nullptr, zero_s);
+#endif
+    EXPECT_EQ(TESTENUM_OK, zero_i);
 }
 
 //////////////////////////////////////////////
