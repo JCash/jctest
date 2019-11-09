@@ -440,7 +440,7 @@ namespace jc {
 #if __cplusplus > 199711L
     template <class _Tp> struct __is_nullptr_t_impl                 : public false_type {};
     template <>          struct __is_nullptr_t_impl<std::nullptr_t> : public true_type {};
-    template <class _Tp> struct _LIBCPP_TEMPLATE_VIS __is_nullptr_t : public __is_nullptr_t_impl<typename remove_cv<_Tp>::type> {};
+    template <class _Tp> struct __is_nullptr_t : public __is_nullptr_t_impl<typename remove_cv<_Tp>::type> {};
 #endif
     namespace _jc_is_function_imp
     {
