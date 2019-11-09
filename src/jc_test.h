@@ -10,6 +10,7 @@
  *
  * HISTORY:
  *
+ *      0.5     2019-11-03  Added support for logging enum values
  *      0.4     2019-08-10  Fix for outputting 64 bit integer values upon error
  *                          Skipping tests now doesn't output extraneous info
  *      0.3     2019-04-25  Ansi colors for Win32
@@ -142,6 +143,7 @@ struct jc_test_params_class : public jc_test_base_class {
 // #define ASSERT_NEAR( A, B, EPSILON )     abs(a - b) < epsilon
 // #define ASSERT_DEATH(S, RE)
 
+// Non fatal failures
 // #define EXPECT_TRUE( VALUE )             value
 // #define EXPECT_FALSE( VALUE )            !value
 // #define EXPECT_EQ( A, B )                A == B
@@ -209,6 +211,10 @@ struct jc_test_params_class : public jc_test_base_class {
 #if __cplusplus >= 201103L
     #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif
+#endif
+
+#if __cplusplus > 199711L
+    #include <cstddef> // nullptr_t
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -347,7 +353,156 @@ static inline jc_test_fixture* jc_test_get_fixture() {
 static inline jc_test_entry* jc_test_get_test() {
     return jc_test_get_state()->current_test;
 }
-template <typename T> char* jc_test_print_value(char* buffer, size_t, const T) {
+
+namespace jc {
+
+// From type_traits
+    template <class _Tp> struct remove_const            {typedef _Tp type;};
+    template <class _Tp> struct remove_const<const _Tp> {typedef _Tp type;};
+
+    template <class _Tp> struct remove_volatile               {typedef _Tp type;};
+    template <class _Tp> struct remove_volatile<volatile _Tp> {typedef _Tp type;};
+
+    template <class _Tp> struct remove_cv
+    {typedef typename remove_volatile<typename remove_const<_Tp>::type>::type type;};
+
+    template <class _Tp, _Tp __v>
+    struct integral_constant
+    {
+        static const _Tp          value = __v;
+        typedef _Tp               value_type;
+        typedef integral_constant type;
+    };
+
+    typedef integral_constant<bool, true>  true_type;
+    typedef integral_constant<bool, false> false_type;
+
+    template <class _Tp> struct _jc_is_void       : public false_type {};
+    template <>          struct _jc_is_void<void> : public true_type {};
+
+    template <class _Tp> struct is_void : public _jc_is_void<typename remove_cv<_Tp>::type> {};
+
+    template <class _Tp> struct _jc_is_integral                     : public false_type {};
+    template <>          struct _jc_is_integral<bool>               : public true_type {};
+    template <>          struct _jc_is_integral<char>               : public true_type {};
+    template <>          struct _jc_is_integral<signed char>        : public true_type {};
+    template <>          struct _jc_is_integral<unsigned char>      : public true_type {};
+    template <>          struct _jc_is_integral<short>              : public true_type {};
+    template <>          struct _jc_is_integral<unsigned short>     : public true_type {};
+    template <>          struct _jc_is_integral<int>                : public true_type {};
+    template <>          struct _jc_is_integral<unsigned int>       : public true_type {};
+    template <>          struct _jc_is_integral<long>               : public true_type {};
+    template <>          struct _jc_is_integral<unsigned long>      : public true_type {};
+    //not compat with c++98 template <>          struct _jc_is_integral<long long>          : public true_type {};
+    //not compat with c++98 template <>          struct _jc_is_integral<unsigned long long> : public true_type {};
+
+    template <class _Tp> struct is_integral : public _jc_is_integral<typename remove_cv<_Tp>::type> {};
+
+
+    template <class _Tp> struct _jc_is_floating_point              : public false_type {};
+    template <>          struct _jc_is_floating_point<float>       : public true_type {};
+    template <>          struct _jc_is_floating_point<double>      : public true_type {};
+    template <>          struct _jc_is_floating_point<long double> : public true_type {};
+
+    template <class _Tp> struct is_floating_point  : public _jc_is_floating_point<typename remove_cv<_Tp>::type> {};
+
+    template <class _Tp> struct is_array : public false_type {};
+    template <class _Tp> struct is_array<_Tp[]> : public true_type {};
+    template <class _Tp, size_t _Np> struct is_array<_Tp[_Np]> : public true_type {};
+
+
+    template <class _Tp> struct _jc_is_pointer       : public false_type {};
+    template <class _Tp> struct _jc_is_pointer<_Tp*> : public true_type {};
+
+    template <class _Tp> struct is_pointer : public _jc_is_pointer<typename remove_cv<_Tp>::type> {};
+
+    template <class _Tp> struct is_reference        : public false_type {};
+    template <class _Tp> struct is_reference<_Tp&>  : public true_type {};
+
+    template <class _Tp>            struct _jc_is_member_pointer             : public false_type {};
+    template <class _Tp, class _Up> struct _jc_is_member_pointer<_Tp _Up::*> : public true_type {};
+
+    template <class _Tp> struct is_member_pointer : public _jc_is_member_pointer<typename remove_cv<_Tp>::type> {};
+
+    template <class _Tp> struct _jc_union : public false_type {};
+    template <class _Tp> struct is_union : public _jc_union<typename remove_cv<_Tp>::type> {};
+
+    struct __two {char __lx[2];};
+
+    namespace __is_class_imp
+    {
+    template <class _Tp> char  __test(int _Tp::*);
+    template <class _Tp> __two __test(...);
+    }
+
+    template <class _Tp> struct is_class : public integral_constant<bool, sizeof(__is_class_imp::__test<_Tp>(0)) == 1 && !is_union<_Tp>::value> {};
+
+#if __cplusplus > 199711L
+    template <class _Tp> struct __is_nullptr_t_impl                 : public false_type {};
+    template <>          struct __is_nullptr_t_impl<std::nullptr_t> : public true_type {};
+    template <class _Tp> struct _LIBCPP_TEMPLATE_VIS __is_nullptr_t : public __is_nullptr_t_impl<typename remove_cv<_Tp>::type> {};
+#endif
+    namespace _jc_is_function_imp
+    {
+    struct __dummy_type {};
+    template <class _Tp> char  __test(_Tp*);
+    template <class _Tp> char __test(__dummy_type);
+    template <class _Tp> __two __test(...);
+    template <class _Tp> _Tp&  __source(int);
+    template <class _Tp> __dummy_type __source(...);
+    }
+
+    template <class _Tp, bool = is_class<_Tp>::value ||
+                                is_union<_Tp>::value ||
+                                is_void<_Tp>::value  ||
+                                is_reference<_Tp>::value
+#if __cplusplus > 199711L
+                                || __is_nullptr_t<_Tp>::value
+#endif
+                                >
+    struct _jc_is_function : public integral_constant<bool, sizeof(_jc_is_function_imp::__test<_Tp>(_jc_is_function_imp::__source<_Tp>(0))) == 1>
+        {};
+    template <class _Tp> struct _jc_is_function<_Tp, true> : public false_type {};
+    template <class _Tp> struct is_function : public _jc_is_function<_Tp> {};
+
+
+    /////////////////////////////////
+
+    template <class _Tp> struct is_enum
+        : public integral_constant<bool, !is_void<_Tp>::value             &&
+                                         !is_integral<_Tp>::value         &&
+                                         !is_floating_point<_Tp>::value   &&
+                                         !is_array<_Tp>::value            &&
+                                         !is_pointer<_Tp>::value          &&
+                                         !is_reference<_Tp>::value        &&
+                                         !is_member_pointer<_Tp>::value   &&
+                                         !is_union<_Tp>::value            &&
+                                         !is_class<_Tp>::value            &&
+                                         !is_function<_Tp>::value         > {};
+
+    template <bool Condition, typename T = void>
+    struct enable_if {
+        // No 'type' here, so any attempt to use it will fail substitution
+    };
+
+    // partial specialization for when Condition==true
+    template <typename T>
+    struct enable_if<true, T> {
+        typedef T type;
+    };
+} // namespace jc
+
+// End of type_traits
+
+template <typename T>
+typename jc::enable_if<jc::is_enum<T>::value, char*>::type
+jc_test_print_value(char* buffer, size_t buffer_len, const T value) {
+    return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "%d", JC_TEST_STATIC_CAST(int, value));
+}
+
+template <typename T>
+typename jc::enable_if<!jc::is_enum<T>::value, char*>::type
+jc_test_print_value(char* buffer, size_t, const T) {
     buffer[0] = '?'; buffer[1] = 0;
     return buffer+2;
 }
