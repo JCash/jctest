@@ -42,6 +42,11 @@ Value A vs B checks. E.g. int, float, double or any type that has the correct op
 * ASSERT_STREQ(expected, value) -> Tests two null terminated strings for equality
 * ASSERT_STRNE(expected, value) -> Tests two null terminated strings for inequality
 
+## Array assertions
+
+* ASSERT_ARRAY_EQ(expected, value) -> Tests two arrays of equal (fixed) length
+* ASSERT_ARRAY_EQ_LEN(expected, value, length) -> Tests two arrays
+
 ## Floating point assertions
 
 ### ASSERT_EQ, ASSERT_NE
