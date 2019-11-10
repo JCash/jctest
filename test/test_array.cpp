@@ -13,7 +13,7 @@ int GlobalTestTeardown() {
 
     int fail = 0;
 #if !defined(USE_GTEST)
-    int expected_fails = 1;
+    int expected_fails = 2;
     int actual_fails = jc_test_get_state()->stats.num_fail;
     // Expecting %d test to fail, got %d failed tests\n", expected_fails, actual_fa
 
@@ -112,6 +112,40 @@ TEST(Array, ExpectFail)
         const double a_double[] = {0,1,2,3,4,5,6,7,8,9};
         const double b_double[] = {0,1,2,3,3,5,5,7,8,9};
         EXPECT_ARRAY_EQ(a_double, b_double);
+    }
+}
+
+TEST(Array, ExpectOkLength)
+{
+    {
+        const char a[] = "HELLO WORLD";
+        const char b[] = "HELLO WORLD";
+        EXPECT_ARRAY_EQ_LEN(a, b, 5);
+    }
+    {
+        const uint8_t a_uint8_t[] = {0,1,2,3,4,5,6,7,8,9};
+        const uint8_t b_uint8_t[] = {0,1,2,3,4,5,6,7,8,9};
+        EXPECT_ARRAY_EQ_LEN(a_uint8_t, b_uint8_t, 5);
+    }
+    {
+        const uint16_t a_uint16_t[] = {0,1,2,3,4,5,6,7,8,9};
+        const uint16_t b_uint16_t[] = {0,1,2,3,4,5,6,7,8,9};
+        EXPECT_ARRAY_EQ_LEN(a_uint16_t, b_uint16_t, 5);
+    }
+    {
+        const uint32_t a_uint32_t[] = {0,1,2,3,4,5,6,7,8,9};
+        const uint32_t b_uint32_t[] = {0,1,2,3,4,5,6,7,8,9};
+        EXPECT_ARRAY_EQ_LEN(a_uint32_t, b_uint32_t, 5);
+    }
+    {
+        const float a_float[] = {0,1,2,3,4,5,6,7,8,9};
+        const float b_float[] = {0,1,2,3,4,5,6,7,8,9};
+        EXPECT_ARRAY_EQ_LEN(a_float, b_float, 5);
+    }
+    {
+        const double a_double[] = {0,1,2,3,4,5,6,7,8,9};
+        const double b_double[] = {0,1,2,3,4,5,6,7,8,9};
+        EXPECT_ARRAY_EQ_LEN(a_double, b_double, 5);
     }
 }
 
