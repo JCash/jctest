@@ -129,7 +129,9 @@ struct jc_test_params_class : public jc_test_base_class {
 
 // #define SKIP()                           Skips the test
 
-// Fatal failures
+// Fatal failures are prefixed ASSERT_
+// Non fatal failures are prefixed EXPECT_
+
 // #define ASSERT_TRUE( VALUE )             value
 // #define ASSERT_FALSE( VALUE )            !value
 // #define ASSERT_EQ( A, B )                A == B
@@ -142,20 +144,8 @@ struct jc_test_params_class : public jc_test_base_class {
 // #define ASSERT_STRNE( A, B )             strcmp(A,B) != 0
 // #define ASSERT_NEAR( A, B, EPSILON )     abs(a - b) < epsilon
 // #define ASSERT_DEATH(S, RE)
-
-// Non fatal failures
-// #define EXPECT_TRUE( VALUE )             value
-// #define EXPECT_FALSE( VALUE )            !value
-// #define EXPECT_EQ( A, B )                A == B
-// #define EXPECT_NE( A, B )                A != B
-// #define EXPECT_LT( A, B )                A <  B
-// #define EXPECT_GT( A, B )                A >  B
-// #define EXPECT_LE( A, B )                A <= B
-// #define EXPECT_GE( A, B )                A >= B
-// #define EXPECT_STREQ( A, B )             strcmp(A,B) == 0
-// #define EXPECT_STRNE( A, B )             strcmp(A,B) != 0
-// #define EXPECT_NEAR( A, B, EPS )         abs(a - b) < epsilon
-// #define EXPECT_DEATH(S, RE)
+// #define ASSERT_ARRAY_EQ( A, B )              memcmp(A, B, sizeof(A)) == 0
+// #define ASSERT_ARRAY_EQ_LEN( A, B, LENGTH)   memcmp(A, B, LENGTH) == 0
 
 // #define SCOPED_TRACE(_MSG)               // nop
 
@@ -582,6 +572,28 @@ template <typename T> int jc_test_cmp_NE(float a, T b, const char* exprA, const 
     return 0;
 }
 
+int jc_test_cmp_array(const uint8_t* a, const uint8_t* b, size_t len, size_t typesize, int valuetype, const char* exprA, const char* exprB);
+
+template<size_t N>
+int jc_test_cmp_ARRAY_EQ(const char (&a)[N], const char (&b)[N], const char* exprA, const char* exprB) {
+   return jc_test_cmp_array(JC_TEST_CAST(const uint8_t*, a), JC_TEST_CAST(const uint8_t*, b), N, sizeof(char), 1, exprA, exprB);
+}
+
+template<size_t N, typename T>
+int jc_test_cmp_ARRAY_EQ(T (&a)[N], T (&b)[N], const char* exprA, const char* exprB) {
+   return jc_test_cmp_array(JC_TEST_CAST(const uint8_t*, a), JC_TEST_CAST(const uint8_t*, b), N, sizeof(T), 0, exprA, exprB);
+}
+
+template<typename T>
+int jc_test_cmp_ARRAY_EQ_LEN(const T* a, const T* b, size_t length, const char* exprA, const char* exprB, const char*) {
+   return jc_test_cmp_array(JC_TEST_CAST(const uint8_t*, a), JC_TEST_CAST(const uint8_t*, b), length, sizeof(T), 0, exprA, exprB);
+}
+
+template<>
+inline int jc_test_cmp_ARRAY_EQ_LEN(const char* a, const char* b, size_t length, const char* exprA, const char* exprB, const char*) {
+   return jc_test_cmp_array(JC_TEST_CAST(const uint8_t*, a), JC_TEST_CAST(const uint8_t*, b), length, sizeof(char), 1, exprA, exprB);
+}
+
 // The only way to match this function, is with a null literal (since the type is hidden)
 char _jc_test_is_null_literal(struct _jc_test_null_literal* p);
 char (&_jc_test_is_null_literal(...))[2];
@@ -689,6 +701,8 @@ struct jc_test_cmp_eq_helper<true> {
 #define ASSERT_STRNE( A, B )            JC_ASSERT_TEST_OP( STRNE, A, B, JC_TEST_FATAL_FAILURE )
 #define ASSERT_NEAR( A, B, EPS )        JC_ASSERT_TEST_3OP( NEAR, A, B, EPS, JC_TEST_FATAL_FAILURE )
 #define ASSERT_DEATH(S, RE)             JC_ASSERT_TEST_DEATH_OP( S, RE, JC_TEST_FATAL_FAILURE )
+#define ASSERT_ARRAY_EQ( A, B )         JC_ASSERT_TEST_OP( ARRAY_EQ, A, B, JC_TEST_FATAL_FAILURE )
+#define ASSERT_ARRAY_EQ_LEN( A, B, LEN )JC_ASSERT_TEST_3OP( ARRAY_EQ_LEN, A, B, LEN, JC_TEST_FATAL_FAILURE )
 
 #define EXPECT_TRUE( VALUE )            JC_ASSERT_TEST_BOOLEAN( TRUE, VALUE, JC_TEST_NON_FATAL_FAILURE )
 #define EXPECT_FALSE( VALUE )           JC_ASSERT_TEST_BOOLEAN( FALSE, VALUE, JC_TEST_NON_FATAL_FAILURE )
@@ -702,6 +716,8 @@ struct jc_test_cmp_eq_helper<true> {
 #define EXPECT_STRNE( A, B )            JC_ASSERT_TEST_OP( STRNE, A, B, JC_TEST_NON_FATAL_FAILURE )
 #define EXPECT_NEAR( A, B, EPS )        JC_ASSERT_TEST_3OP( NEAR, A, B, EPS, JC_TEST_NON_FATAL_FAILURE )
 #define EXPECT_DEATH(S, RE)             JC_ASSERT_TEST_DEATH_OP(S, RE, JC_TEST_NON_FATAL_FAILURE )
+#define EXPECT_ARRAY_EQ( A, B )         JC_ASSERT_TEST_OP( ARRAY_EQ, A, B, JC_TEST_NON_FATAL_FAILURE )
+#define EXPECT_ARRAY_EQ_LEN( A, B, LEN )JC_ASSERT_TEST_3OP( ARRAY_EQ_LEN, A, B, LEN, JC_TEST_NON_FATAL_FAILURE )
 
 #define SCOPED_TRACE(_MSG)  // nop
 
@@ -1016,6 +1032,22 @@ static int jc_get_formatted_test_name(char* buffer, size_t buffer_len, const jc_
         return JC_TEST_SNPRINTF(buffer, buffer_len, "%s%s%s.%s%s%s", JC_TEST_COL(CYAN), fixture->name, JC_TEST_COL(DEFAULT), JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
 }
 
+static inline void jc_test_memset(void* _mem, unsigned int pattern, size_t size)
+{
+    for (size_t i = 0; i < size; ++i) {
+        JC_TEST_CAST(unsigned char*, _mem)[i] = JC_TEST_STATIC_CAST(unsigned char, pattern & 0xFF);
+    }
+}
+
+static inline size_t jc_test_memcmp(const uint8_t* a, const uint8_t* b, size_t size)
+{
+    for (size_t i = 0; i < size; ++i) {
+        if (a[i] != b[i])
+            return i;
+    }
+    return JC_TEST_STATIC_CAST(size_t, -1);
+}
+
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__ ((format (printf, 5, 6)))
 #endif
@@ -1095,14 +1127,96 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
     printf("%s", buffer);
 }
 
-#undef JC_TEST_COL
+int jc_test_cmp_array(const uint8_t* a, const uint8_t* b, size_t len, size_t typesize, int valuetype, const char* exprA, const char* exprB) {
+    size_t erroroffset = jc_test_memcmp(a, b, typesize*len);
+    if (erroroffset == JC_TEST_STATIC_CAST(size_t, -1)) return 1;
 
-static inline void jc_test_memset(void* _mem, unsigned int pattern, size_t size)
-{
-    for (size_t i = 0; i < size; ++i) {
-        JC_TEST_CAST(unsigned char*, _mem)[i] = JC_TEST_STATIC_CAST(unsigned char, pattern & 0xFF);
+    // max number of differing characters displayed
+    const size_t max_num_to_display = 32;
+    // Each byte is shown as two characters + start/end color
+    const size_t stringsize = max_num_to_display*(2 + sizeof(JC_TEST_CLR_RED)*2) + 1;
+    char stra[stringsize] = {0};
+    char strb[stringsize] = {0};
+    char indexprefix[stringsize] = {0};
+    char diff[stringsize] = {0};
+    size_t size = len*typesize;
+
+    // try to frame the output around the diff
+    // also slide the view frame to always show num_elements (if available)
+    size_t num_local_elements = max_num_to_display / typesize;
+    size_t start = erroroffset/typesize - num_local_elements;
+    size_t end = erroroffset/typesize + num_local_elements;
+
+    if (start > size) { // overflow
+        start = 0;
+        end = len < num_local_elements ? len : num_local_elements;
     }
+    if (end > len) {
+        end = len;
+        start = len < num_local_elements ? 0 : len - num_local_elements;
+    }
+
+    start *= typesize;
+    end *= typesize;
+
+    // index of element in the shown sub array
+    size_t local_index = (erroroffset - start) / typesize;
+
+    jc_test_memset(indexprefix, ' ', 1 + local_index * typesize * (valuetype == 1 ? 1 : 2) + (valuetype == 1 ? 0 : local_index));
+
+    char* pa = stra;
+    char* pb = strb;
+    char* pd = diff;
+    char* penda = pa + stringsize;
+    char* pendb = pb + stringsize;
+    char* pendd = pd + stringsize;
+    for(size_t i = start; i < end; i += typesize) {
+        int byte_diff = jc_test_memcmp(a+i, b+i, typesize) != JC_TEST_STATIC_CAST(size_t, -1);
+        const char* color_a = byte_diff ? JC_TEST_COL(GREEN) : JC_TEST_COL(DEFAULT);
+        const char* color_b = byte_diff ? JC_TEST_COL(RED) : JC_TEST_COL(DEFAULT);
+
+        pa += JC_TEST_SNPRINTF(pa, JC_TEST_STATIC_CAST(size_t, penda - pa), "%s", color_a);
+        pb += JC_TEST_SNPRINTF(pb, JC_TEST_STATIC_CAST(size_t, pendb - pb), "%s", color_b);
+
+        if (valuetype == 1) // char
+        {
+            pa += JC_TEST_SNPRINTF(pa, JC_TEST_STATIC_CAST(size_t, penda - pa), "%c", JC_TEST_STATIC_CAST(char, a[i]));
+            pb += JC_TEST_SNPRINTF(pb, JC_TEST_STATIC_CAST(size_t, pendb - pb), "%c", JC_TEST_STATIC_CAST(char, b[i]));
+            diff[(i-start)+0] = byte_diff ? '^' : ' ';
+        }
+        else {
+            for (int t = JC_TEST_STATIC_CAST(int, typesize)-1; t >= 0; --t) {
+                pa += JC_TEST_SNPRINTF(pa, JC_TEST_STATIC_CAST(size_t, penda - pa), "%02X", a[JC_TEST_STATIC_CAST(size_t, t) + i]);
+                pb += JC_TEST_SNPRINTF(pb, JC_TEST_STATIC_CAST(size_t, pendb - pb), "%02X", b[JC_TEST_STATIC_CAST(size_t, t) + i]);
+                pd += JC_TEST_SNPRINTF(pd, JC_TEST_STATIC_CAST(size_t, pendd - pd), "%s", byte_diff ? "^^" : "  ");
+            }
+            pd += JC_TEST_SNPRINTF(pd, JC_TEST_STATIC_CAST(size_t, pendd - pd), "%c", ' ');
+        }
+        int add_space = valuetype != 1 && (i < (end - typesize));
+        pa += JC_TEST_SNPRINTF(pa, JC_TEST_STATIC_CAST(size_t, penda - pa), "%s%s", JC_TEST_COL(DEFAULT), add_space ? " " : "");
+        pb += JC_TEST_SNPRINTF(pb, JC_TEST_STATIC_CAST(size_t, pendb - pb), "%s%s", JC_TEST_COL(DEFAULT), add_space ? " " : "");
+
+    }
+    const char* emptyprefix = "   ";
+    const char* prefix = start == 0 ? (valuetype == 1 ? "  \"" : "  [") : (valuetype == 1 ? "\".." : "[..");
+    const char* suffix = end < size ? (valuetype == 1 ? "..\"" : "..]") : (valuetype == 1 ? "\"" : "]");
+    JC_TEST_LOGF(jc_test_get_fixture(), jc_test_get_test(), 0, JC_TEST_EVENT_ASSERT_FAILED,
+            "\nValue of %s == %s\nIndex:   %s%s%zu\nExpected: %s%s%s\nActual:   %s%s%s\nDiff:     %s%s\n",
+            exprA, exprB,
+            emptyprefix, indexprefix, erroroffset/typesize,
+            prefix, stra, suffix,
+            prefix, strb, suffix,
+            emptyprefix, diff);
+    return 0;
 }
+
+#undef JC_TEST_COL
+#undef JC_TEST_CLR_DEFAULT
+#undef JC_TEST_CLR_RED
+#undef JC_TEST_CLR_GREEN
+#undef JC_TEST_CLR_YELLOW
+#undef JC_TEST_CLR_MAGENTA
+#undef JC_TEST_CLR_CYAN
 
 void jc_test_memcpy(void* dst, void* src, size_t size) {
     for (size_t i = 0; i < size; ++i) {

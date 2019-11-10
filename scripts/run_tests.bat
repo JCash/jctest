@@ -5,4 +5,5 @@ echo off
 .\build\test_expect.exe
 .\build\test_death.exe
 .\build\test_empty.exe
+.\build\test_array.exe
 
