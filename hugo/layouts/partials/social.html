@@ -1,0 +1,6 @@
+{{ range $social := .Site.Params.Social }}
+  <a href="{{ $social.url }}" class="social-link" target="_blank">
+    <img src="{{ $social.imgUrl }}"/></a><br/>
+{{ end }}
+
+
