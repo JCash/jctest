@@ -1,0 +1,6 @@
+[submodule "hugo/themes/base16"]
+	path = hugo/themes/base16
+	url = https://github.com/htdvisser/hugo-base16-theme.git
+[submodule "hugo/themes/cupper-hugo-theme"]
+	path = hugo/themes/cupper-hugo-theme
+	url = https://github.com/zwbetz-gh/cupper-hugo-theme.git

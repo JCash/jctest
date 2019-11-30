@@ -1,0 +1,52 @@
+<nav id="patterns-nav" class="patterns" role="navigation">
+  <h2 class="vh">Main navigation</h2>
+  <button id="menu-button" aria-expanded="false">
+    <svg viewBox="0 0 50 50" aria-hidden="true" focusable="false">
+      <use xlink:href="#menu"></use>
+    </svg>
+    Menu
+  </button>
+  {{ $current := . }}
+  <ul id="patterns-list">
+    {{ with $section := .Site.Sections }}
+      {{ range .ByWeight }}
+        <li class="pattern">
+          {{ $active := 0 }}
+          {{ $active = or $active (eq .Name $current.Title) }}
+          <a href="{{ .URL }}" {{ if $active }}aria-current="page"{{ end }}>
+            <svg class="bookmark-icon" aria-hidden="true" focusable="false" viewBox="0 0 40 50">
+              <use xlink:href="#bookmark"></use>
+            </svg>
+
+            <span class="text">{{ .Name }}</span>
+          </a>
+          {{ if .Pages }}
+            <ul id="sub-patterns-list">
+              {{ range .Pages.ByWeight }}
+                <li>
+                  {{ $active := 0 }}
+                  {{ $active = or $active (eq .Name $current.Title) }}
+                  <a href="{{ .URL }}" {{ if $active }}aria-current="page"{{ end }}>
+                    <svg class="bookmark-icon" aria-hidden="false" focusable="false" viewBox="0 0 40 50">
+                      <use xlink:href="#bookmark"></use>
+                    </svg>
+                    <span class="text">{{ .Name }}</span>
+                  </a>
+                </li>
+              {{ end }}
+            </ul>
+          {{ end }}
+        </li>
+      {{ end }}
+    {{ end }}
+  </ul>
+  <div id="view-size-normal">
+  <br>
+  {{ partial "social.html" . }}
+  </div>
+
+</nav>
+
+<div id="view-size-normal">
+{{ $.Site.Copyright }}
+</div>

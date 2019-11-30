@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>http://localhost:1313/jctest/api/features/</loc>
+  </url>
+  
+  <url>
+    <loc>http://localhost:1313/jctest/main/</loc>
+  </url>
+  
+  <url>
+    <loc>http://localhost:1313/jctest/api/01-assertions/</loc>
+  </url>
+  
+  <url>
+    <loc>http://localhost:1313/jctest/building/</loc>
+  </url>
+  
+  <url>
+    <loc>http://localhost:1313/jctest/api/</loc>
+    <lastmod>2019-11-16T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://localhost:1313/jctest/api/02-testcases/</loc>
+  </url>
+  
+  <url>
+    <loc>http://localhost:1313/jctest/benchmarks/</loc>
+  </url>
+  
+  <url>
+    <loc>http://localhost:1313/jctest/api/03-runtime/</loc>
+  </url>
+  
+  <url>
+    <loc>http://localhost:1313/jctest/about/</loc>
+  </url>
+  
+  <url>
+    <loc>http://localhost:1313/jctest/api/customization/</loc>
+  </url>
+  
+  <url>
+    <loc>http://localhost:1313/jctest/about/</loc>
+    <lastmod>2019-11-10T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://localhost:1313/jctest/</loc>
+    <lastmod>2019-11-10T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://localhost:1313/jctest/categories/api/</loc>
+  </url>
+  
+  <url>
+    <loc>http://localhost:1313/jctest/categories/</loc>
+  </url>
+  
+  <url>
+    <loc>http://localhost:1313/jctest/tags/</loc>
+  </url>
+  
+</urlset>

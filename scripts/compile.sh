@@ -60,8 +60,17 @@ LDFLAGS="$LDFLAGS $ASAN_LDFLAGS"
 echo "COMPILING WITH JCTEST"
 PREFIX=jctest
 
+EXAMPLE_SOURCE_DIR=./hugo/static/code
+
+function compile_doc_example {
+    local file=example_${1}.cpp
+    echo "Compiling ${file}"
+    $CXX -o ./build/${PREFIX}_example_${1} $OPT $ARCH $SYSROOT $CXXFLAGS ${EXAMPLE_SOURCE_DIR}/${file}
+}
+
 function compile_test {
     local name=$1
+    echo "Compiling test $name"
     $CXX -o ./build/${PREFIX}_test_${name}.o $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS -c test/test_${name}.cpp
     $CXX -o ./build/${PREFIX}_main.o $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS -c test/main.cpp
     $CXX -o ./build/${PREFIX}_${name} $OPT $ARCH ./build/${PREFIX}_main.o ./build/${PREFIX}_test_${name}.o $LDFLAGS
@@ -73,6 +82,9 @@ time compile_test expect
 time compile_test death
 time compile_test empty
 time compile_test array
+
+time compile_doc_example minimal
+time compile_doc_example custom_print
 
 if [ "$TRAVIS_COMPILER" == "" ]; then
     echo ""
@@ -95,5 +107,3 @@ if [ "$TRAVIS_COMPILER" == "" ]; then
     time compile_test expect
     time compile_test death
 fi
-
-$CXX -o ./build/test_example $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS docs/examples/test_example.cpp

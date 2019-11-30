@@ -1,7 +1,5 @@
-|Branch      | OSX / Linux / Windows     |
-|------------|---------------------------|
-|master      | [![Build Status](https://travis-ci.org/JCash/jctest.svg?branch=master)](https://travis-ci.org/JCash/jctest?branch=master) |
-|dev         | [![Build Status](https://travis-ci.org/JCash/jctest.svg?branch=dev)](https://travis-ci.org/JCash/jctest?branch=dev) |
+
+![License](https://img.shields.io/github/license/JCash/jctest?label=License) ![Version](https://img.shields.io/github/v/release/JCash/jctest?color=blue&label=Version&sort=semver) ![Size](https://img.shields.io/github/size/JCash/jctest/src/jc_test.h?color=green&label=jc_test.h) ![Build Status](https://img.shields.io/travis/JCash/jctest/master?label=master) ![Build Status](https://img.shields.io/travis/JCash/jctest/dev?label=dev)
 
 # Documentation
 
@@ -9,7 +7,7 @@ https://jcash.github.io/jctest/ (or [here](./docs/index.md))
 
 # jctest
 
-A C++ header only test framework
+A C++ single file, header only test framework
 
 See [documentation](https://jcash.github.io/jctest) for a full list of features
 
@@ -28,9 +26,7 @@ This software is supplied "AS IS" without any warranties and support
 * No added warnings to the code (according to Travis-CI)
 * New features must have unit tests
 
-I don't want to put performance (compile time/code size/runtime) explicitly in the list, since
-one might sometimes need to fix a bug, which might have those effects.
-But as a general rule, take care to keep the performance high in this library.
+As a general rule, take care to keep the performance high in this library.
 
 # Code of conduct
 
