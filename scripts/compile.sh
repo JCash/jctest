@@ -65,7 +65,7 @@ EXAMPLE_SOURCE_DIR=./hugo/static/code
 function compile_doc_example {
     local file=example_${1}.cpp
     echo "Compiling ${file}"
-    $CXX -o ./build/${PREFIX}_example_${1} $OPT $ARCH $SYSROOT $CXXFLAGS ${EXAMPLE_SOURCE_DIR}/${file}
+    $CXX -o ./build/example_${1} $OPT $ARCH $SYSROOT $CXXFLAGS ${EXAMPLE_SOURCE_DIR}/${file}
 }
 
 function compile_test {
