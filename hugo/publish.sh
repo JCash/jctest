@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-hugo server -ws . -d ../docs
+hugo server --minify -ws . -d ../docs
