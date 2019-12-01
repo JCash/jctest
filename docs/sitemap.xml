@@ -3,66 +3,77 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>http://JCash.github.com/jctest/api/features/</loc>
+    <loc>/api/features/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://JCash.github.com/jctest/main/</loc>
+    <loc>/main/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://JCash.github.com/jctest/api/01-assertions/</loc>
+    <loc>/api/01-assertions/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://JCash.github.com/jctest/building/</loc>
+    <loc>/building/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://JCash.github.com/jctest/api/</loc>
-    <lastmod>2019-11-16T00:00:00+00:00</lastmod>
+    <loc>/api/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://JCash.github.com/jctest/api/02-testcases/</loc>
+    <loc>/api/02-testcases/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://JCash.github.com/jctest/benchmarks/</loc>
+    <loc>/benchmarks/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://JCash.github.com/jctest/api/03-runtime/</loc>
+    <loc>/api/03-runtime/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://JCash.github.com/jctest/about/</loc>
+    <loc>/about/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://JCash.github.com/jctest/api/customization/</loc>
+    <loc>/api/customization/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://JCash.github.com/jctest/about/</loc>
-    <lastmod>2019-11-10T00:00:00+00:00</lastmod>
+    <loc>/about/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://JCash.github.com/jctest/</loc>
-    <lastmod>2019-11-10T00:00:00+00:00</lastmod>
+    <loc>/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://JCash.github.com/jctest/categories/api/</loc>
+    <loc>/categories/api/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://JCash.github.com/jctest/categories/</loc>
+    <loc>/categories/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://JCash.github.com/jctest/tags/</loc>
+    <loc>/tags/</loc>
   </url>
   
 </urlset>

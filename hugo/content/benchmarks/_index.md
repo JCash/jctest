@@ -40,10 +40,10 @@ In our case (the [Defold](www.defold.com) game engine), we wanted to replace `GT
 Here's a comparison between the `GTEST` and `jctest` frameworks when building the game engine tests.
 We see a decrease of the compile time, ending up at ~54% of the original time.
 
-![benchmark_enginetests.png](/jctest/images/benchmark_enginetests.png)
+![benchmark_enginetests.png](/images/benchmark_enginetests.png)
 
 The footprint on disc is also important, as it takes up both space but also affects writing/reading times.
 In this scenario the file sizes ended up at ~45% of the original sizes.
 
-![benchmark_enginetests.png](/jctest/images/benchmark_enginetestsizes.png)
+![benchmark_enginetests.png](/images/benchmark_enginetestsizes.png)
 

@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
   <meta name="generator" content="Hugo 0.59.1" />
-  <link rel="canonical" href="http://JCash.github.com/jctest/about/">
+  <link rel="canonical" href="/about/">
 
   
 
@@ -18,13 +18,13 @@
   <meta name="msapplication-TileColor" content="#ffffff">
   <meta name="theme-color" content="#ffffff">
 
-  <link rel="stylesheet" href="http://JCash.github.com/jctest/css/prism.css" media="none" onload="this.media='all';">
+  <link rel="stylesheet" href="/css/prism.css" media="none" onload="this.media='all';">
 
   
   
-  <link rel="stylesheet" type="text/css" href="http://JCash.github.com/jctest/css/styles.css">
+  <link rel="stylesheet" type="text/css" href="/css/styles.css">
 
-  <link rel="stylesheet" href="http://JCash.github.com/jctest/css/custom.css">
+  <link rel="stylesheet" href="/css/custom.css">
 
   <style id="inverter" media="none">
     html { filter: invert(100%) }
@@ -132,8 +132,8 @@
       <header class="intro-and-nav" role="banner">
   <div>
     <div class="intro">
-      <a class="logo" href="http://JCash.github.com/jctest" aria-label="jctest home page">
-        <img src="http://JCash.github.com/jctest/images/logo.svg" alt="">
+      <a class="logo" href="/" aria-label="jctest home page">
+        <img src="/images/logo.svg" alt="">
       </a>
       <p class="library-desc">
         
@@ -156,7 +156,7 @@
         <li class="pattern">
           
           
-          <a href="/jctest/main/" >
+          <a href="/main/" >
             <svg class="bookmark-icon" aria-hidden="true" focusable="false" viewBox="0 0 40 50">
               <use xlink:href="#bookmark"></use>
             </svg>
@@ -169,7 +169,7 @@
         <li class="pattern">
           
           
-          <a href="/jctest/building/" >
+          <a href="/building/" >
             <svg class="bookmark-icon" aria-hidden="true" focusable="false" viewBox="0 0 40 50">
               <use xlink:href="#bookmark"></use>
             </svg>
@@ -182,7 +182,7 @@
         <li class="pattern">
           
           
-          <a href="/jctest/api/" >
+          <a href="/api/" >
             <svg class="bookmark-icon" aria-hidden="true" focusable="false" viewBox="0 0 40 50">
               <use xlink:href="#bookmark"></use>
             </svg>
@@ -195,7 +195,7 @@
                 <li>
                   
                   
-                  <a href="/jctest/api/features/" >
+                  <a href="/api/features/" >
                     <svg class="bookmark-icon" aria-hidden="false" focusable="false" viewBox="0 0 40 50">
                       <use xlink:href="#bookmark"></use>
                     </svg>
@@ -206,7 +206,7 @@
                 <li>
                   
                   
-                  <a href="/jctest/api/01-assertions/" >
+                  <a href="/api/01-assertions/" >
                     <svg class="bookmark-icon" aria-hidden="false" focusable="false" viewBox="0 0 40 50">
                       <use xlink:href="#bookmark"></use>
                     </svg>
@@ -217,7 +217,7 @@
                 <li>
                   
                   
-                  <a href="/jctest/api/02-testcases/" >
+                  <a href="/api/02-testcases/" >
                     <svg class="bookmark-icon" aria-hidden="false" focusable="false" viewBox="0 0 40 50">
                       <use xlink:href="#bookmark"></use>
                     </svg>
@@ -228,7 +228,7 @@
                 <li>
                   
                   
-                  <a href="/jctest/api/03-runtime/" >
+                  <a href="/api/03-runtime/" >
                     <svg class="bookmark-icon" aria-hidden="false" focusable="false" viewBox="0 0 40 50">
                       <use xlink:href="#bookmark"></use>
                     </svg>
@@ -239,7 +239,7 @@
                 <li>
                   
                   
-                  <a href="/jctest/api/customization/" >
+                  <a href="/api/customization/" >
                     <svg class="bookmark-icon" aria-hidden="false" focusable="false" viewBox="0 0 40 50">
                       <use xlink:href="#bookmark"></use>
                     </svg>
@@ -254,7 +254,7 @@
         <li class="pattern">
           
           
-          <a href="/jctest/benchmarks/" >
+          <a href="/benchmarks/" >
             <svg class="bookmark-icon" aria-hidden="true" focusable="false" viewBox="0 0 40 50">
               <use xlink:href="#bookmark"></use>
             </svg>
@@ -267,7 +267,7 @@
         <li class="pattern">
           
           
-          <a href="/jctest/about/" aria-current="page">
+          <a href="/about/" aria-current="page">
             <svg class="bookmark-icon" aria-hidden="true" focusable="false" viewBox="0 0 40 50">
               <use xlink:href="#bookmark"></use>
             </svg>
@@ -314,30 +314,34 @@
           
   <main id="main">
     <h1>About</h1>
-    <p>You can read in more detail about this library came to be in the blog post: <a href="http://www.sizeofvoid.com/2019/04/13/replacing-googletest-with-jctest/">Replacing googletest with jctest</a></p>
+    
 
-<p>Hi there, you just reached my blog.</p>
+<h2 id="why">Why</h2>
 
-<pre><code class="language-c">int a = 0;
+<p>The main reason this library was created, was to minimize code maintenance for an existing code base (where we compiled GTEST for many platforms), and to see if the build pipeline could be optimized.</p>
 
-void foo(int* b) {
-    *b = a;
-}
+<p>You can read in more detail about how this library came to be in the blog post:<br>
+<a href="http://www.sizeofvoid.com/2019/04/13/replacing-googletest-with-jctest/">Replacing googletest with jctest</a></p>
 
-typedef struct jc_test_entry {
-    jc_test_entry*            next;       // linked list
-    const char*               name;
-    jc_test_base_class*       instance;
-    jc_test_factory_base_interface* factory;    // Factory for parameterized tests
-    uint32_t                  fail:1;
-    uint32_t                  skipped:1;
-    uint32_t                  :30;
-    #if defined(__x86_64__) || defined(__ppc64__) || defined(_WIN64)
-    uint32_t                  :32;
-    #endif
-} jc_test_entry;
-</code></pre>
+<h2 id="goals">Goals</h2>
 
+<p>This library was created with requirements and guidelines in place:</p>
+
+<div class="ticks">
+  <ul>
+<li>Replacement for googletest, with minimal changes</li>
+<li>Support a few use cases: TEST, TEST_F, TEST_P, TYPED_TEST</li>
+<li>As few templates as possible</li>
+<li>No STL</li>
+<li>As small as possible</li>
+<li>Single header only library</li>
+</ul>
+</div>
+
+
+    <ul class="patterns-list">
+    
+    </ul>
   </main>
 
           <footer role="contentinfo">
@@ -376,8 +380,8 @@ typedef struct jc_test_entry {
         </div>
       </div>
     </div>
-    <script src="http://JCash.github.com/jctest/js/prism.js"></script>
-<script src="http://JCash.github.com/jctest/js/dom-scripts.js"></script>
+    <script src="/js/prism.js"></script>
+<script src="/js/dom-scripts.js"></script>
 
     
     

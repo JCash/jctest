@@ -18,4 +18,4 @@ $ clang++ -I src hugo/static/code/example_minimal.cpp
 $ ./a.out
 ```
 
-![example_minimal.png](/jctest/images/example_minimal.png)
+![example_minimal.png](/images/example_minimal.png)

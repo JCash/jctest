@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Api on jctest</title>
-    <link>http://JCash.github.com/jctest/api/</link>
+    <link>/api/</link>
     <description>Recent content in Api on jctest</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 16 Nov 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="http://JCash.github.com/jctest/api/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/api/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Features</title>
-      <link>http://JCash.github.com/jctest/api/features/</link>
+      <link>/api/features/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://JCash.github.com/jctest/api/features/</guid>
+      <guid>/api/features/</guid>
       <description>API This framework was designed to be a (subset) replacement of the Googletest.
 
    Features jc_test gtest     ASSERT_EQ Yes Yes   ASSERT_NE Yes Yes   ASSERT_GT Yes Yes   ASSERT_LT Yes Yes   ASSERT_GE Yes Yes   ASSERT_LE Yes Yes   ASSERT_ARRAY_EQ Yes No   ASSERT_ARRAY_EQ_LEN Yes No   ASSERT_STREQ Yes Yes   ASSERT_STRNE Yes Yes   ASSERT_NEAR Yes Yes   ASSERT_DEATH Yes Yes   ASSERT_FLOAT_EQ No*  Yes   ASSERT_DOUBLE_EQ No*  Yes   ASSERT_TRUE Yes Yes   ASSERT_FALSE Yes Yes   EXPECT_* variants Yes Yes   TEST Yes Yes   TEST_F Yes Yes   TEST_P Yes Yes   TYPED_TEST** Yes Yes</description>
@@ -24,10 +24,10 @@
     
     <item>
       <title>Assertions</title>
-      <link>http://JCash.github.com/jctest/api/01-assertions/</link>
+      <link>/api/01-assertions/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://JCash.github.com/jctest/api/01-assertions/</guid>
+      <guid>/api/01-assertions/</guid>
       <description>There are two main types of assertions: fatal (ASSERT_*) and non-fatal (EXPECT_*).
 The general format of each assertion is that the expected value is to the left, and the value to test is on the right. This is good to know so that the error reporting doesn&amp;rsquo;t get confusing.
 ASSERT_EQ(expected, actual);  Boolean checks 
@@ -36,10 +36,10 @@ ASSERT_EQ(expected, actual);  Boolean checks
     
     <item>
       <title>Test Cases</title>
-      <link>http://JCash.github.com/jctest/api/02-testcases/</link>
+      <link>/api/02-testcases/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://JCash.github.com/jctest/api/02-testcases/</guid>
+      <guid>/api/02-testcases/</guid>
       <description>Test Fixtures TEST(FixtureName, TestName) Tests a single function.
 TEST(MyTest, TestName) { ASSERT_EQ(4, 2*2); ASSERT_STREQ(&amp;quot;a&amp;quot;, &amp;quot;b&amp;quot;); }  TEST_F(FixtureName, TestName) Uses a base class:
 struct MyTest : public jc_test_base_class { static void SetUpTestCase() {}; static void TearDownTestCase() {}; void SetUp() {}; void TearDown() {}; }; TEST_F(MyTest, TestName) { ASSERT_EQ(4, 2*2); ASSERT_STREQ(&amp;quot;a&amp;quot;, &amp;quot;b&amp;quot;); }  TEST_P + INSTANTIATE_TEST_CASE_P Using a templated base class which accepts a parameter type, it&amp;rsquo;s easy to use a test case with multiple values.</description>
@@ -47,10 +47,10 @@ struct MyTest : public jc_test_base_class { static void SetUpTestCase() {}; stat
     
     <item>
       <title>Runtime</title>
-      <link>http://JCash.github.com/jctest/api/03-runtime/</link>
+      <link>/api/03-runtime/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://JCash.github.com/jctest/api/03-runtime/</guid>
+      <guid>/api/03-runtime/</guid>
       <description>Command line options --test-filter &amp;lt;substring&amp;gt; If the substring matches part of the full test name, the test will be included. The non matching tests will be skipped.
 The complete name isn&amp;rsquo;t written out during the tests, but is pieced together from the components making up the test. E.g.:
  FirstParamsTest/ParamsTest.Test/0 FirstParamsTest/ParamsTest.Test/1 SecondParamsTest/ParamsTest.Test/0 SecondParamsTest/ParamsTest.Test/1   Fixture name Test case name Test name Test number (for parameterized tests)  Given the tests above, the option --test-filter Second will match:</description>
@@ -58,10 +58,10 @@ The complete name isn&amp;rsquo;t written out during the tests, but is pieced to
     
     <item>
       <title>Customization</title>
-      <link>http://JCash.github.com/jctest/api/customization/</link>
+      <link>/api/customization/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://JCash.github.com/jctest/api/customization/</guid>
+      <guid>/api/customization/</guid>
       <description>Custom type formatting It&amp;rsquo;s beneficial to be able to convert your custom types to a human readable string. If your type doesn&amp;rsquo;t match any of the supported types, it will default to the &amp;quot;?&amp;quot; output, which isn&amp;rsquo;t very helpful.
 All that is needed it to make a function available for the template matching to find it.
 Here is an example that takes a custom enum and converts that to a readable output:</description>

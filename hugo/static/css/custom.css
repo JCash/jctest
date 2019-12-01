@@ -56,19 +56,6 @@ pre[class*="language-"] {
     background-color: rgb(245,245,245);
 }
 
-/*.keyword {
-    padding: 0.75rem;
-    background: #111;
-}
-.keyword code {
-    color: #fefefe;
-    white-space: nowrap;
-}
-.keyword code::before {
-    content: '$';
-    font-weight: bold;
-    padding-right: 0.25em;
-}*/
 #sub-patterns-list {
   margin-top: 0.5rem;
 }

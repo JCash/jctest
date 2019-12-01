@@ -22,4 +22,4 @@ $ clang++ -I src hugo/static/code/example_custom_print.cpp
 $ ./a.out
 ```
 
-![example_custom_print.png](/jctest/images/example_custom_print.png)
+![example_custom_print.png](/images/example_custom_print.png)
