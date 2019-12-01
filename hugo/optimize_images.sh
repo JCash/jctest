@@ -20,6 +20,8 @@ do
 
     pngquant --quality=65-80 $f
 
-    SIZE_AFTER=$(stat -f %z $NEWFILE)
+    mv $NEWFILE $f
+
+    SIZE_AFTER=$(stat -f %z $f)
     echo "   " $SIZE_BEFORE " -> " $SIZE_AFTER
 done
