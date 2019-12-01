@@ -34,7 +34,7 @@ p {
     margin-top: 1.0rem;
 }
 
-.social-link {
+.image-link {
     border-bottom: 0px;
 }
 
@@ -54,6 +54,12 @@ pre[class*="language-"] {
 
 .code-annotated {
     background-color: rgb(245,245,245);
+}
+
+figcaption {
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 0.0rem;
 }
 
 #sub-patterns-list {

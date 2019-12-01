@@ -1,5 +1,5 @@
-#baseURL = "http://JCash.github.com/jctest"
-baseURL = "/jctest"
+baseURL = "http://JCash.github.com/jctest"
+#baseURL = "/"
 languageCode = "en-us"
 defaultContentLanguage = "en"
 title = "jctest"

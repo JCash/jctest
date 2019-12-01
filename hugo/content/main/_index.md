@@ -7,13 +7,13 @@ weight: 1
 The library was build as a lightweight replacement for `googletest`.
 
 {{% figure
-    src="/main/images/test_example.png"
+    src="main/images/test_example.png"
     caption="An example where all tests pass"
 %}}
 
 
 {{% figure
-    src="/main/images/test_example_fail.png"
+    src="main/images/test_example_fail.png"
     caption="An example how some failing tests look"
 %}}
 

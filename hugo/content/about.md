@@ -3,33 +3,23 @@ title: "About"
 date: "2019-11-10"
 ---
 
+## Why
 
+The main reason this library was created, was to minimize code maintenance for an existing code base (where we compiled GTEST for many platforms), and to see if the build pipeline could be optimized.
 
+You can read in more detail about how this library came to be in the blog post:<br>
+[Replacing googletest with jctest](http://www.sizeofvoid.com/2019/04/13/replacing-googletest-with-jctest/)
 
-You can read in more detail about this library came to be in the blog post: [Replacing googletest with jctest](http://www.sizeofvoid.com/2019/04/13/replacing-googletest-with-jctest/)
+## Goals
 
+This library was created with requirements and guidelines in place:
 
+{{% ticks %}}
+* Replacement for googletest, with minimal changes
+* Support a few use cases: TEST, TEST_F, TEST_P, TYPED_TEST
+* As few templates as possible
+* No STL
+* As small as possible
+* Single header only library
+{{% /ticks %}}
 
-Hi there, you just reached my blog.
-
-
-```c
-int a = 0;
-
-void foo(int* b) {
-    *b = a;
-}
-
-typedef struct jc_test_entry {
-    jc_test_entry*            next;       // linked list
-    const char*               name;
-    jc_test_base_class*       instance;
-    jc_test_factory_base_interface* factory;    // Factory for parameterized tests
-    uint32_t                  fail:1;
-    uint32_t                  skipped:1;
-    uint32_t                  :30;
-    #if defined(__x86_64__) || defined(__ppc64__) || defined(_WIN64)
-    uint32_t                  :32;
-    #endif
-} jc_test_entry;
-```

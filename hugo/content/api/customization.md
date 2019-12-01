@@ -22,4 +22,6 @@ $ clang++ -I src hugo/static/code/example_custom_print.cpp
 $ ./a.out
 ```
 
-![example_custom_print.png](/images/example_custom_print.png)
+{{% figure
+    src="images/example_custom_print.png"
+%}}
