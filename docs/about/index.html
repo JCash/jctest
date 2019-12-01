@@ -6,25 +6,25 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
   <meta name="generator" content="Hugo 0.59.1" />
-  <link rel="canonical" href="//localhost:1313/about/">
+  <link rel="canonical" href="/about/">
 
   
 
-  <link rel="apple-touch-icon" sizes="180x180" href='//localhost:1313/apple-touch-icon.png'>
-  <link rel="icon" type="image/png" sizes="32x32" href='//localhost:1313/favicon-32x32.png'>
-  <link rel="icon" type="image/png" sizes="16x16" href='//localhost:1313/favicon-16x16.png'>
-  <link rel="manifest" href='//localhost:1313/site.webmanifest'>
-  <link rel="mask-icon" href='//localhost:1313/safari-pinned-tab.svg' color="#000000">
+  <link rel="apple-touch-icon" sizes="180x180" href='/apple-touch-icon.png'>
+  <link rel="icon" type="image/png" sizes="32x32" href='/favicon-32x32.png'>
+  <link rel="icon" type="image/png" sizes="16x16" href='/favicon-16x16.png'>
+  <link rel="manifest" href='/site.webmanifest'>
+  <link rel="mask-icon" href='/safari-pinned-tab.svg' color="#000000">
   <meta name="msapplication-TileColor" content="#ffffff">
   <meta name="theme-color" content="#ffffff">
 
-  <link rel="stylesheet" href='//localhost:1313/css/prism.css' media="none" onload="this.media='all';">
+  <link rel="stylesheet" href='/css/prism.css' media="none" onload="this.media='all';">
 
   
   
-  <link rel="stylesheet" type="text/css" href="//localhost:1313/css/styles.css">
+  <link rel="stylesheet" type="text/css" href="/css/styles.css">
 
-  <link rel="stylesheet" href="//localhost:1313/css/custom.css">
+  <link rel="stylesheet" href="/css/custom.css">
 
   <style id="inverter" media="none">
     html { filter: invert(100%) }
@@ -132,8 +132,8 @@
       <header class="intro-and-nav" role="banner">
   <div>
     <div class="intro">
-      <a class="logo" href="//localhost:1313/" aria-label="jctest home page">
-        <img src="//localhost:1313/images/logo.svg" alt="">
+      <a class="logo" href="/" aria-label="jctest home page">
+        <img src="/images/logo.svg" alt="">
       </a>
       <p class="library-desc">
         
@@ -314,34 +314,30 @@
           
   <main id="main">
     <h1>About</h1>
-    
+    <p>You can read in more detail about this library came to be in the blog post: <a href="http://www.sizeofvoid.com/2019/04/13/replacing-googletest-with-jctest/">Replacing googletest with jctest</a></p>
 
-<h2 id="why">Why</h2>
+<p>Hi there, you just reached my blog.</p>
 
-<p>The main reason this library was created, was to minimize code maintenance for an existing code base (where we compiled GTEST for many platforms), and to see if the build pipeline could be optimized.</p>
+<pre><code class="language-c">int a = 0;
 
-<p>You can read in more detail about how this library came to be in the blog post:<br>
-<a href="http://www.sizeofvoid.com/2019/04/13/replacing-googletest-with-jctest/">Replacing googletest with jctest</a></p>
+void foo(int* b) {
+    *b = a;
+}
 
-<h2 id="goals">Goals</h2>
+typedef struct jc_test_entry {
+    jc_test_entry*            next;       // linked list
+    const char*               name;
+    jc_test_base_class*       instance;
+    jc_test_factory_base_interface* factory;    // Factory for parameterized tests
+    uint32_t                  fail:1;
+    uint32_t                  skipped:1;
+    uint32_t                  :30;
+    #if defined(__x86_64__) || defined(__ppc64__) || defined(_WIN64)
+    uint32_t                  :32;
+    #endif
+} jc_test_entry;
+</code></pre>
 
-<p>This library was created with requirements and guidelines in place:</p>
-
-<div class="ticks">
-  <ul>
-<li>Replacement for googletest, with minimal changes</li>
-<li>Support a few use cases: TEST, TEST_F, TEST_P, TYPED_TEST</li>
-<li>As few templates as possible</li>
-<li>No STL</li>
-<li>As small as possible</li>
-<li>Single header only library</li>
-</ul>
-</div>
-
-
-    <ul class="patterns-list">
-    
-    </ul>
   </main>
 
           <footer role="contentinfo">
@@ -380,10 +376,19 @@
         </div>
       </div>
     </div>
-    <script src="//localhost:1313/js/prism.js"></script>
-<script src="//localhost:1313/js/dom-scripts.js"></script>
+    <script src="/js/prism.js"></script>
+<script src="/js/dom-scripts.js"></script>
 
     
     
-  <script data-no-instant>document.write('<script src="/livereload.js?port=1313&mindelay=10&v=2"></' + 'script>')</script></body>
+  
+  <script>
+  window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+  ga('create', 'UA-152712676-1', 'auto');
+  ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  </body>
 </html>

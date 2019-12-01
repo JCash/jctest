@@ -3,77 +3,77 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>//localhost:1313/api/features/</loc>
+    <loc>/api/features/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>//localhost:1313/main/</loc>
+    <loc>/main/</loc>
+    <lastmod>2019-12-01T02:18:52+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/api/01-assertions/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/building/</loc>
     <lastmod>2019-12-01T01:07:24+01:00</lastmod>
   </url>
   
   <url>
-    <loc>//localhost:1313/api/01-assertions/</loc>
+    <loc>/api/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>//localhost:1313/building/</loc>
+    <loc>/api/02-testcases/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/benchmarks/</loc>
+    <lastmod>2019-12-01T02:18:52+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/api/03-runtime/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/about/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/api/customization/</loc>
     <lastmod>2019-12-01T01:07:24+01:00</lastmod>
   </url>
   
   <url>
-    <loc>//localhost:1313/api/</loc>
+    <loc>/about/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>//localhost:1313/api/02-testcases/</loc>
-    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>//localhost:1313/benchmarks/</loc>
+    <loc>/</loc>
     <lastmod>2019-12-01T01:07:24+01:00</lastmod>
   </url>
   
   <url>
-    <loc>//localhost:1313/api/03-runtime/</loc>
+    <loc>/categories/api/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>//localhost:1313/about/</loc>
+    <loc>/categories/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>//localhost:1313/api/customization/</loc>
-    <lastmod>2019-12-01T01:07:24+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>//localhost:1313/about/</loc>
-    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>//localhost:1313/</loc>
-    <lastmod>2019-12-01T01:07:24+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>//localhost:1313/categories/api/</loc>
-    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>//localhost:1313/categories/</loc>
-    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>//localhost:1313/tags/</loc>
+    <loc>/tags/</loc>
   </url>
   
 </urlset>
