@@ -14,6 +14,6 @@ The library was build as a lightweight replacement for `googletest`.
 
 {{% figure
     src="main/images/test_example_fail.png"
-    caption="An example how some failing tests look"
+    caption="An example of how failing tests look"
 %}}
 
