@@ -3,77 +3,77 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/jctest/api/features/</loc>
+    <loc>//localhost:1313/api/features/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/jctest/main/</loc>
+    <loc>//localhost:1313/main/</loc>
     <lastmod>2019-12-01T01:07:24+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/jctest/api/01-assertions/</loc>
+    <loc>//localhost:1313/api/01-assertions/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/jctest/building/</loc>
+    <loc>//localhost:1313/building/</loc>
     <lastmod>2019-12-01T01:07:24+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/jctest/api/</loc>
+    <loc>//localhost:1313/api/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/jctest/api/02-testcases/</loc>
+    <loc>//localhost:1313/api/02-testcases/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/jctest/benchmarks/</loc>
+    <loc>//localhost:1313/benchmarks/</loc>
     <lastmod>2019-12-01T01:07:24+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/jctest/api/03-runtime/</loc>
+    <loc>//localhost:1313/api/03-runtime/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/jctest/about/</loc>
+    <loc>//localhost:1313/about/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/jctest/api/customization/</loc>
+    <loc>//localhost:1313/api/customization/</loc>
     <lastmod>2019-12-01T01:07:24+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/jctest/about/</loc>
+    <loc>//localhost:1313/about/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/jctest/</loc>
+    <loc>//localhost:1313/</loc>
     <lastmod>2019-12-01T01:07:24+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/jctest/categories/api/</loc>
+    <loc>//localhost:1313/categories/api/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/jctest/categories/</loc>
+    <loc>//localhost:1313/categories/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/jctest/tags/</loc>
+    <loc>//localhost:1313/tags/</loc>
   </url>
   
 </urlset>
