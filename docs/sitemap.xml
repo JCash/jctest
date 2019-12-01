@@ -3,77 +3,77 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/api/features/</loc>
+    <loc>/jctest/api/features/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/main/</loc>
+    <loc>/jctest/main/</loc>
     <lastmod>2019-12-01T02:18:52+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/api/01-assertions/</loc>
+    <loc>/jctest/api/01-assertions/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/building/</loc>
+    <loc>/jctest/building/</loc>
     <lastmod>2019-12-01T01:07:24+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/api/</loc>
+    <loc>/jctest/api/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/api/02-testcases/</loc>
+    <loc>/jctest/api/02-testcases/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/benchmarks/</loc>
+    <loc>/jctest/benchmarks/</loc>
     <lastmod>2019-12-01T02:18:52+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/api/03-runtime/</loc>
+    <loc>/jctest/api/03-runtime/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/about/</loc>
+    <loc>/jctest/about/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/api/customization/</loc>
+    <loc>/jctest/api/customization/</loc>
     <lastmod>2019-12-01T01:07:24+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/about/</loc>
+    <loc>/jctest/about/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/</loc>
+    <loc>/jctest/</loc>
     <lastmod>2019-12-01T01:07:24+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/api/</loc>
+    <loc>/jctest/categories/api/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/</loc>
+    <loc>/jctest/categories/</loc>
     <lastmod>2019-12-01T00:27:56+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/</loc>
+    <loc>/jctest/tags/</loc>
   </url>
   
 </urlset>
