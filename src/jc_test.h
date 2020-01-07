@@ -983,7 +983,7 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 
 #endif // JC_TEST_H
 
-#ifdef JC_TEST_IMPLEMENTATION_WITH_MAIN
+#ifdef JC_TEST_USE_DEFAULT_MAIN
 #define JC_TEST_IMPLEMENTATION
 #endif
 
@@ -1748,7 +1748,7 @@ void jc_test_init(int* argc, char** argv) {
 #endif
 #endif
 
-#ifdef JC_TEST_IMPLEMENTATION_WITH_MAIN
+#ifdef JC_TEST_USE_DEFAULT_MAIN
 int main(int argc, char** argv) {
     jc_test_init(&argc, argv);
     return jc_test_run_all();

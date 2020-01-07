@@ -1,4 +1,4 @@
-#define JC_TEST_IMPLEMENTATION_WITH_MAIN
+#define JC_TEST_USE_DEFAULT_MAIN
 #include <jc_test.h>
 
 TEST(my, test) {
