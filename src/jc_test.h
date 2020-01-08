@@ -721,6 +721,10 @@ struct jc_test_cmp_eq_helper<true> {
 
 #define SCOPED_TRACE(_MSG)  // nop
 
+// doctest compatible
+#define CHECK( VALUE ) ASSERT_TRUE(VALUE)
+#define CHECK_EQ( A, B ) ASSERT_TRUE(A, B)
+
 template<typename T>
 struct jc_test_value_iterator {
     virtual ~jc_test_value_iterator();
@@ -985,13 +989,13 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 #endif
 
 #define TEST_ANONYMOUS(testfixture,testfn)                                                                                            \
-class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public jc_test_base_class {                                             \
+class JC_TEST_MAKE_CLASS_NAME(testfixture,testfixture) : public jc_test_base_class {                                             \
     virtual void TestBody();                                                                                                \
 };                                                                                                                          \
-static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) JC_TEST_UNUSED = jc_test_register_class_test(              \
+static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfixture,__LINE__) JC_TEST_UNUSED = jc_test_register_class_test(              \
         "", #testfn, jc_test_base_class::SetUpTestCase, jc_test_base_class::TearDownTestCase,                     \
-        new JC_TEST_MAKE_CLASS_NAME(testfixture,testfn), JC_TEST_FIXTURE_TYPE_CLASS);                                       \
-void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
+        new JC_TEST_MAKE_CLASS_NAME(testfixture,testfixture), JC_TEST_FIXTURE_TYPE_CLASS);                                       \
+void JC_TEST_MAKE_CLASS_NAME(testfixture,testfixture)::TestBody()
 
 #define TEST_CASE(name) TEST_ANONYMOUS(JC_TEST_ANONYMOUS(_JC_TEST_ANON), name)
 
