@@ -976,6 +976,24 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
                 JC_TEST_MAKE_NAME2(testfixture,Types)>::register_test(#testfixture, #testfn, 0);            \
     template<typename T> void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)<T>::TestBody()
 
+#define JC_TEST_CAT_IMPL(s1, s2) s1##s2
+#define JC_TEST_CAT(s1, s2) JC_TEST_CAT_IMPL(s1, s2)
+#ifdef __COUNTER__
+#define JC_TEST_ANONYMOUS(x) JC_TEST_CAT(x, __COUNTER__)
+#else
+#define JC_TEST_ANONYMOUS(x) JC_TEST_CAT(x, __LINE__)
+#endif
+
+#define TEST_ANONYMOUS(testfixture,testfn)                                                                                            \
+class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public jc_test_base_class {                                             \
+    virtual void TestBody();                                                                                                \
+};                                                                                                                          \
+static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) JC_TEST_UNUSED = jc_test_register_class_test(              \
+        "", #testfn, jc_test_base_class::SetUpTestCase, jc_test_base_class::TearDownTestCase,                     \
+        new JC_TEST_MAKE_CLASS_NAME(testfixture,testfn), JC_TEST_FIXTURE_TYPE_CLASS);                                       \
+void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
+
+#define TEST_CASE(name) TEST_ANONYMOUS(JC_TEST_ANONYMOUS(_JC_TEST_ANON), name)
 
 #if !defined(_MSC_VER)
 #pragma GCC diagnostic pop
