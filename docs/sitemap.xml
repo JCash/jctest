@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>/jctest/api/features/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/jctest/main/</loc>
+    <lastmod>2019-12-01T12:01:38+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/jctest/api/01-assertions/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/jctest/building/</loc>
+    <lastmod>2019-12-01T11:52:13+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/jctest/api/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/jctest/api/02-testcases/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/jctest/benchmarks/</loc>
+    <lastmod>2019-12-01T11:52:13+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/jctest/api/03-runtime/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/jctest/api/customization/</loc>
+    <lastmod>2019-12-01T11:52:13+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/jctest/about/</loc>
+    <lastmod>2019-12-01T12:01:38+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/jctest/categories/api/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/jctest/categories/</loc>
+    <lastmod>2019-12-01T00:27:56+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/jctest/</loc>
+    <lastmod>2019-12-01T11:52:13+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/jctest/tags/</loc>
+  </url>
+  
+</urlset>

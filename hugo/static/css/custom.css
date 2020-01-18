@@ -1,0 +1,90 @@
+h1,
+h2,
+h3,
+h4 {
+    font-family: Miriam Libre, serif;
+    line-height: 1.0;
+}
+h1 {
+    font-size: 1.4rem;
+}
+h2 {
+    font-size: 1.25rem;
+}
+h3 {
+    font-size: 1.15rem;
+}
+h4,
+h5 {
+    font-size: 1rem;
+    font-family: PT Sans, sans-serif;
+}
+h5 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+p {
+    font-size: 0.85rem;
+}
+
+#patterns-nav {
+    overflow: unset;
+    line-height: 1.2;
+    margin-top: 1.0rem;
+}
+
+.image-link {
+    border-bottom: 0px;
+}
+
+.logo img {
+    max-height: 18vh;
+}
+
+[id^="js-expandable-"] {
+    padding: 0.75rem 0 0.75rem;
+}
+
+code[class*="language-"],
+pre[class*="language-"] {
+    background-color: rgb(245,245,245);
+    margin-top: 1.25em;
+}
+
+.code-annotated {
+    background-color: rgb(245,245,245);
+}
+
+figcaption {
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 0.0rem;
+}
+
+#sub-patterns-list {
+  margin-top: 0.5rem;
+}
+
+@media screen and (min-width: 45em) {
+    #view-size-normal {
+        display: block;
+    }
+    #view-size-mobile {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 45em) {
+    #sub-patterns-list {
+      margin-top: 0.5rem;
+      margin-left: 0.5rem;
+    }
+
+    #view-size-normal {
+        display: none;
+    }
+    #view-size-mobile {
+        display: block;
+    }
+}

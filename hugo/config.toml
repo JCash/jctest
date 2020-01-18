@@ -1,0 +1,51 @@
+#baseURL = "http://JCash.github.com/jctest"
+baseURL = "/jctest"
+#baseURL = "/"
+languageCode = "en-us"
+defaultContentLanguage = "en"
+title = "jctest"
+theme = "cupper-hugo-theme"
+publishDir = "../docs"
+googleAnalytics = "UA-152712676-1"
+enableGitInfo = true
+author = "Mathias Westerdahl"
+
+[permalinks]
+  post = "/:filename/"
+
+[imaging]
+  quality = 99
+
+[params]
+  description = "A small but powerful C++ unit test framework"
+  homeMetaContent = "A small but powerful C++ unit test framework"
+  mainPage = "/main"
+  mainTitle = "JCTEST"
+  katex = false
+  footer = "©2019 Mathias Westerdahl<br>Built with [HUGO](https://gohugo.io) using [Cupper Theme](https://github.com/zwbetz-gh/cupper-hugo-theme). Icon made by [Freepik](https://www.flaticon.com/authors/freepik) from [www.flaticon.com](https://www.flaticon.com)"
+  custom_css = ['css/custom.css']
+
+[params.social.a_license]
+  url = "https://github.com/JCash/jctest/blob/master/LICENSE"
+  imgUrl = "https://img.shields.io/github/license/JCash/jctest?label=License"
+
+[params.social.b_github2]
+  url = "https://github.com/JCash/jctest/blob/master/src/jc_test.h"
+  imgUrl = "https://img.shields.io/github/size/JCash/jctest/src/jc_test.h?color=green&label=jc_test.h"
+
+[params.social.c_release]
+  url = "https://github.com/JCash/jctest/releases"
+  imgUrl = "https://img.shields.io/github/v/release/JCash/jctest?color=blue&label=Version&sort=semver"
+
+[params.social.d_github]
+  url = "https://github.com/JCash/jctest"
+  imgUrl = "https://img.shields.io/github/stars/JCash/jctest?label=Github&style=social"
+
+[params.social.e_twitter]
+  url = "https://twitter.com/mwesterdahl76"
+  imgUrl = "https://img.shields.io/twitter/url?label=%40mwesterdahl76&style=social&url=https%3A%2F%2Ftwitter.com%2Fmwesterdahl76"
+
+
+
+
+

@@ -10,7 +10,8 @@
  *
  * HISTORY:
  *
- *      0.5     2019-11-03  Added support for logging enum values
+ *      0.5     2019-11-10  Added support for logging enum values
+                            Added ASSERT_ARRAY_EQ
  *      0.4     2019-08-10  Fix for outputting 64 bit integer values upon error
  *                          Skipping tests now doesn't output extraneous info
  *      0.3     2019-04-25  Ansi colors for Win32

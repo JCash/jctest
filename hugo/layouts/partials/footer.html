@@ -1,0 +1,14 @@
+<footer role="contentinfo">
+  <div id="view-size-mobile">
+  <br>
+  {{ partial "social.html" . }}
+  </div>
+
+  <div id="view-size-mobile">
+  {{ $.Site.Copyright }}
+  </div>
+
+  {{ with .Site.Params.footer }}
+    {{ . | markdownify }}
+  {{ end }}
+</footer>
