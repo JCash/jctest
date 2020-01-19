@@ -79,7 +79,7 @@ time compile_test expect
 time compile_test death
 time compile_test empty
 time compile_test array
-time compile_test_with_main minimal
+time compile_test_with_main doctest
 
 if [ "$TRAVIS_COMPILER" == "" ]; then
     echo ""

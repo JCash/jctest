@@ -3,4 +3,5 @@
 
 TEST_CASE(multiply) {
   CHECK_EQ(4, 2*2);
+  CHECK(4 == 2*2);
 }
