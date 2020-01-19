@@ -723,7 +723,7 @@ struct jc_test_cmp_eq_helper<true> {
 
 // doctest compatible
 #define CHECK( VALUE ) ASSERT_TRUE(VALUE)
-#define CHECK_EQ( A, B ) ASSERT_TRUE(A, B)
+#define CHECK_EQ( A, B ) ASSERT_EQ(A, B)
 
 template<typename T>
 struct jc_test_value_iterator {
@@ -923,14 +923,16 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
 #define JC_TEST_MAKE_FUNCTION_NAME(X, Y)        JC_TEST_MAKE_NAME2(X, Y)
 #define JC_TEST_MAKE_UNIQUE_NAME(X, Y, LINE)    JC_TEST_MAKE_NAME3(X, Y, LINE)
 
-#define TEST(testfixture,testfn)                                                                                            \
+#define TEST3(testfixture,testfn,testname)                                                                                  \
 class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public jc_test_base_class {                                             \
     virtual void TestBody();                                                                                                \
 };                                                                                                                          \
 static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) JC_TEST_UNUSED = jc_test_register_class_test(              \
-        #testfixture, #testfn, jc_test_base_class::SetUpTestCase, jc_test_base_class::TearDownTestCase,                     \
+        testname, #testfn, jc_test_base_class::SetUpTestCase, jc_test_base_class::TearDownTestCase,                         \
         new JC_TEST_MAKE_CLASS_NAME(testfixture,testfn), JC_TEST_FIXTURE_TYPE_CLASS);                                       \
 void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
+
+#define TEST(testfixture,testfn) TEST3(testfixture,testfn,#testfixture)
 
 #define TEST_F(testfixture,testfn)                                                                                          \
     class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture {                                                \
@@ -980,24 +982,7 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
                 JC_TEST_MAKE_NAME2(testfixture,Types)>::register_test(#testfixture, #testfn, 0);            \
     template<typename T> void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)<T>::TestBody()
 
-#define JC_TEST_CAT_IMPL(s1, s2) s1##s2
-#define JC_TEST_CAT(s1, s2) JC_TEST_CAT_IMPL(s1, s2)
-#ifdef __COUNTER__
-#define JC_TEST_ANONYMOUS(x) JC_TEST_CAT(x, __COUNTER__)
-#else
-#define JC_TEST_ANONYMOUS(x) JC_TEST_CAT(x, __LINE__)
-#endif
-
-#define TEST_ANONYMOUS(testfixture,testfn)                                                                                            \
-class JC_TEST_MAKE_CLASS_NAME(testfixture,testfixture) : public jc_test_base_class {                                             \
-    virtual void TestBody();                                                                                                \
-};                                                                                                                          \
-static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfixture,__LINE__) JC_TEST_UNUSED = jc_test_register_class_test(              \
-        "", #testfn, jc_test_base_class::SetUpTestCase, jc_test_base_class::TearDownTestCase,                     \
-        new JC_TEST_MAKE_CLASS_NAME(testfixture,testfixture), JC_TEST_FIXTURE_TYPE_CLASS);                                       \
-void JC_TEST_MAKE_CLASS_NAME(testfixture,testfixture)::TestBody()
-
-#define TEST_CASE(name) TEST_ANONYMOUS(JC_TEST_ANONYMOUS(_JC_TEST_ANON), name)
+#define TEST_CASE(name) TEST3(JC_TEST_MAKE_NAME2(_JC_TEST_ANON, __LINE__), name, "")
 
 #if !defined(_MSC_VER)
 #pragma GCC diagnostic pop
