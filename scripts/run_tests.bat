@@ -6,4 +6,4 @@ echo off
 .\build\test_death.exe
 .\build\test_empty.exe
 .\build\test_array.exe
-
+.\build\test_doctest.exe

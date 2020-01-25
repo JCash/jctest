@@ -722,6 +722,10 @@ struct jc_test_cmp_eq_helper<true> {
 
 #define SCOPED_TRACE(_MSG)  // nop
 
+// doctest compatible
+#define CHECK( VALUE ) ASSERT_TRUE(VALUE)
+#define CHECK_EQ( A, B ) ASSERT_EQ(A, B)
+
 template<typename T>
 struct jc_test_value_iterator {
     virtual ~jc_test_value_iterator();
@@ -920,14 +924,16 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
 #define JC_TEST_MAKE_FUNCTION_NAME(X, Y)        JC_TEST_MAKE_NAME2(X, Y)
 #define JC_TEST_MAKE_UNIQUE_NAME(X, Y, LINE)    JC_TEST_MAKE_NAME3(X, Y, LINE)
 
-#define TEST(testfixture,testfn)                                                                                            \
+#define TEST3(testfixture,testfn,testname)                                                                                  \
 class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public jc_test_base_class {                                             \
     virtual void TestBody();                                                                                                \
 };                                                                                                                          \
 static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) JC_TEST_UNUSED = jc_test_register_class_test(              \
-        #testfixture, #testfn, jc_test_base_class::SetUpTestCase, jc_test_base_class::TearDownTestCase,                     \
+        testname, #testfn, jc_test_base_class::SetUpTestCase, jc_test_base_class::TearDownTestCase,                         \
         new JC_TEST_MAKE_CLASS_NAME(testfixture,testfn), JC_TEST_FIXTURE_TYPE_CLASS);                                       \
 void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
+
+#define TEST(testfixture,testfn) TEST3(testfixture,testfn,#testfixture)
 
 #define TEST_F(testfixture,testfn)                                                                                          \
     class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture {                                                \
@@ -977,12 +983,17 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
                 JC_TEST_MAKE_NAME2(testfixture,Types)>::register_test(#testfixture, #testfn, 0);            \
     template<typename T> void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)<T>::TestBody()
 
+#define TEST_CASE(name) TEST3(JC_TEST_MAKE_NAME2(_JC_TEST_ANON, __LINE__), name, "")
 
 #if !defined(_MSC_VER)
 #pragma GCC diagnostic pop
 #endif
 
 #endif // JC_TEST_H
+
+#ifdef JC_TEST_USE_DEFAULT_MAIN
+#define JC_TEST_IMPLEMENTATION
+#endif
 
 #ifdef JC_TEST_IMPLEMENTATION
 #undef JC_TEST_IMPLEMENTATION
@@ -1745,6 +1756,12 @@ void jc_test_init(int* argc, char** argv) {
 #endif
 #endif
 
+#ifdef JC_TEST_USE_DEFAULT_MAIN
+int main(int argc, char** argv) {
+    jc_test_init(&argc, argv);
+    return jc_test_run_all();
+}
+#endif
 
 /*
 
