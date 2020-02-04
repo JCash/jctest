@@ -27,7 +27,7 @@ if(JCTEST_INSTALL)
     ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake VERSION
     ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion)
 
-  install(FILES src/jc_test.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+  install(FILES src/jc_test.h DESTINATION include)
   install(EXPORT ${PROJECT_NAME}Targets
     FILE ${PROJECT_NAME}Config.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
