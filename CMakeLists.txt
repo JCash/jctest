@@ -21,8 +21,8 @@ if(JCTEST_INSTALL)
     TARGETS ${PROJECT_NAME}
     EXPORT ${PROJECT_NAME}Targets
     PUBLIC_HEADER
-    INCLUDES
-    DESTINATION include)
+    LIBRARY DESTINATION lib
+    INCLUDES DESTINATION include)
 
   include(WriteBasicConfigVersionFile)
   write_basic_config_version_file(
