@@ -1,12 +1,37 @@
 cmake_minimum_required(VERSION 3.12.4)
 
-project(jctest VERSION 0.5 LANGUAGES CXX)
+project(
+  jctest
+  VERSION 0.5
+  LANGUAGES CXX)
 
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+include(CMakeDependentOption)
+cmake_dependent_option(JCTEST_INSTALL "Install jctest" ON
+                       "CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME" OFF)
+
+add_library(${PROJECT_NAME} INTERFACE)
+target_include_directories(${PROJECT_NAME} INTERFACE src)
+
+include(WriteBasicConfigVersionFile)
+write_basic_config_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake VERSION
+  ${PROJECT_VERSION} COMPATIBILITY SameMajorVersion)
+if(JCTEST_INSTALL)
+  install(
+    TARGETS ${PROJECT_NAME}
+    EXPORT jctestTargets
+    PUBLIC_HEADER
+    INCLUDES
+    DESTINATION ${CMAKE_INSTALL_INCLUDE})
+  install(FILES src/jc_test.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+endif()
 
 find_program(CCACHE ccache)
 if(CCACHE)
@@ -32,7 +57,6 @@ endif()
 macro(add_test_gtest NAME)
   add_executable(${NAME} ${ARGN})
   target_include_directories(${NAME} PRIVATE src)
-  target_link_libraries(${NAME} gtest gmock gtest_main)
   gtest_discover_tests(${NAME})
 endmacro()
 
@@ -45,11 +69,8 @@ add_executable(test_doctest test/test_doctest.cpp)
 target_include_directories(test_doctest PRIVATE src)
 add_test(test_doctest test_doctest)
 
-option(USE_GTEST "Enable tests w/ googletest" ON)
-if(USE_GTEST)
-  add_subdirectory(test/external/googletest)
-  include(GoogleTest)
-  foreach(test IN ITEMS test_array test_death test_empty test_expect test_params test_typed_test)
-    add_test_by_name(${test})
-  endforeach()
-endif()
+include(GoogleTest)
+foreach(test IN ITEMS test_array test_death test_empty test_expect test_params
+                      test_typed_test)
+  add_test_by_name(${test})
+endforeach()
