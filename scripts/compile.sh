@@ -89,28 +89,34 @@ time compile_test death
 time compile_test empty
 time compile_test array
 time compile_test_with_main doctest
+time compile_test_with_main color_on
+time compile_test_with_main color_off
 
 time compile_doc_example minimal
 time compile_doc_example custom_print
 
 if [ "$TRAVIS_COMPILER" == "" ]; then
-    echo ""
-    echo "COMPILING WITH GTEST"
 
-    UNAME=`uname | tr '[:upper:]' '[:lower:]'`
-    PLATFORM=x86_64-$UNAME
     GTESTDIR=./test/external/gtest
-    PREFIX=gtest
-    #PREPROCESS="-E"
-    CXXFLAGS="-Wall -std=c++11 -Wno-deprecated-declarations -Isrc -I. -DUSE_GTEST -I${GTESTDIR}/include $PREPROCESS"
-    LDFLAGS="-L${GTESTDIR}/lib/$PLATFORM -lgtest"
 
-    if [ "$UNAME" == 'linux' ]; then
-        LDFLAGS="$LDFLAGS -lpthread"
+    if [ -d "$GTESTDIR" ]; then
+        echo ""
+        echo "COMPILING WITH GTEST"
+
+        UNAME=`uname | tr '[:upper:]' '[:lower:]'`
+        PLATFORM=x86_64-$UNAME
+        PREFIX=gtest
+        #PREPROCESS="-E"
+        CXXFLAGS="-Wall -std=c++11 -Wno-deprecated-declarations -Isrc -I. -DUSE_GTEST -I${GTESTDIR}/include $PREPROCESS"
+        LDFLAGS="-L${GTESTDIR}/lib/$PLATFORM -lgtest"
+
+        if [ "$UNAME" == 'linux' ]; then
+            LDFLAGS="$LDFLAGS -lpthread"
+        fi
+
+        time compile_test params
+        time compile_test typed_test
+        time compile_test expect
+        time compile_test death
     fi
-
-    time compile_test params
-    time compile_test typed_test
-    time compile_test expect
-    time compile_test death
 fi

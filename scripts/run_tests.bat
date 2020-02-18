@@ -7,3 +7,5 @@ echo off
 .\build\test_empty.exe
 .\build\test_array.exe
 .\build\test_doctest.exe
+.\build\test_color_off.exe
+.\build\test_color_on.exe
