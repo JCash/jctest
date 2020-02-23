@@ -78,7 +78,7 @@ function compile_test {
 
 function compile_test_with_main {
     local name=$1
-    $CXX -o ./build/${PREFIX}_test_${name}.o $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS -c test/test_${name}.cpp
+    $CXX -o ./build/${PREFIX}_test_${name}.o $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS -c test/doctest/test_${name}.cpp
     $CXX -o ./build/${PREFIX}_${name} $OPT $ARCH ./build/${PREFIX}_test_${name}.o $LDFLAGS
 }
 
