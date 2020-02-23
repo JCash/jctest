@@ -32,9 +32,9 @@ if(JCTEST_INSTALL)
   install(
     EXPORT ${PROJECT_NAME}Targets
     FILE ${PROJECT_NAME}Config.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+    DESTINATION lib/cmake/${PROJECT_NAME})
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-          DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+          DESTINATION lib/cmake/${PROJECT_NAME})
 endif()
 
 cmake_dependent_option(JCTEST_TEST "Build tests" ON
