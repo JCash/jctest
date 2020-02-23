@@ -21,8 +21,7 @@ if(JCTEST_INSTALL)
     TARGETS ${PROJECT_NAME}
     EXPORT ${PROJECT_NAME}Targets
     PUBLIC_HEADER
-    INCLUDES
-    DESTINATION include)
+    INCLUDES DESTINATION include)
 
   include(WriteBasicConfigVersionFile)
   write_basic_config_version_file(
@@ -62,24 +61,17 @@ if(JCTEST_TEST)
     message(STATUS "include-what-you-use not found")
   endif()
 
-  macro(add_test_gtest NAME)
-    add_executable(${NAME} ${ARGN})
-    target_include_directories(${NAME} PRIVATE src)
-    gtest_discover_tests(${NAME})
-  endmacro()
-
-  macro(add_test_by_name NAME)
-    add_test_gtest(${NAME} test/main.cpp test/${NAME}.cpp)
-  endmacro()
-
   enable_testing()
-  add_executable(test_doctest test/test_doctest.cpp)
+  add_executable(test_doctest test/doctest/test_doctest.cpp)
   target_include_directories(test_doctest PRIVATE src)
   add_test(test_doctest test_doctest)
 
   include(GoogleTest)
-  foreach(test IN ITEMS test_array test_death test_empty test_expect
-                        test_params test_typed_test)
-    add_test_by_name(${test})
+  file(GLOB tests "test/test_*.cpp")
+  foreach(test ${tests})
+    string(REGEX MATCH "test_[^.]+" name ${test})
+    add_executable(${name} test/main.cpp test/${name}.cpp)
+    target_include_directories(${name} PRIVATE src)
+    gtest_discover_tests(${name})
   endforeach()
 endif()
