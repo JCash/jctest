@@ -10,6 +10,7 @@
  *
  * HISTORY:
  *
+ *              2020-02-18  Added support for JC_TEST_USE_COLORS
  *      0.5     2019-11-10  Added support for logging enum values
                             Added ASSERT_ARRAY_EQ
  *      0.4     2019-08-10  Fix for outputting 64 bit integer values upon error
@@ -313,7 +314,7 @@ typedef struct jc_test_state {
     jc_test_fixture*    fixtures;
     jc_test_stats       stats;
     int                 num_fixtures:31;
-    unsigned int        is_a_tty:1;
+    unsigned int        use_colors:1;
     unsigned int        :32;
 } jc_test_state;
 
@@ -1033,7 +1034,7 @@ template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const flo
 #define JC_TEST_CLR_MAGENTA "\x1B[35m"
 #define JC_TEST_CLR_CYAN    "\x1B[36m"
 
-#define JC_TEST_COL(CLR) (jc_test_get_state()->is_a_tty ? JC_TEST_CLR_ ## CLR : "")
+#define JC_TEST_COL(CLR) (jc_test_get_state()->use_colors ? JC_TEST_CLR_ ## CLR : "")
 
 static size_t jc_test_snprint_time(char* buffer, size_t buffer_len, jc_test_time_t t);
 
@@ -1085,9 +1086,9 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
             JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "/%d ", fixture->index);
         }
     } else if (event == JC_TEST_EVENT_TEST_TEARDOWN) {
-        const char* pass = jc_test_get_state()->is_a_tty ? JC_TEST_CLR_GREEN "PASS" JC_TEST_CLR_DEFAULT : "PASS";
-        const char* fail = jc_test_get_state()->is_a_tty ? JC_TEST_CLR_RED "FAIL" JC_TEST_CLR_DEFAULT : "FAIL";
-        const char* skipped = jc_test_get_state()->is_a_tty ? JC_TEST_CLR_MAGENTA "SKIPPED" JC_TEST_CLR_DEFAULT : "SKIPPED";
+        const char* pass = jc_test_get_state()->use_colors ? JC_TEST_CLR_GREEN "PASS" JC_TEST_CLR_DEFAULT : "PASS";
+        const char* fail = jc_test_get_state()->use_colors ? JC_TEST_CLR_RED "FAIL" JC_TEST_CLR_DEFAULT : "FAIL";
+        const char* skipped = jc_test_get_state()->use_colors ? JC_TEST_CLR_MAGENTA "SKIPPED" JC_TEST_CLR_DEFAULT : "SKIPPED";
 
         cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "\n%s%s%s", JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
         if (fixture->index != 0xFFFFFFFF) {
@@ -1675,10 +1676,8 @@ int jc_test_run_all() {
     return num_fail;
 }
 
-#if defined(JC_TEST_NO_COLORS)
-    #define JC_TEST_ISATTY(_X) 0U
-#else
-#ifndef JC_TEST_ISATTY
+#if !defined(JC_TEST_USE_COLORS)
+#if !defined(JC_TEST_ISATTY) // this is only needed if we're trying to find out if the output supports ansi colors
 
 #if defined(__CYGWIN__) || !defined(_WIN32)
     #include <unistd.h> // isatty
@@ -1727,28 +1726,35 @@ int jc_test_run_all() {
     }
 #endif // _WIN32
 #endif // JC_TEST_ISATTY
-#endif // JC_TEST_NO_COLORS
+#endif // JC_TEST_USE_COLORS
+
+static int _jc_get_tty_color_support() {
+    #if defined(JC_TEST_USE_COLORS)
+        return JC_TEST_USE_COLORS;
+    #else
+        int is_a_tty = JC_TEST_ISATTY(1);
+        #if defined(_WIN32)
+        if (is_a_tty) { // Try enabling ANSI escape sequence support on Windows 10 terminals.
+            DWORD mode;
+            HANDLE console_ = GetStdHandle(STD_OUTPUT_HANDLE);
+            if (GetConsoleMode(console_, &mode)) {
+                SetConsoleMode(console_, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+            } else {
+                is_a_tty = 0;
+            }
+        }
+        #endif
+        return is_a_tty;
+    #endif
+}
 
 void jc_test_init(int* argc, char** argv) {
+    jc_test_get_state()->use_colors = JC_TEST_STATIC_CAST(unsigned int, _jc_get_tty_color_support());
+
     if (jc_test_parse_commandline(argc, argv)) {
         jc_test_usage();
         JC_TEST_EXIT(1);
     }
-
-    jc_test_get_state()->is_a_tty = JC_TEST_ISATTY(1);
-
-    #if !defined(JC_TEST_NO_COLORS)
-    #if defined(_WIN32)
-    // Try enabling ANSI escape sequence support on Windows 10 terminals.
-    if (jc_test_get_state()->is_a_tty) {
-        DWORD mode;
-        HANDLE console_ = GetStdHandle(STD_OUTPUT_HANDLE);
-        if (GetConsoleMode(console_, &mode)) {
-            SetConsoleMode(console_, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-        }
-    }
-    #endif
-    #endif // JC_TEST_NO_COLORS
 }
 
 #if !defined(_MSC_VER)

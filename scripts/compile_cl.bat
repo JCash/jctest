@@ -58,6 +58,8 @@ mkdir build
 %TIMEIT% cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /nologo /D_HAS_EXCEPTIONS=0 /EHsc /W4 /wd4611 /Isrc test/test_empty.cpp test/main.cpp /link /out:.\build\test_empty.exe
 %TIMEIT% cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /nologo /D_HAS_EXCEPTIONS=0 /EHsc /W4 /wd4611 /Isrc test/test_array.cpp test/main.cpp /link /out:.\build\test_array.exe
 %TIMEIT% cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /nologo /D_HAS_EXCEPTIONS=0 /EHsc /W4 /wd4611 /Isrc test/test_doctest.cpp /link /out:.\build\test_doctest.exe
+%TIMEIT% cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /nologo /D_HAS_EXCEPTIONS=0 /EHsc /W4 /wd4611 /Isrc test/test_color_off.cpp /link /out:.\build\test_color_off.exe
+%TIMEIT% cl.exe /O2 /D_CRT_SECURE_NO_WARNINGS /nologo /D_HAS_EXCEPTIONS=0 /EHsc /W4 /wd4611 /Isrc test/test_color_on.cpp /link /out:.\build\test_color_on.exe
 
 del *.obj
 
