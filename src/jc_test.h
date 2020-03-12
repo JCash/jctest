@@ -10,6 +10,7 @@
  *
  * HISTORY:
  *
+ *              2020-03-12  Fixed bootstrap issue w/static initializers
  *              2020-02-18  Added support for JC_TEST_USE_COLORS
  *      0.5     2019-11-10  Added support for logging enum values
                             Added ASSERT_ARRAY_EQ
@@ -281,10 +282,12 @@ typedef struct jc_test_stats {
 typedef struct jc_test_fixture {
     virtual ~jc_test_fixture();
     virtual void SetParam();
+    virtual void Instantiate();
     jc_test_fixture*            next;       // linked list
     jc_test_entry*              tests;      // linked list
     const char*                 name;       // The name of the fixture
     const char*                 filename;   // The filename of the current ASSERT/EXPECT
+    const char*                 prototype;  // The name of any prototype fixture
     struct jc_test_fixture*     parent;     // In case of parameterized tests, this points to the first test
     jc_test_void_staticfunc     fixture_setup;
     jc_test_void_staticfunc     fixture_teardown;
@@ -759,8 +762,16 @@ template<typename ParamType> const ParamType* jc_test_params_class<ParamType>::p
 template<typename ParamType>
 struct jc_test_fixture_with_param : public jc_test_fixture {
     void SetParam() { JC_TEST_CAST(jc_test_params_class<ParamType>*, jc_test_get_state()->current_test)->SetParam(param); }
+    void Instantiate();
     const ParamType* param;
 };
+
+template<typename ParamType>
+void jc_test_create_from_prototype(jc_test_fixture_with_param<ParamType>* fixture);
+
+template<typename ParamType>
+void jc_test_fixture_with_param<ParamType>::Instantiate() { jc_test_create_from_prototype(this); }
+
 
 struct jc_test_factory_base_interface {
     virtual ~jc_test_factory_base_interface();
@@ -856,18 +867,52 @@ jc_test_fixture* jc_test_alloc_fixture_with_param(const char* name, unsigned int
 }
 
 template<typename ParamType>
+void jc_test_create_from_prototype(jc_test_fixture_with_param<ParamType>* fixture) {
+
+    jc_test_fixture* prototype_fixture = jc_test_find_fixture(fixture->prototype, JC_TEST_FIXTURE_TYPE_PARAMS_CLASS);
+    if (!prototype_fixture) {
+        JC_TEST_LOGF(0, 0, 0, JC_TEST_EVENT_GENERIC, "Couldn't find fixture of name %s\n", fixture->prototype);
+        JC_TEST_ASSERT_FN(prototype_fixture != 0);
+    }
+    JC_TEST_ASSERT_FN(prototype_fixture->type == JC_TEST_FIXTURE_TYPE_PARAMS_CLASS);
+
+    fixture->fixture_setup = prototype_fixture->fixture_setup;
+    fixture->fixture_teardown = prototype_fixture->fixture_teardown;
+
+    fixture->num_tests = prototype_fixture->num_tests;
+    jc_test_entry* prototype_test = prototype_fixture->tests;
+    jc_test_entry* first = 0;
+    jc_test_entry* prev = 0;
+    while (prototype_test) {
+        jc_test_entry* test = new jc_test_entry;
+        test->next = 0;
+        test->name = prototype_test->name;
+        test->factory = 0;
+        test->fail = 0;
+        test->skipped = 0;
+
+        jc_test_factory_interface<ParamType>* factory = JC_TEST_CAST(jc_test_factory_interface<ParamType>*, prototype_test->factory);
+        factory->SetParam(fixture->param);
+        test->instance = factory->New();
+
+        if (!first) {
+            first = test;
+            prev = test;
+        } else {
+            prev->next = test;
+            prev = test;
+        }
+        prototype_test = prototype_test->next;
+    }
+    fixture->tests = first;
+}
+
+template<typename ParamType>
 int jc_test_register_param_tests(const char* prototype_fixture_name, const char* fixture_name, jc_test_value_iterator<ParamType>* values)
 {
     unsigned int index = 0;
     jc_test_fixture* first_fixture = 0;
     while (!values->Empty()) {
-        jc_test_fixture* prototype_fixture = jc_test_find_fixture(prototype_fixture_name, JC_TEST_FIXTURE_TYPE_PARAMS_CLASS);
-        if (!prototype_fixture) {
-            JC_TEST_LOGF(0, 0, 0, JC_TEST_EVENT_GENERIC, "Couldn't find fixture of name %s\n", prototype_fixture_name);
-            JC_TEST_ASSERT_FN(prototype_fixture != 0);
-            return 0;
-        }
-        JC_TEST_ASSERT_FN(prototype_fixture->type == JC_TEST_FIXTURE_TYPE_PARAMS_CLASS);
 
         // Allocate a new fixture, and create the test class
         jc_test_fixture_with_param<ParamType>* fixture = JC_TEST_CAST(jc_test_fixture_with_param<ParamType>*,
@@ -880,35 +925,7 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
         fixture->parent = first_fixture;
         fixture->index = index++;
         fixture->param = values->Get();
-        fixture->fixture_setup = prototype_fixture->fixture_setup;
-        fixture->fixture_teardown = prototype_fixture->fixture_teardown;
-
-        fixture->num_tests = prototype_fixture->num_tests;
-        jc_test_entry* prototype_test = prototype_fixture->tests;
-        jc_test_entry* first = 0;
-        jc_test_entry* prev = 0;
-        while (prototype_test) {
-            jc_test_entry* test = new jc_test_entry;
-            test->next = 0;
-            test->name = prototype_test->name;
-            test->factory = 0;
-            test->fail = 0;
-            test->skipped = 0;
-
-            jc_test_factory_interface<ParamType>* factory = JC_TEST_CAST(jc_test_factory_interface<ParamType>*, prototype_test->factory);
-            factory->SetParam(fixture->param);
-            test->instance = factory->New();
-
-            if (!first) {
-                first = test;
-                prev = test;
-            } else {
-                prev->next = test;
-                prev = test;
-            }
-            prototype_test = prototype_test->next;
-        }
-        fixture->tests = first;
+        fixture->prototype = prototype_fixture_name;
 
         values->Advance();
 
@@ -1316,6 +1333,7 @@ jc_test_factory_base_interface::~jc_test_factory_base_interface() {}
 
 jc_test_fixture::~jc_test_fixture() {}
 void jc_test_fixture::SetParam() {}
+void jc_test_fixture::Instantiate() {}
 
 jc_test_base_class::~jc_test_base_class() {}
 void jc_test_base_class::SetUp() {}
@@ -1452,7 +1470,6 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
 
     jc_test_memset(&fixture->stats, 0, sizeof(fixture->stats));
 
-
     if (fixture->skipped) {
         fixture->stats.num_skipped += fixture->num_tests;
         return;
@@ -1462,6 +1479,9 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
     if (fixture->first) {
         JC_TEST_LOGF(fixture, 0, 0, JC_TEST_EVENT_FIXTURE_SETUP, 0);
     }
+
+    if (fixture->prototype)
+        fixture->Instantiate();
 
     if (fixture->first && fixture->fixture_setup != 0) {
         fixture->fixture_setup();
