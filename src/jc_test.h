@@ -12,7 +12,6 @@
  *
  *      0.6     2020-03-12  Fixed bootstrap issue w/static initializers
  *                          Added support for JC_TEST_USE_COLORS to force color on/off
- *                          Added support for TEST_CASE
  *                          Added support for JC_TEST_IMPLEMENTATION_WITH_MAIN
  *      0.5     2019-11-10  Added support for logging enum values
  *                          Added ASSERT_ARRAY_EQ
