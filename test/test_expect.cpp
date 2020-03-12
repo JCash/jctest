@@ -3,7 +3,7 @@
 #include "testutil.h"
 
 #if defined(USE_GTEST)
-    #define JC_TEST_IS_NULL_LITERAL GTEST_IS_NULL_LITERAL_
+    #define JC_TEST_IS_NULL_LITERAL(_X) _X
 #endif
 
 // To test the testing framework /////////////
