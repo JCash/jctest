@@ -1,4 +1,4 @@
-/* test.h    Copyright 2018 Mathias Westerdahl
+/* test.h    Copyright 2018-2021 Mathias Westerdahl
  *
  * https://github.com/JCash/jctest
  * https://jcash.github.io/jctest
