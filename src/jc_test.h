@@ -9,6 +9,7 @@
  *      Made sure to compile with highest warning/error levels possible
  *
  * HISTORY:
+ *      0.7     2021-02-07  Fixed null pointer warning on C++0x and above
  *
  *      0.6     2020-03-12  Fixed bootstrap issue w/static initializers
  *                          Added support for JC_TEST_USE_COLORS to force color on/off
@@ -100,7 +101,7 @@ struct jc_test_base_class {
     virtual void TestBody() = 0;        // Implemented by TEST_F and TEST_P
 private:
     struct Setup_should_be_spelled_SetUp {};
-    virtual Setup_should_be_spelled_SetUp* Setup() { return 0; } // Trick from GTEST to make sure users don't accidentally misspell the function
+    virtual Setup_should_be_spelled_SetUp* Setup(); // Trick from GTEST to make sure users don't accidentally misspell the function
 };
 
 // A parameterized test class, to use with TEST_P and INSTANTIATE_TEST_CASE_P
@@ -1078,6 +1079,8 @@ static inline size_t jc_test_memcmp(const uint8_t* a, const uint8_t* b, size_t s
     }
     return JC_TEST_STATIC_CAST(size_t, -1);
 }
+
+jc_test_base_class::Setup_should_be_spelled_SetUp* jc_test_base_class::Setup() { return 0; } // Trick from GTEST to make sure users don't accidentally misspell the function
 
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__ ((format (printf, 5, 6)))
