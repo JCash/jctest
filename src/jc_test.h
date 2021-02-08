@@ -10,7 +10,7 @@
  *
  * HISTORY:
  *      0.7     2021-02-07  Fixed null pointer warning on C++0x and above
- *
+ *                          Test filtering now works on parameterized tests
  *      0.6     2020-03-12  Fixed bootstrap issue w/static initializers
  *                          Added support for JC_TEST_USE_COLORS to force color on/off
  *                          Added support for JC_TEST_USE_DEFAULT_MAIN
