@@ -1,4 +1,4 @@
-/* test.h    Copyright 2018 Mathias Westerdahl
+/* test.h    Copyright 2018-2021 Mathias Westerdahl
  *
  * https://github.com/JCash/jctest
  * https://jcash.github.io/jctest
@@ -9,10 +9,11 @@
  *      Made sure to compile with highest warning/error levels possible
  *
  * HISTORY:
- *
+ *      0.7     2021-02-07  Fixed null pointer warning on C++0x and above
+ *                          Test filtering now works on parameterized tests
  *      0.6     2020-03-12  Fixed bootstrap issue w/static initializers
  *                          Added support for JC_TEST_USE_COLORS to force color on/off
- *                          Added support for JC_TEST_IMPLEMENTATION_WITH_MAIN
+ *                          Added support for JC_TEST_USE_DEFAULT_MAIN
  *      0.5     2019-11-10  Added support for logging enum values
  *                          Added ASSERT_ARRAY_EQ
  *      0.4     2019-08-10  Fix for outputting 64 bit integer values upon error
@@ -100,7 +101,7 @@ struct jc_test_base_class {
     virtual void TestBody() = 0;        // Implemented by TEST_F and TEST_P
 private:
     struct Setup_should_be_spelled_SetUp {};
-    virtual Setup_should_be_spelled_SetUp* Setup() { return 0; } // Trick from GTEST to make sure users don't accidentally misspell the function
+    virtual Setup_should_be_spelled_SetUp* Setup(); // Trick from GTEST to make sure users don't accidentally misspell the function
 };
 
 // A parameterized test class, to use with TEST_P and INSTANTIATE_TEST_CASE_P
@@ -317,9 +318,11 @@ typedef struct jc_test_state {
     jc_test_fixture*    current_fixture;
     jc_test_fixture*    fixtures;
     jc_test_stats       stats;
+    char**              filter_patterns;
+    unsigned int        num_filter_patterns:8;
+    unsigned int        :24;
     int                 num_fixtures:31;
     unsigned int        use_colors:1;
-    unsigned int        :32;
 } jc_test_state;
 
 // ***************************************************************************************
@@ -798,7 +801,9 @@ extern jc_test_fixture* jc_test_find_fixture(const char* name, unsigned int fixt
 extern jc_test_fixture* jc_test_alloc_fixture(const char* name, unsigned int fixture_type);
 extern jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* name, unsigned int fixture_type);
 extern jc_test_entry*   jc_test_add_test_to_fixture(jc_test_fixture* fixture, const char* test_name, jc_test_base_class* instance, jc_test_factory_base_interface* factory);
-extern void             jc_test_memcpy(void* dst, void* src, size_t size);
+extern void             jc_test_memcpy(void* dst, const void* src, size_t size);
+
+extern int jc_test_keep_test(jc_test_state* state, const char* name); // checks if the name is tagged for skipping
 
 extern int jc_test_register_class_test(const char* fixture_name, const char* test_name,
                                                 jc_test_void_staticfunc class_setup, jc_test_void_staticfunc class_teardown,
@@ -1052,15 +1057,16 @@ template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const flo
 #define JC_TEST_CLR_MAGENTA "\x1B[35m"
 #define JC_TEST_CLR_CYAN    "\x1B[36m"
 
-#define JC_TEST_COL(CLR) (jc_test_get_state()->use_colors ? JC_TEST_CLR_ ## CLR : "")
+#define JC_TEST_COL(CLR)            (jc_test_get_state()->use_colors ? JC_TEST_CLR_ ## CLR : "")
+#define JC_TEST_COL2(CLR, USECOLOR) ((USECOLOR) ? JC_TEST_CLR_ ## CLR : "")
 
 static size_t jc_test_snprint_time(char* buffer, size_t buffer_len, jc_test_time_t t);
 
-static int jc_get_formatted_test_name(char* buffer, size_t buffer_len, const jc_test_fixture* fixture, const jc_test_entry* test) {
+static int jc_get_formatted_test_name(char* buffer, size_t buffer_len, const jc_test_fixture* fixture, const jc_test_entry* test, int usecolor) {
     if (fixture->index != 0xFFFFFFFF)
-        return JC_TEST_SNPRINTF(buffer, buffer_len, "%s%s%s.%s%s%s/%d", JC_TEST_COL(CYAN), fixture->name, JC_TEST_COL(DEFAULT), JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT), fixture->index);
+        return JC_TEST_SNPRINTF(buffer, buffer_len, "%s%s%s.%s%s%s/%d", JC_TEST_COL2(CYAN,usecolor), fixture->name, JC_TEST_COL2(DEFAULT,usecolor), JC_TEST_COL2(YELLOW,usecolor), test->name, JC_TEST_COL2(DEFAULT,usecolor), fixture->index);
     else
-        return JC_TEST_SNPRINTF(buffer, buffer_len, "%s%s%s.%s%s%s", JC_TEST_COL(CYAN), fixture->name, JC_TEST_COL(DEFAULT), JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
+        return JC_TEST_SNPRINTF(buffer, buffer_len, "%s%s%s.%s%s%s", JC_TEST_COL2(CYAN,usecolor), fixture->name, JC_TEST_COL2(DEFAULT,usecolor), JC_TEST_COL2(YELLOW,usecolor), test->name, JC_TEST_COL2(DEFAULT,usecolor));
 }
 
 static inline void jc_test_memset(void* _mem, unsigned int pattern, size_t size)
@@ -1078,6 +1084,8 @@ static inline size_t jc_test_memcmp(const uint8_t* a, const uint8_t* b, size_t s
     }
     return JC_TEST_STATIC_CAST(size_t, -1);
 }
+
+jc_test_base_class::Setup_should_be_spelled_SetUp* jc_test_base_class::Setup() { return 0; } // Trick from GTEST to make sure users don't accidentally misspell the function
 
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__ ((format (printf, 5, 6)))
@@ -1126,20 +1134,26 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
     } else if (event == JC_TEST_EVENT_SUMMARY) {
         // print failed tests
         fixture = jc_test_get_state()->fixtures;
-        while (stats->num_fail && fixture)
+        int max_errors = 15;
+        while (stats->num_fail && fixture && max_errors > 0)
         {
             if (fixture->fail) {
                 test = fixture->tests;
-                while(test) {
+                while(test && max_errors > 0) {
                     if (test->fail) {
-                        cursor += jc_get_formatted_test_name(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), fixture, test);
+                        cursor += jc_get_formatted_test_name(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), fixture, test, jc_test_get_state()->use_colors);
                         cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), " %sfailed%s\n", JC_TEST_COL(RED), JC_TEST_COL(DEFAULT));
+                        max_errors--;
                     }
                     test = test->next;
                 }
             }
             fixture = fixture->next;
         }
+        if (max_errors == 0) {
+            cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "//too many errors\n");
+        }
+
         cursor += JC_TEST_SNPRINTF(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), "Ran %d tests, with %d assertions in ", stats->num_tests, stats->num_assertions);
         cursor += jc_test_snprint_time(cursor, JC_TEST_STATIC_CAST(size_t,end-cursor), stats->totaltime);
         if( stats->num_fail)
@@ -1249,9 +1263,9 @@ int jc_test_cmp_array(const uint8_t* a, const uint8_t* b, size_t len, size_t typ
 #undef JC_TEST_CLR_MAGENTA
 #undef JC_TEST_CLR_CYAN
 
-void jc_test_memcpy(void* dst, void* src, size_t size) {
+void jc_test_memcpy(void* dst, const void* src, size_t size) {
     for (size_t i = 0; i < size; ++i) {
-        JC_TEST_CAST(unsigned char*, dst)[i] = JC_TEST_CAST(unsigned char*, src)[i];
+        JC_TEST_CAST(unsigned char*, dst)[i] = JC_TEST_CAST(const unsigned char*, src)[i];
     }
 }
 
@@ -1264,7 +1278,7 @@ int jc_test_streq(const char* a, const char* b) {
     return (*a - *b) == 0 ? 1 : 0;
 }
 
-static inline int jc_test_compare_str(const char* a, const char* b) {
+static inline int jc_test_compare_str(const char* a, const char* b) { // returns 1 if the strings are equal
     while(*a && *b) {
         if (*a != *b) return 0;
         ++a; ++b;
@@ -1272,7 +1286,7 @@ static inline int jc_test_compare_str(const char* a, const char* b) {
     return *b == 0;
 }
 
-static const char* jc_test_strstr(const char* a, const char* b) {
+static const char* jc_test_strstr(const char* a, const char* b) { // returns non-null if the string B is found in A
     while (*a) {
         if (*a == *b && jc_test_compare_str(a, b))
             return a;
@@ -1427,6 +1441,11 @@ void jc_test_exit() {
         fixture = fixture->next;
         delete tmp_fixture;
     }
+
+    for (int i = 0; i < state->num_filter_patterns; ++i) {
+        delete[] state->filter_patterns[i];
+    }
+    delete[] state->filter_patterns;
 }
 
 void jc_test_set_test_fail(int fatal) {
@@ -1462,6 +1481,21 @@ static size_t jc_test_snprint_time(char* buffer, size_t buffer_len, jc_test_time
 #define JC_TEST_INVOKE_MEMBER_FN(INSTANCE, FN) \
     (JC_TEST_CAST(jc_test_base_class*,INSTANCE) ->* JC_TEST_CAST(jc_test_void_memberfunc,FN)) ()
 
+static void jc_test_disable_tests(jc_test_state* state, jc_test_fixture* fixture) {
+    jc_test_entry* test = fixture->tests;
+    int num_skipped = 0;
+    while (test) {
+        char name_buffer[256];
+        jc_get_formatted_test_name(name_buffer, sizeof(name_buffer), fixture, test, 0);
+        if (!jc_test_keep_test(state, name_buffer))
+            test->skipped = 1;
+        num_skipped += test->skipped;
+        test = test->next;
+    }
+    fixture->skipped = num_skipped == fixture->num_tests ? 1 : 0;
+}
+
+
 static void jc_test_run_fixture(jc_test_fixture* fixture) {
     jc_test_get_state()->current_fixture = fixture;
 
@@ -1470,6 +1504,12 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
     }
 
     jc_test_memset(&fixture->stats, 0, sizeof(fixture->stats));
+
+    if (fixture->prototype)
+        fixture->Instantiate(); // instantiate the parameterized tests so we can (potentially) filter them
+
+    // check for skipping tests
+    jc_test_disable_tests(jc_test_get_state(), fixture);
 
     if (fixture->skipped) {
         fixture->stats.num_skipped += fixture->num_tests;
@@ -1481,9 +1521,6 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
         JC_TEST_LOGF(fixture, 0, 0, JC_TEST_EVENT_FIXTURE_SETUP, 0);
     }
 
-    if (fixture->prototype)
-        fixture->Instantiate();
-
     if (fixture->first && fixture->fixture_setup != 0) {
         fixture->fixture_setup();
     }
@@ -1493,6 +1530,7 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
     jc_test_entry* test = fixture->tests;
     while (test) {
         test->fail = 0;
+
         if (!test->skipped) {
             jc_test_get_state()->current_test = test;
             fixture->SetParam();
@@ -1622,37 +1660,52 @@ static void jc_test_signal_handler(int) {
 #endif
 #endif
 
-static jc_test_state* g_test_global_state = 0;
-
 jc_test_state* jc_test_get_state() {
-    if (!g_test_global_state) {
-        g_test_global_state = new jc_test_state;
-        jc_test_memset(g_test_global_state, 0, sizeof(jc_test_state));
+    static jc_test_state g_state;
+    static int g_state_first = 1;
+    if (g_state_first) {
+        g_state_first = 0;
+        jc_test_memset(&g_state, 0, sizeof(jc_test_state));
     }
-    return g_test_global_state;
+    return &g_state;
 }
+
 
 static void jc_test_usage() {
     JC_TEST_LOGF(0, 0, 0, JC_TEST_EVENT_GENERIC, "jc_test options:\n");
     JC_TEST_LOGF(0, 0, 0, JC_TEST_EVENT_GENERIC, "\t--test-filter <pattern>  (e.g. --test-filter MathFuncs.Multiply/1)\n");
 }
 
-static void jc_test_disable_tests(jc_test_state* state, const char* pattern) {
-    jc_test_fixture* fixture = state->fixtures;
-    while (fixture) {
-        jc_test_entry* test = fixture->tests;
-        int num_skipped = 0;
-        while (test) {
-            char name_buffer[256];
-            jc_get_formatted_test_name(name_buffer, sizeof(name_buffer), fixture, test);
-            if (jc_test_strstr(name_buffer, pattern) == 0)
-                test->skipped = 1;
-            num_skipped += test->skipped;
-            test = test->next;
-        }
-        fixture->skipped = num_skipped == fixture->num_tests ? 1 : 0;
-        fixture = fixture->next;
+int jc_test_keep_test(jc_test_state* state, const char* name) {
+    if (state->num_filter_patterns == 0)
+        return 1;
+    for (int i = 0; i < state->num_filter_patterns; ++i) {
+        if (jc_test_strstr(name, state->filter_patterns[i]) != 0)
+            return 1; // it matched the pattern, so let's keep it
     }
+    return 0;
+}
+
+
+static size_t jc_test_strlen(const char* str) {
+    const char *s;
+    for (s = str; *s; ++s);
+    return JC_TEST_STATIC_CAST(size_t, s - str);
+}
+
+static char* jc_test_strdup(const char* s) {
+    size_t len = jc_test_strlen(s);
+    char* dup = new char[len+1];
+    jc_test_memcpy(JC_TEST_CAST(void*, dup), JC_TEST_CAST(const void*, s), len+1);
+    return dup;
+}
+
+static void jc_test_add_test_filter(jc_test_state* state, const char* pattern) {
+    if (state->filter_patterns == 0)
+        state->filter_patterns = new char*[255];
+    if (state->num_filter_patterns == 255)
+        return;
+    state->filter_patterns[state->num_filter_patterns++] = jc_test_strdup(pattern);
 }
 
 // checks for jctest specific command line arguments: e.g. "--test-filter Foo"
@@ -1667,7 +1720,7 @@ static int jc_test_parse_commandline(int* argc, char** argv) {
                 argv[j-2] = argv[j];
             }
             *argc -= 2;
-            jc_test_disable_tests(jc_test_get_state(), pattern);
+            jc_test_add_test_filter(jc_test_get_state(), pattern);
         } else {
             ++count;
         }
