@@ -9,6 +9,7 @@
  *      Made sure to compile with highest warning/error levels possible
  *
  * HISTORY:
+ *      0.8     2021-03-04  Fixed compile warnings on Android
  *      0.7     2021-02-07  Fixed null pointer warning on C++0x and above
  *                          Test filtering now works on parameterized tests
  *      0.6     2020-03-12  Fixed bootstrap issue w/static initializers
@@ -223,18 +224,13 @@ struct jc_test_params_class : public jc_test_base_class {
 #endif
 
 #if !defined(JC_FMT_U64)
-    #if defined(__ANDROID__)
-        #define JC_FMT_U64 "%llu"
-        #define JC_FMT_I64 "%lld"
-    #else
-        #if __cplusplus == 199711L && (defined(__GNUC__) && !defined(__clang__))
-            // For some reason GCC would always warn about the format not working in c++98 (it does though)
-            #pragma GCC diagnostic ignored "-Wformat"
-        #endif
-        #include <inttypes.h>
-        #define JC_FMT_U64 "%" PRIu64
-        #define JC_FMT_I64 "%" PRId64
+    #if __cplusplus == 199711L && (defined(__GNUC__) && !defined(__clang__))
+        // For some reason GCC would always warn about the format not working in c++98 (it does though)
+        #pragma GCC diagnostic ignored "-Wformat"
     #endif
+    #include <inttypes.h>
+    #define JC_FMT_U64 "%" PRIu64
+    #define JC_FMT_I64 "%" PRId64
 #endif
 
 #define JC_TEST_EVENT_FIXTURE_SETUP     0
@@ -1031,6 +1027,9 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
     #if (__cplusplus == 199711L && (defined(__GNUC__) && !defined(__clang__)))
         #pragma GCC diagnostic ignored "-Wformat"
     #endif
+
+    // Not all implementations of longjmp have set noreturn
+    #pragma GCC diagnostic ignored "-Winvalid-noreturn"
 #endif
 
 #define JC_TEST_PRINT_TYPE_FN(TYPE, FORMAT) \
