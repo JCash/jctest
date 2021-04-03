@@ -9,6 +9,7 @@
  *      Made sure to compile with highest warning/error levels possible
  *
  * HISTORY:
+ *      0.8     2021-04-03  Added fflush to logging to prevent test output becoming out of order
  *      0.7     2021-02-07  Fixed null pointer warning on C++0x and above
  *                          Test filtering now works on parameterized tests
  *      0.6     2020-03-12  Fixed bootstrap issue w/static initializers
@@ -1170,6 +1171,7 @@ void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, con
     }
     buffer[sizeof(buffer)-1] = 0;
     printf("%s", buffer);
+    fflush(stdout);
 }
 
 int jc_test_cmp_array(const uint8_t* a, const uint8_t* b, size_t len, size_t typesize, int valuetype, const char* exprA, const char* exprB) {
