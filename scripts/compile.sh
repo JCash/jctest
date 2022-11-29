@@ -91,6 +91,7 @@ time compile_test array
 time compile_test_with_main doctest
 time compile_test_with_main color_on
 time compile_test_with_main color_off
+time compile_test_with_main type_traits
 
 time compile_doc_example minimal
 time compile_doc_example custom_print

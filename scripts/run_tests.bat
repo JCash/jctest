@@ -9,3 +9,4 @@ echo off
 .\build\test_doctest.exe
 .\build\test_color_off.exe
 .\build\test_color_on.exe
+.\build\test_type_traits.exe

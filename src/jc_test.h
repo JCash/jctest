@@ -393,8 +393,10 @@ namespace jc {
     template <>          struct _jc_is_integral<unsigned int>       : public true_type {};
     template <>          struct _jc_is_integral<long>               : public true_type {};
     template <>          struct _jc_is_integral<unsigned long>      : public true_type {};
-    //not compat with c++98 template <>          struct _jc_is_integral<long long>          : public true_type {};
-    //not compat with c++98 template <>          struct _jc_is_integral<unsigned long long> : public true_type {};
+#if __cplusplus > 199711L
+    template <>          struct _jc_is_integral<long long>          : public true_type {};
+    template <>          struct _jc_is_integral<unsigned long long> : public true_type {};
+#endif
 
     template <class _Tp> struct is_integral : public _jc_is_integral<typename remove_cv<_Tp>::type> {};
 
@@ -474,6 +476,9 @@ namespace jc {
                                          !is_floating_point<_Tp>::value   &&
                                          !is_array<_Tp>::value            &&
                                          !is_pointer<_Tp>::value          &&
+#if __cplusplus > 199711L
+                                         !__is_nullptr_t<_Tp>::value      &&
+#endif
                                          !is_reference<_Tp>::value        &&
                                          !is_member_pointer<_Tp>::value   &&
                                          !is_union<_Tp>::value            &&
