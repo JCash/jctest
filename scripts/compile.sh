@@ -42,7 +42,7 @@ if [ "$CXX" == "clang++" ]; then
 fi
 
 if [ "$CXX" != "c++98" ]; then
-    CXXFLAGS="$CXXFLAGS -Wno-zero-as-null-pointer-constant -Wno-c++98-compat"
+    CXXFLAGS="$CXXFLAGS -Wno-zero-as-null-pointer-constant -Wno-c++98-compat -Wno-suggest-override"
 fi
 
 LDFLAGS="$LDFLAGS $ASAN_LDFLAGS"
@@ -55,6 +55,14 @@ LDFLAGS="$LDFLAGS $ASAN_LDFLAGS"
 # CXXFLAGS="-ftime-trace -DJC_TEST_ASSERT_FN(_X) -DJC_TEST_NO_COLORS $CXXFLAGS"
 
 # SYSROOT="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk"
+if [ "Darwin" == "$(uname)" ]; then
+    if [ -e "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk" ]; then
+        SYSROOT="-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
+    fi
+    if [ "" == "${SYSROOT}" ]; then
+        SYSROOT="-isysroot $(xcode-select --print-path)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+    fi
+fi
 
 # Use pedantic flags when compiling jctest tests
 echo "COMPILING WITH JCTEST"
