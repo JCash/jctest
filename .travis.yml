@@ -22,13 +22,14 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ./scripts/compile_cl.bat; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then ./scripts/run_tests.bat; fi
   # Darwin+Linux
-  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++98 ./scripts/compile.sh; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++0x ./scripts/compile.sh; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++03 ./scripts/compile.sh; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++11 ./scripts/compile.sh; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++17 ./scripts/compile.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++20 ./scripts/compile.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++2b ./scripts/compile.sh; fi
   # 32 bit
-  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++98 ARCH=-m32 ./scripts/compile.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then STDVERSION=c++11 ARCH=-m32 ./scripts/compile.sh; fi
   # the one we wish to run
-  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++98 USE_ASAN=1 ./scripts/compile.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then STDVERSION=c++11 USE_ASAN=1 ./scripts/compile.sh; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then ./scripts/run_tests.sh; fi

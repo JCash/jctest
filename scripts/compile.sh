@@ -42,7 +42,7 @@ if [ "$CXX" == "clang++" ]; then
 fi
 
 if [ "$CXX" != "c++98" ]; then
-    CXXFLAGS="$CXXFLAGS -Wno-zero-as-null-pointer-constant -Wno-c++98-compat -Wno-suggest-override"
+    CXXFLAGS="$CXXFLAGS -Wno-zero-as-null-pointer-constant -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-suggest-override"
 fi
 
 LDFLAGS="$LDFLAGS $ASAN_LDFLAGS"

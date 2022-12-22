@@ -1,14 +1,16 @@
-/* test.h    Copyright 2018-2021 Mathias Westerdahl
+/* test.h    Copyright 2018-2022 Mathias Westerdahl
  *
  * https://github.com/JCash/jctest
  * https://jcash.github.io/jctest
  *
  * BRIEF:
  *
- *      A small, single header only C++-98 test framework
+ *      A small, single header only C++-11 test framework
  *      Made sure to compile with highest warning/error levels possible
  *
  * HISTORY:
+ *      0.9     2022-12-22  Fixed proper printout for pointer values
+ *                          Minimum version is now C++11 due to usage of <type_traits>
  *      0.8     2021-04-03  Added fflush to logging to prevent test output becoming out of order
  *      0.7     2021-02-07  Fixed null pointer warning on C++0x and above
  *                          Test filtering now works on parameterized tests
@@ -30,7 +32,7 @@
  *
  *     The MIT License (MIT)
  *
- *     Copyright (c) 2018-2019 Mathias Westerdahl
+ *     Copyright (c) 2018-2022 Mathias Westerdahl
  *
  *     Permission is hereby granted, free of charge, to any person obtaining a copy
  *     of this software and associated documentation files (the "Software"), to deal
@@ -195,23 +197,23 @@ struct jc_test_params_class : public jc_test_base_class {
 #endif
 #endif
 
+#include <type_traits> // painful
+
 // C++0x and above
 #if !defined(_MSC_VER)
-#pragma GCC diagnostic push
-#if !defined(__GNUC__)
-    #if __cplusplus >= 199711L
-        // Silencing them made the code unreadable, so I opted to disable them instead
-        #pragma GCC diagnostic ignored "-Wc++98-compat"
+    #pragma GCC diagnostic push
+    #if !defined(__GNUC__)
+        #if __cplusplus >= 199711L
+            // Silencing them made the code unreadable, so I opted to disable them instead
+            #pragma GCC diagnostic ignored "-Wc++98-compat"
+        #endif
     #endif
-#endif
-#if __cplusplus >= 201103L
-    #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif
+    #if __cplusplus >= 201103L
+        #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+    #endif
 #endif
 
 #if __cplusplus > 199711L
-    #include <cstddef> // nullptr_t
-
     #define JC_OVERRIDE override
 #else
     #define JC_OVERRIDE
@@ -246,13 +248,16 @@ struct jc_test_params_class : public jc_test_base_class {
     #define JC_TEST_64BIT
 #endif
 
-#define JC_TEST_EVENT_FIXTURE_SETUP     0
-#define JC_TEST_EVENT_FIXTURE_TEARDOWN  1
-#define JC_TEST_EVENT_TEST_SETUP        2
-#define JC_TEST_EVENT_TEST_TEARDOWN     3
-#define JC_TEST_EVENT_ASSERT_FAILED     4
-#define JC_TEST_EVENT_SUMMARY           5
-#define JC_TEST_EVENT_GENERIC           6
+enum jc_test_event
+{
+    JC_TEST_EVENT_FIXTURE_SETUP     = 0,
+    JC_TEST_EVENT_FIXTURE_TEARDOWN  = 1,
+    JC_TEST_EVENT_TEST_SETUP        = 2,
+    JC_TEST_EVENT_TEST_TEARDOWN     = 3,
+    JC_TEST_EVENT_ASSERT_FAILED     = 4,
+    JC_TEST_EVENT_SUMMARY           = 5,
+    JC_TEST_EVENT_GENERIC           = 6
+};
 
 #ifndef JC_TEST_TIMING_FUNC
     #define JC_TEST_TIMING_FUNC jc_test_get_time // returns micro seconds
@@ -345,7 +350,7 @@ extern void jc_test_increment_assertions();
 extern void jc_test_set_signal_handler();
 extern void jc_test_unset_signal_handler();
 extern int jc_test_streq(const char* a, const char* b);
-extern void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, const jc_test_stats* stats, int event, const char* format, ...);
+extern void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, const jc_test_stats* stats, jc_test_event event, const char* format, ...);
 extern int jc_test_cmp_double_eq(double, double);
 extern int jc_test_cmp_float_eq(float, float);
 extern int jc_test_cmp_STREQ(const char* a, const char* b, const char* exprA, const char* exprB);
@@ -362,154 +367,20 @@ static inline jc_test_entry* jc_test_get_test() {
     return jc_test_get_state()->current_test;
 }
 
-namespace jc {
-
-// From type_traits
-    template <class _Tp> struct remove_const            {typedef _Tp type;};
-    template <class _Tp> struct remove_const<const _Tp> {typedef _Tp type;};
-
-    template <class _Tp> struct remove_volatile               {typedef _Tp type;};
-    template <class _Tp> struct remove_volatile<volatile _Tp> {typedef _Tp type;};
-
-    template <class _Tp> struct remove_cv
-    {typedef typename remove_volatile<typename remove_const<_Tp>::type>::type type;};
-
-    template <class _Tp, _Tp __v>
-    struct integral_constant
-    {
-        static const _Tp          value = __v;
-        typedef _Tp               value_type;
-        typedef integral_constant type;
-    };
-
-    typedef integral_constant<bool, true>  true_type;
-    typedef integral_constant<bool, false> false_type;
-
-    template <class _Tp> struct _jc_is_void       : public false_type {};
-    template <>          struct _jc_is_void<void> : public true_type {};
-
-    template <class _Tp> struct is_void : public _jc_is_void<typename remove_cv<_Tp>::type> {};
-
-    template <class _Tp> struct _jc_is_integral                     : public false_type {};
-    template <>          struct _jc_is_integral<bool>               : public true_type {};
-    template <>          struct _jc_is_integral<char>               : public true_type {};
-    template <>          struct _jc_is_integral<signed char>        : public true_type {};
-    template <>          struct _jc_is_integral<unsigned char>      : public true_type {};
-    template <>          struct _jc_is_integral<short>              : public true_type {};
-    template <>          struct _jc_is_integral<unsigned short>     : public true_type {};
-    template <>          struct _jc_is_integral<int>                : public true_type {};
-    template <>          struct _jc_is_integral<unsigned int>       : public true_type {};
-    template <>          struct _jc_is_integral<long>               : public true_type {};
-    template <>          struct _jc_is_integral<unsigned long>      : public true_type {};
-    //not compat with c++98 template <>          struct _jc_is_integral<long long>          : public true_type {};
-    //not compat with c++98 template <>          struct _jc_is_integral<unsigned long long> : public true_type {};
-
-    template <class _Tp> struct is_integral : public _jc_is_integral<typename remove_cv<_Tp>::type> {};
-
-
-    template <class _Tp> struct _jc_is_floating_point              : public false_type {};
-    template <>          struct _jc_is_floating_point<float>       : public true_type {};
-    template <>          struct _jc_is_floating_point<double>      : public true_type {};
-    template <>          struct _jc_is_floating_point<long double> : public true_type {};
-
-    template <class _Tp> struct is_floating_point  : public _jc_is_floating_point<typename remove_cv<_Tp>::type> {};
-
-    template <class _Tp> struct is_array : public false_type {};
-    template <class _Tp> struct is_array<_Tp[]> : public true_type {};
-    template <class _Tp, size_t _Np> struct is_array<_Tp[_Np]> : public true_type {};
-
-
-    template <class _Tp> struct _jc_is_pointer       : public false_type {};
-    template <class _Tp> struct _jc_is_pointer<_Tp*> : public true_type {};
-
-    template <class _Tp> struct is_pointer : public _jc_is_pointer<typename remove_cv<_Tp>::type> {};
-
-    template <class _Tp> struct is_reference        : public false_type {};
-    template <class _Tp> struct is_reference<_Tp&>  : public true_type {};
-
-    template <class _Tp>            struct _jc_is_member_pointer             : public false_type {};
-    template <class _Tp, class _Up> struct _jc_is_member_pointer<_Tp _Up::*> : public true_type {};
-
-    template <class _Tp> struct is_member_pointer : public _jc_is_member_pointer<typename remove_cv<_Tp>::type> {};
-
-    template <class _Tp> struct _jc_union : public false_type {};
-    template <class _Tp> struct is_union : public _jc_union<typename remove_cv<_Tp>::type> {};
-
-    struct __two {char __lx[2];};
-
-    namespace __is_class_imp
-    {
-    template <class _Tp> char  __test(int _Tp::*);
-    template <class _Tp> __two __test(...);
-    }
-
-    template <class _Tp> struct is_class : public integral_constant<bool, sizeof(__is_class_imp::__test<_Tp>(0)) == 1 && !is_union<_Tp>::value> {};
-
-#if __cplusplus > 199711L
-    template <class _Tp> struct __is_nullptr_t_impl                 : public false_type {};
-    template <>          struct __is_nullptr_t_impl<std::nullptr_t> : public true_type {};
-    template <class _Tp> struct __is_nullptr_t : public __is_nullptr_t_impl<typename remove_cv<_Tp>::type> {};
-#endif
-    namespace _jc_is_function_imp
-    {
-    struct __dummy_type {};
-    template <class _Tp> char  __test(_Tp*);
-    template <class _Tp> char __test(__dummy_type);
-    template <class _Tp> __two __test(...);
-    template <class _Tp> _Tp&  __source(int);
-    template <class _Tp> __dummy_type __source(...);
-    }
-
-    template <class _Tp, bool = is_class<_Tp>::value ||
-                                is_union<_Tp>::value ||
-                                is_void<_Tp>::value  ||
-                                is_reference<_Tp>::value
-#if __cplusplus > 199711L
-                                || __is_nullptr_t<_Tp>::value
-#endif
-                                >
-    struct _jc_is_function : public integral_constant<bool, sizeof(_jc_is_function_imp::__test<_Tp>(_jc_is_function_imp::__source<_Tp>(0))) == 1>
-        {};
-    template <class _Tp> struct _jc_is_function<_Tp, true> : public false_type {};
-    template <class _Tp> struct is_function : public _jc_is_function<_Tp> {};
-
-
-    /////////////////////////////////
-
-    template <class _Tp> struct is_enum
-        : public integral_constant<bool, !is_void<_Tp>::value             &&
-                                         !is_integral<_Tp>::value         &&
-                                         !is_floating_point<_Tp>::value   &&
-                                         !is_array<_Tp>::value            &&
-                                         !is_pointer<_Tp>::value          &&
-                                         !is_reference<_Tp>::value        &&
-                                         !is_member_pointer<_Tp>::value   &&
-                                         !is_union<_Tp>::value            &&
-                                         !is_class<_Tp>::value            &&
-                                         !is_function<_Tp>::value         > {};
-
-    template <bool Condition, typename T = void>
-    struct enable_if {
-        // No 'type' here, so any attempt to use it will fail substitution
-    };
-
-    // partial specialization for when Condition==true
-    template <typename T>
-    struct enable_if<true, T> {
-        typedef T type;
-    };
-} // namespace jc
-
-// End of type_traits
-
 template <typename T>
-typename jc::enable_if<jc::is_enum<T>::value, char*>::type
+typename std::enable_if<std::is_enum<T>::value, char*>::type
 jc_test_print_value(char* buffer, size_t buffer_len, const T value) {
     return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "%d", JC_TEST_STATIC_CAST(int, value));
 }
 
 template <typename T>
-typename jc::enable_if<!jc::is_enum<T>::value, char*>::type
+typename std::enable_if< !std::is_enum<T>::value && std::is_pointer<T>::value, char*>::type
+jc_test_print_value(char* buffer, size_t buffer_len, const T value) {
+    return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "%p", JC_TEST_CAST(void*, value));
+}
+
+template <typename T>
+typename std::enable_if< !std::is_enum<T>::value && !std::is_pointer<T>::value, char*>::type
 jc_test_print_value(char* buffer, size_t, const T) {
     buffer[0] = '?'; buffer[1] = 0;
     return buffer+2;
@@ -517,11 +388,17 @@ jc_test_print_value(char* buffer, size_t, const T) {
 
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const double value);
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const float value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const int8_t value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const uint8_t value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const int16_t value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const uint16_t value);
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const int32_t value);
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const uint32_t value);
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const int64_t value);
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const uint64_t value);
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const char* value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const std::nullptr_t value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const struct _jc_test_null_literal* value);
 
 template <typename T1, typename T2>
 static inline void jc_test_log_failure(T1 a, T2 b, const char* exprA, const char* exprB, const char* op) {
@@ -612,36 +489,18 @@ inline int jc_test_cmp_ARRAY_EQ_LEN(const char* a, const char* b, size_t length,
    return jc_test_cmp_array(JC_TEST_CAST(const uint8_t*, a), JC_TEST_CAST(const uint8_t*, b), length, sizeof(char), 1, exprA, exprB);
 }
 
-// The only way to match this function, is with a null literal (since the type is hidden)
-char _jc_test_is_null_literal(struct _jc_test_null_literal* p);
-char (&_jc_test_is_null_literal(...))[2];
-#define JC_TEST_IS_NULL_LITERAL(VALUE)          (sizeof(_jc_test_is_null_literal(VALUE)) == 1)
-
-template <typename T> struct jc_test_is_pointer {
-    static const bool value = false;
-};
-template <typename T> struct jc_test_is_pointer<T*> {
-    static const bool value = true;
-};
-template <bool> struct jc_test_enable_argument;
-template <> struct jc_test_enable_argument<true> { typedef void type; };
-
-
-template<bool is_null_literal>
 struct jc_test_cmp_eq_helper {
-    template<typename T1, typename T2>
+    template <typename T1, typename T2,
+        typename std::enable_if<!std::is_integral<T1>::value ||
+                                !std::is_pointer<T2>::value>::type* = nullptr>
     static int compare(const T1& a, const T2& b, const char* exprA, const char* exprB) {
         return jc_test_cmp_EQ(a, b, exprA, exprB);
     }
-};
 
-template<>
-struct jc_test_cmp_eq_helper<true> {
-    template<typename T1, typename T2>
-    static int compare(const T1& a, const T2& b, const char* exprA, const char* exprB,
-                        typename jc_test_enable_argument<!jc_test_is_pointer<T2>::value>::type* = 0) {
+    static int Compare(const long long& a, const long long& b, const char* exprA, const char* exprB) {
         return jc_test_cmp_EQ(a, b, exprA, exprB);
     }
+
     template<typename T>
     static int compare(_jc_test_null_literal*, T* b, const char* exprA, const char* exprB) {
         return jc_test_cmp_EQ(JC_TEST_STATIC_CAST(T*, 0), b, exprA, exprB);
@@ -666,7 +525,7 @@ struct jc_test_cmp_eq_helper<true> {
 #define JC_ASSERT_TEST_EQ(A, B, FAIL_FUNC)                                      \
     do {                                                                        \
         JC_TEST_ASSERT_SETUP;                                                   \
-        if ( jc_test_cmp_eq_helper<JC_TEST_IS_NULL_LITERAL(A)>::compare(A, B, #A, #B) == 0 ) { \
+        if ( jc_test_cmp_eq_helper::compare(A, B, #A, #B) == 0 ) {              \
             FAIL_FUNC;                                                          \
         }                                                                       \
     } while(0)
@@ -1031,17 +890,6 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 #ifdef JC_TEST_IMPLEMENTATION
 #undef JC_TEST_IMPLEMENTATION
 
-#if !defined(_MSC_VER)
-    #pragma GCC diagnostic push
-    #if __cplusplus >= 201103L
-        #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-    #endif
-
-    #if (__cplusplus == 199711L && (defined(__GNUC__) && !defined(__clang__)))
-        #pragma GCC diagnostic ignored "-Wformat"
-    #endif
-#endif
-
 #define JC_TEST_PRINT_TYPE_FN(TYPE, FORMAT) \
     template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const TYPE value) { \
         return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, FORMAT, value); \
@@ -1049,7 +897,11 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 
 // Note that you have to add the corresponding declaration above too
 JC_TEST_PRINT_TYPE_FN(double,   "%f")
+JC_TEST_PRINT_TYPE_FN(int8_t,   "%hhd")
+JC_TEST_PRINT_TYPE_FN(int16_t,  "%hd")
 JC_TEST_PRINT_TYPE_FN(int32_t,  "%d")
+JC_TEST_PRINT_TYPE_FN(uint8_t,  "%hhu")
+JC_TEST_PRINT_TYPE_FN(uint16_t, "%hu")
 JC_TEST_PRINT_TYPE_FN(uint32_t, "%u")
 JC_TEST_PRINT_TYPE_FN(uint64_t, JC_FMT_U64)
 JC_TEST_PRINT_TYPE_FN(int64_t,  JC_FMT_I64)
@@ -1057,6 +909,10 @@ JC_TEST_PRINT_TYPE_FN(char*,    "%s")
 
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const float value) {
     return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "%f", JC_TEST_STATIC_CAST(double, value));
+}
+
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, std::nullptr_t) {
+    return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "nullptr_t");
 }
 
 #define JC_TEST_CLR_DEFAULT "\x1B[0m"
@@ -1099,7 +955,7 @@ jc_test_base_class::Setup_should_be_spelled_SetUp* jc_test_base_class::Setup() {
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__ ((format (printf, 5, 6)))
 #endif
-void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, const jc_test_stats* stats, int event, const char* format, ...) {
+void jc_test_logf(const jc_test_fixture* fixture, const jc_test_entry* test, const jc_test_stats* stats, jc_test_event event, const char* format, ...) {
     char buffer[1024];
     char* cursor = buffer;
     const char* end = buffer + sizeof(buffer);
@@ -1841,9 +1697,6 @@ void jc_test_init(int* argc, char** argv) {
     }
 }
 
-#if !defined(_MSC_VER)
-#pragma GCC diagnostic pop
-#endif
 #endif
 
 #ifdef JC_TEST_USE_DEFAULT_MAIN
