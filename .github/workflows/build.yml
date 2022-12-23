@@ -6,7 +6,7 @@ jobs:
   build-linux:
     strategy:
       matrix:
-        feature: [NOFEATURE, USE_ASAN=1]
+        feature: ["", "USE_ASAN=1"]
         compiler: [g++, clang++]
         arch:    ["-m64", "-m32"]
         platform: [c++0x, c++11, c++14, c++17, c++20, c++2b]
@@ -23,7 +23,7 @@ jobs:
   build-macos:
     strategy:
       matrix:
-        feature: [NOFEATURE, USE_ASAN=1]
+        feature: ["", "USE_ASAN=1"]
         platform: [c++0x, c++11, c++14, c++17, c++20, c++2b]
     runs-on: macos-latest
     steps:
