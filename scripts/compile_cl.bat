@@ -1,4 +1,4 @@
-echo off
+rem echo off
 
 python3 --version 2>NUL
 if errorlevel 1 goto errorNoPython
