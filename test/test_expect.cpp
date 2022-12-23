@@ -42,6 +42,40 @@ enum TestEnum
     TESTENUM_VALUE1
 };
 
+
+#if !defined(USE_GTEST)
+TEST(Assertions, Print)
+{
+    // test printouts of pointers
+    char buffer[1024];
+
+    Foo* p1 = reinterpret_cast<Foo*>(1);
+    jc_test_print_value(buffer, sizeof(buffer), p1);
+    EXPECT_STREQ("0x1", buffer);
+
+    TestPrintValue v = { 2 };
+    jc_test_print_value(buffer, sizeof(buffer), v);
+    EXPECT_STREQ("TestPrintValue(2)", buffer);
+
+    #define TEST_PRINT(VALUE, EXPECTEDSTR) \
+        jc_test_print_value(buffer, sizeof(buffer), VALUE); \
+        EXPECT_STREQ(EXPECTEDSTR, buffer);
+
+    TEST_PRINT(float(3), "3.000000");
+    TEST_PRINT(double(4), "4.000000");
+    TEST_PRINT(uint8_t(4), "4");
+    TEST_PRINT(uint16_t(5), "5");
+    TEST_PRINT(uint32_t(6), "6");
+    TEST_PRINT(uint64_t(7), "7");
+    TEST_PRINT(int8_t(-4), "-4");
+    TEST_PRINT(int16_t(-5), "-5");
+    TEST_PRINT(int32_t(-6), "-6");
+    TEST_PRINT(int64_t(-7), "-7");
+
+    TEST_PRINT(TestPrintUnknownType(), "?");
+}
+#endif
+
 TEST(Assertions, ExpectOk)
 {
     const int           zero_i = 0;
@@ -89,36 +123,6 @@ TEST(Assertions, ExpectOk)
     EXPECT_EQ(TESTENUM_OK, zero_i);
 
 
-#if !defined(USE_GTEST)
-    // test printouts of pointers
-    char buffer[1024];
-
-    Foo* p1 = reinterpret_cast<Foo*>(1);
-    jc_test_print_value(buffer, sizeof(buffer), p1);
-    EXPECT_STREQ("0x1", buffer);
-
-    TestPrintValue v = { 2 };
-    jc_test_print_value(buffer, sizeof(buffer), v);
-    EXPECT_STREQ("TestPrintValue(2)", buffer);
-
-    #define TEST_PRINT(VALUE, EXPECTEDSTR) \
-        jc_test_print_value(buffer, sizeof(buffer), VALUE); \
-        EXPECT_STREQ(EXPECTEDSTR, buffer);
-
-    TEST_PRINT(float(3), "3.000000");
-    TEST_PRINT(double(4), "4.000000");
-    TEST_PRINT(uint8_t(4), "4");
-    TEST_PRINT(uint16_t(5), "5");
-    TEST_PRINT(uint32_t(6), "6");
-    TEST_PRINT(uint64_t(7), "7");
-    TEST_PRINT(int8_t(-4), "-4");
-    TEST_PRINT(int16_t(-5), "-5");
-    TEST_PRINT(int32_t(-6), "-6");
-    TEST_PRINT(int64_t(-7), "-7");
-
-    TEST_PRINT(TestPrintUnknownType(), "?");
-
-#endif
 
     printf("EXPECTED ASSERT ->\n");
     EXPECT_DEATH(Foo f(16), "");
@@ -151,6 +155,10 @@ TEST(Assertions, ExpectFail)
     EXPECT_STREQ("zero", zero_s);
     EXPECT_STRNE("one", zero_s);
     EXPECT_EQ(TESTENUM_OK, zero_i);
+
+    // issue 28: make sure different types can be compared and printed out correctly
+    EXPECT_EQ(uint32_t(0), zero_i);
+    EXPECT_EQ(int32_t(0), zero_u);
 
     // Pointers
 #if __cplusplus > 199711L

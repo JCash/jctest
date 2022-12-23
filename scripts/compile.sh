@@ -78,21 +78,23 @@ function compile_doc_example {
 
 function compile_test {
     local name=$1
+    shift
     echo "Compiling test $name"
-    $CXX -o ./build/${PREFIX}_test_${name}.o $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS -c test/test_${name}.cpp
+    $CXX -o ./build/${PREFIX}_test_${name}.o $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS $* -c test/test_${name}.cpp
     $CXX -o ./build/${PREFIX}_main.o $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS -c test/main.cpp
     $CXX -o ./build/${PREFIX}_${name} $OPT $ARCH ./build/${PREFIX}_main.o ./build/${PREFIX}_test_${name}.o $LDFLAGS
 }
 
 function compile_test_with_main {
     local name=$1
-    $CXX -o ./build/${PREFIX}_test_${name}.o $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS -c test/test_${name}.cpp
+    shift
+    $CXX -o ./build/${PREFIX}_test_${name}.o $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS $* -c test/test_${name}.cpp
     $CXX -o ./build/${PREFIX}_${name} $OPT $ARCH ./build/${PREFIX}_test_${name}.o $LDFLAGS
 }
 
 time compile_test params
 time compile_test typed_test
-time compile_test expect
+time compile_test expect -Wno-sign-compare
 time compile_test death
 time compile_test empty
 time compile_test array
@@ -102,29 +104,3 @@ time compile_test_with_main color_off
 
 time compile_doc_example minimal
 time compile_doc_example custom_print
-
-if [ "$TRAVIS_COMPILER" == "" ]; then
-
-    GTESTDIR=./test/external/gtest
-
-    if [ -d "$GTESTDIR" ]; then
-        echo ""
-        echo "COMPILING WITH GTEST"
-
-        UNAME=`uname | tr '[:upper:]' '[:lower:]'`
-        PLATFORM=x86_64-$UNAME
-        PREFIX=gtest
-        #PREPROCESS="-E"
-        CXXFLAGS="-Wall -std=c++11 -Wno-deprecated-declarations -Isrc -I. -DUSE_GTEST -I${GTESTDIR}/include $PREPROCESS"
-        LDFLAGS="-L${GTESTDIR}/lib/$PLATFORM -lgtest"
-
-        if [ "$UNAME" == 'linux' ]; then
-            LDFLAGS="$LDFLAGS -lpthread"
-        fi
-
-        time compile_test params
-        time compile_test typed_test
-        time compile_test expect
-        time compile_test death
-    fi
-fi
