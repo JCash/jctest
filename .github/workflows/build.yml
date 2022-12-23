@@ -37,14 +37,14 @@ jobs:
     strategy:
       matrix:
         vsversion:  ['16.4', '16.5']
-        arch:       ['x86', 'x64']
+        arch:       [amd64, amd64_x86, amd64_arm64]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: microsoft/setup-msbuild@v1.1
+      - uses: ilammy/msvc-dev-cmd@v1
         with:
-          vs-version: ${{ matrix.vsversion }}
-          msbuild-architecture: ${{ matrix.arch }}
+          vsversion: ${{ matrix.vsversion }}
+          arch: ${{ matrix.arch }}
       - name: Build tests
         run: ./scripts/compile_cl.bat
       - name: Run Tests
