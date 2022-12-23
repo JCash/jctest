@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install
-        run: sudo apt-get install -y gcc-multilib g++-multilib
+        run: if [[ "-m32" == "${{ matrix.arch }}" ]; then sudo apt-get install -y gcc-multilib g++-multilib; fi
       - name: Build tests
         run: CXX=${{ matrix.compiler }} STDVERSION=${{ matrix.platform }} ARCH=${{ matrix.arch }} ${{ matrix.feature }} ./scripts/compile.sh
       - name: Run Tests
@@ -34,9 +34,17 @@ jobs:
         run: ./scripts/run_tests.sh
 
   build-windows:
+    strategy:
+      matrix:
+        vsversion:  ['16.4', '16.5']
+        arch:       ['x86', 'x64']
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: microsoft/setup-msbuild@v1.1
+        with:
+          vs-version: ${{ matrix.vsversion }}
+          msbuild-architecture: ${{ matrix.arch }}
       - name: Build tests
         run: ./scripts/compile_cl.bat
       - name: Run Tests

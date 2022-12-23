@@ -4,6 +4,7 @@ echo "Using " %VCINSTALLDIR%
 
 if NOT DEFINED VCINSTALLDIR (
     echo "No compatible visual studio found! run vcvarsall.bat first!"
+    exit 1
 )
 
 python3 --version 2>NUL
