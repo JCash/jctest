@@ -98,7 +98,6 @@ time compile_test expect -Wno-sign-compare
 time compile_test death
 time compile_test empty
 time compile_test array
-time compile_test_with_main doctest
 time compile_test_with_main color_on
 time compile_test_with_main color_off
 

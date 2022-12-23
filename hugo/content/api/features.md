@@ -51,11 +51,11 @@ regarding compile time and runtime.
 | Feature vs Impl        | jc_test |  gtest  | greatest |  utest  | doctest |  catch2 | snow 2  |
 |-----------------------:|---------|---------|----------|---------|---------|---------|---------|
 | Header only            |   yes   |    no   |    yes   |   yes   |   yes   |   yes   |   yes   |
-| Version                |  C++98  |  C++11  |    C89   |   C89   |  C++11  |  C++11  | c99/c11 |
+| Version                |  C++11  |  C++11  |    C89   |   C89   |  C++11  |  C++11  | c99/c11 |
 | -Wall                  |   yes   |   yes   |    no    |   no    |   yes   |   yes   |   yes   |
 | -Weverything           |   yes   |    no   |    no    |   no    |   yes   |    no   |    no   |
 | -pedantic              |   yes*  |    no   |    no    |   no    |   yes   |    no   |    no   |
-| Lines of Code**        |  ~1100  |  10000+ |   <1000  |  <400   |  4000+  |  11000+ |  ~1100  |
+| Lines of Code**        |  ~1300  |  10000+ |   <1000  |  <400   |  4000+  |  11000+ |  ~1100  |
 | Size of program***     |  27292  |  414608 |   19228  |  18280  |  146348 |  829572 |  23144  |
 | Compile time***        |  217ms  |  600ms  |   141ms  |   86ms  |  1890ms | 10662ms |  216ms  |
 | Run time***            |    3ms  |    3ms  |    6ms   |    5ms  |    3ms  |   4ms   |   3ms   |
