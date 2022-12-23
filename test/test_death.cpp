@@ -5,6 +5,7 @@
 #include "testutil.h"
 
 #include <assert.h>
+#include <signal.h>
 
 #if !defined(_MSC_VER)
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
@@ -28,14 +29,12 @@ static void call_abort(bool v) {
     assert(v && "call_assert called with false");
 }
 
-static void call_segv(int* paddr) {
-    *paddr = 0;
-}
-
 TEST(DeathTest, Test1)
 {
-    EXPECT_DEATH(call_segv(0),"");
+    EXPECT_DEATH(raise(SIGSEGV),"");
+    EXPECT_DEATH(raise(SIGFPE),"");
+    EXPECT_DEATH(raise(SIGABRT),"");
+    EXPECT_DEATH(raise(SIGILL),"");
     EXPECT_DEATH(call_abort(false),"");
     EXPECT_TRUE(true);
 }
-

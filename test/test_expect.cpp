@@ -2,10 +2,6 @@
 #include <stdio.h>
 #include "testutil.h"
 
-#if defined(USE_GTEST)
-    #define JC_TEST_IS_NULL_LITERAL(_X) _X
-#endif
-
 // To test the testing framework /////////////
 void GlobalTestSetup(); // to silence a warning
 void GlobalTestSetup() {
@@ -32,12 +28,53 @@ struct Foo
     Foo(int a) : i(a) { assert(i & 1 && "This should fail"); }
     int i;
 };
+#if !defined(USE_GTEST)
+    struct TestPrintValue { int value; };
+    struct TestPrintUnknownType {};
+    template <> char* jc_test_print_value(char* buffer, size_t buffer_len, TestPrintValue v) {
+        return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "TestPrintValue(%d)", v.value);
+    }
+#endif
 
 enum TestEnum
 {
     TESTENUM_OK,
     TESTENUM_VALUE1
 };
+
+
+#if !defined(USE_GTEST)
+TEST(Assertions, Print)
+{
+    // test printouts of pointers
+    char buffer[1024];
+
+    Foo* p1 = reinterpret_cast<Foo*>(1);
+    jc_test_print_value(buffer, sizeof(buffer), p1);
+    EXPECT_STREQ("0x1", buffer);
+
+    TestPrintValue v = { 2 };
+    jc_test_print_value(buffer, sizeof(buffer), v);
+    EXPECT_STREQ("TestPrintValue(2)", buffer);
+
+    #define TEST_PRINT(VALUE, EXPECTEDSTR) \
+        jc_test_print_value(buffer, sizeof(buffer), VALUE); \
+        EXPECT_STREQ(EXPECTEDSTR, buffer);
+
+    TEST_PRINT(float(3), "3.000000");
+    TEST_PRINT(double(4), "4.000000");
+    TEST_PRINT(uint8_t(4), "4");
+    TEST_PRINT(uint16_t(5), "5");
+    TEST_PRINT(uint32_t(6), "6");
+    TEST_PRINT(uint64_t(7), "7");
+    TEST_PRINT(int8_t(-4), "-4");
+    TEST_PRINT(int16_t(-5), "-5");
+    TEST_PRINT(int32_t(-6), "-6");
+    TEST_PRINT(int64_t(-7), "-7");
+
+    TEST_PRINT(TestPrintUnknownType(), "?");
+}
+#endif
 
 TEST(Assertions, ExpectOk)
 {
@@ -48,6 +85,7 @@ TEST(Assertions, ExpectOk)
     const char*         zero_s = "zero";
     const uint64_t      zero_u64 = 0u;
     const int64_t       zero_i64 = 0;
+
     EXPECT_TRUE(0 == zero_i);
     EXPECT_FALSE(0 != zero_i);
     EXPECT_EQ(0, zero_i);
@@ -66,24 +104,11 @@ TEST(Assertions, ExpectOk)
     EXPECT_STREQ("zero", zero_s);
     EXPECT_STRNE("one", zero_s);
 
-    EXPECT_TRUE(JC_TEST_IS_NULL_LITERAL(0));
-    EXPECT_TRUE(JC_TEST_IS_NULL_LITERAL(NULL));
-    EXPECT_TRUE(JC_TEST_IS_NULL_LITERAL(0U));
-    EXPECT_TRUE(JC_TEST_IS_NULL_LITERAL(0L));
-    EXPECT_FALSE(JC_TEST_IS_NULL_LITERAL(1));
-    EXPECT_FALSE(JC_TEST_IS_NULL_LITERAL(0.0));
-    EXPECT_FALSE(JC_TEST_IS_NULL_LITERAL('a'));
-
     // float/double checks
     const float twothirds_f = 2.0f/3.0f;
     EXPECT_EQ(twothirds_f, 1.0f - 1.0f/3.0f );
     const double twothirds_d = 2.0/3.0;
     EXPECT_EQ(twothirds_d, 1.0 - 1.0/3.0 );
-
-    #if !defined(USE_GTEST)
-    EXPECT_TRUE(jc_test_is_pointer<char*>::value);
-    EXPECT_FALSE(jc_test_is_pointer<char>::value);
-    #endif
 
     const char* cow = "cow";
     EXPECT_STREQ("cow", cow);
@@ -93,11 +118,11 @@ TEST(Assertions, ExpectOk)
     const char* nullstr = 0;
     EXPECT_STREQ(NULL, nullstr);
     EXPECT_STREQ(0, nullstr);
-#if __cplusplus > 199711L
     EXPECT_EQ(nullptr, nullstr);
-#endif
 
     EXPECT_EQ(TESTENUM_OK, zero_i);
+
+
 
     printf("EXPECTED ASSERT ->\n");
     EXPECT_DEATH(Foo f(16), "");
@@ -129,11 +154,21 @@ TEST(Assertions, ExpectFail)
     EXPECT_NEAR(0.001, zero_d, 0.01);
     EXPECT_STREQ("zero", zero_s);
     EXPECT_STRNE("one", zero_s);
+    EXPECT_EQ(TESTENUM_OK, zero_i);
+
+    // issue 28: make sure different types can be compared and printed out correctly
+    EXPECT_EQ(uint32_t(0), zero_i);
+    EXPECT_EQ(int32_t(0), zero_u);
+
+    // Pointers
 #if __cplusplus > 199711L
     EXPECT_EQ(nullptr, zero_s);
 #endif
-    EXPECT_EQ(TESTENUM_OK, zero_i);
+
+    Foo* p = reinterpret_cast<Foo*>(1);
+    EXPECT_EQ(0, p);
+    EXPECT_EQ(0U, p);
+    EXPECT_EQ(reinterpret_cast<void*>(0), reinterpret_cast<void*>(p));
 }
 
 //////////////////////////////////////////////
-

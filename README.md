@@ -1,5 +1,5 @@
 
-![License](https://img.shields.io/github/license/JCash/jctest?label=License) ![Version](https://img.shields.io/github/v/release/JCash/jctest?color=blue&label=Version&sort=semver) ![Size](https://img.shields.io/github/size/JCash/jctest/src/jc_test.h?color=green&label=jc_test.h) ![Build Status](https://img.shields.io/travis/JCash/jctest/master?label=master) ![Build Status](https://img.shields.io/travis/JCash/jctest/dev?label=dev)
+![License](https://img.shields.io/github/license/JCash/jctest?label=License) ![Version](https://img.shields.io/github/v/release/JCash/jctest?color=blue&label=Version&sort=semver) ![Size](https://img.shields.io/github/size/JCash/jctest/src/jc_test.h?color=green&label=jc_test.h) [![Build Status](https://github.com/JCash/jctest/actions/workflows/build.yml/badge.svg)](https://github.com/JCash/jctest/actions/workflows/build.yml)
 
 # Documentation
 
@@ -31,4 +31,3 @@ As a general rule, take care to keep the performance high in this library.
 # Code of conduct
 
 [Contributor covenant](./CODE_OF_CONDUCT.md)
-
