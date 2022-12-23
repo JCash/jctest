@@ -11,6 +11,7 @@
  * HISTORY:
  *      0.9     2022-12-22  Fixed proper printout for pointer values
  *                          Minimum version is now C++11 due to usage of <type_traits>
+ *                          Removed doctest support
  *      0.8     2021-04-03  Added fflush to logging to prevent test output becoming out of order
  *      0.7     2021-02-07  Fixed null pointer warning on C++0x and above
  *                          Test filtering now works on parameterized tests
@@ -598,10 +599,6 @@ struct jc_test_cmp_eq_helper {
 
 #define SCOPED_TRACE(_MSG)  // nop
 
-// doctest compatible
-#define CHECK( VALUE ) ASSERT_TRUE(VALUE)
-#define CHECK_EQ( A, B ) ASSERT_EQ(A, B)
-
 template<typename T>
 struct jc_test_value_iterator {
     virtual ~jc_test_value_iterator();
@@ -874,8 +871,6 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
                 jc_test_template_sel<JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)>,                          \
                 JC_TEST_MAKE_NAME2(testfixture,Types)>::register_test(#testfixture, #testfn, 0);            \
     template<typename T> void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)<T>::TestBody()
-
-#define TEST_CASE(name) TEST3(JC_TEST_MAKE_NAME2(_JC_TEST_ANON, __LINE__), name, "")
 
 #if !defined(_MSC_VER)
 #pragma GCC diagnostic pop
