@@ -54,7 +54,6 @@ LDFLAGS="$LDFLAGS $ASAN_LDFLAGS"
 # CXX=/Users/mathiaswesterdahl/external/llvm-build/bin/clang++
 # CXXFLAGS="-ftime-trace -DJC_TEST_ASSERT_FN(_X) -DJC_TEST_NO_COLORS $CXXFLAGS"
 
-# SYSROOT="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk"
 if [ "Darwin" == "$(uname)" ]; then
     if [ -e "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk" ]; then
         SYSROOT="-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"

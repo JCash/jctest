@@ -377,7 +377,7 @@ jc_test_print_value(char* buffer, size_t buffer_len, const T value) {
 template <typename T>
 typename std::enable_if< !std::is_enum<T>::value && std::is_pointer<T>::value, char*>::type
 jc_test_print_value(char* buffer, size_t buffer_len, const T value) {
-    return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "%p", JC_TEST_CAST(void*, value));
+    return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "%p", JC_TEST_CAST(const void*, value));
 }
 
 template <typename T>
