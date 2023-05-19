@@ -13,7 +13,7 @@ int GlobalTestTeardown() {
 
     int fail = 0;
 #if !defined(USE_GTEST)
-    int expected_fails = 1;
+    int expected_fails = 2;
     int actual_fails = jc_test_get_state()->stats.num_fail;
     printf("Expecting %d test to fail, got %d failed tests\n", expected_fails, actual_fails);
 
