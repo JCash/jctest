@@ -142,6 +142,13 @@ TEST(Assertions, ExpectFail)
     EXPECT_TRUE(0 == zero_i);
     EXPECT_FALSE(0 != zero_i);
     EXPECT_EQ(0, zero_i);
+    EXPECT_EQ(0U, zero_i);
+    EXPECT_EQ(0LLU, zero_i);
+
+    EXPECT_EQ(zero_i, 0);
+    EXPECT_EQ(zero_i, 0U);
+    EXPECT_EQ(zero_i, 0LLU);
+
     EXPECT_EQ(0u, zero_u);
     EXPECT_EQ(0.0f, zero_f);
     EXPECT_EQ(0.0, zero_d);
@@ -159,16 +166,18 @@ TEST(Assertions, ExpectFail)
     // issue 28: make sure different types can be compared and printed out correctly
     EXPECT_EQ(uint32_t(0), zero_i);
     EXPECT_EQ(int32_t(0), zero_u);
+}
 
-    // Pointers
+TEST(Assertions, ExpectFailPointers)
+{
 #if __cplusplus > 199711L
-    EXPECT_EQ(nullptr, zero_s);
+    EXPECT_EQ(nullptr, (char*)1);
+    EXPECT_EQ((char*)1, nullptr);
 #endif
 
-    Foo* p = reinterpret_cast<Foo*>(1);
-    EXPECT_EQ(0, p);
-    EXPECT_EQ(0U, p);
-    EXPECT_EQ(reinterpret_cast<void*>(0), reinterpret_cast<void*>(p));
+    EXPECT_EQ(0, (Foo*)1);
+    EXPECT_EQ(0U, (Foo*)1);
+    EXPECT_EQ((void*)0, (void*)(Foo*)1);
 }
 
 //////////////////////////////////////////////
