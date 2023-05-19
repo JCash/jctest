@@ -324,6 +324,7 @@ typedef struct jc_test_fixture {
 
 struct jc_test_print_logger
 {
+    // Public api
     void OnFixtureSetup(const jc_test_fixture* fixture);
     void OnFixtureTeardown(const jc_test_fixture* fixture);
     void OnTestSetup(const jc_test_fixture* fixture, const jc_test_entry* test);
@@ -334,6 +335,14 @@ struct jc_test_print_logger
     void Log(const char* str);
     void Log(const char* str, size_t len);
     void Logf(const char* format, ...) _JCT_PRINTF_CHECK(2, 3);
+
+    jc_test_print_logger();
+    ~jc_test_print_logger();
+
+    // private api
+    struct jc_buffered_string* str;
+    void ResetBuffer();
+    void FlushBuffer();
 };
 
 typedef struct jc_test_state {
@@ -945,6 +954,11 @@ struct jc_buffered_string
         return size;
     }
 
+    void Reset()
+    {
+        size = 0;
+    }
+
     void Grow(size_t _size)
     {
         capacity += _size;
@@ -1093,32 +1107,55 @@ static inline size_t jc_test_memcmp(const uint8_t* a, const uint8_t* b, size_t s
 
 jc_test_base_class::Setup_should_be_spelled_SetUp* jc_test_base_class::Setup() { return 0; } // Trick from GTEST to make sure users don't accidentally misspell the function
 
-void jc_test_print_logger::Log(const char* str, size_t len)
+
+jc_test_print_logger::jc_test_print_logger()
 {
-    fwrite(str, len, 1, stdout);
+    str = new jc_buffered_string(1024);
+}
+
+jc_test_print_logger::~jc_test_print_logger()
+{
+    delete str;
+}
+
+void jc_test_print_logger::ResetBuffer()
+{
+    str->Reset();
+}
+
+void jc_test_print_logger::FlushBuffer()
+{
+    fwrite(str->buffer, str->size, 1, stdout);
+    fflush(stdout);
+    str->Reset();
+}
+
+void jc_test_print_logger::Log(const char* text, size_t text_len)
+{
+    fwrite(text, text_len, 1, stdout);
     fflush(stdout);
 }
 
-void jc_test_print_logger::Log(const char* str)
+void jc_test_print_logger::Log(const char* text)
 {
-    Log(str, strlen(str));
+    Log(text, strlen(text));
 }
 
 void jc_test_print_logger::Logf(const char* format, ...)
 {
-    jc_buffered_string str(1024);
+    ResetBuffer();
+
     va_list args;
     va_start(args, format);
-    str.AppendList(format, args);
+    str->AppendList(format, args);
     va_end(args);
 
-    fwrite(str.buffer, str.size, 1, stdout);
-    fflush(stdout);
+    FlushBuffer();
 }
 
 void jc_test_print_logger::OnSummary(const jc_test_stats* stats, const jc_test_state* state)
 {
-    jc_buffered_string str(1024);
+    ResetBuffer();
 
     // print failed tests
     const jc_test_fixture* fixture = state->fixtures;
@@ -1135,8 +1172,8 @@ void jc_test_print_logger::OnSummary(const jc_test_stats* stats, const jc_test_s
                     char buffer[256];
                     size_t len = (size_t)jc_get_formatted_test_name(buffer, sizeof(buffer), fixture, test, jc_test_get_state()->use_colors);
 
-                    str.Append(buffer, len);
-                    str.Appendf(" %sfailed%s\n", JC_TEST_COL(RED), JC_TEST_COL(DEFAULT));
+                    str->Append(buffer, len);
+                    str->Appendf(" %sfailed%s\n", JC_TEST_COL(RED), JC_TEST_COL(DEFAULT));
                     max_errors--;
                 }
                 test = test->next;
@@ -1145,100 +1182,92 @@ void jc_test_print_logger::OnSummary(const jc_test_stats* stats, const jc_test_s
         fixture = fixture->next;
     }
     if (max_errors == 0) {
-        str.Append("//too many errors\n");
+        str->Append("//too many errors\n");
     }
 
-    str.Appendf("Ran %d tests, with %d assertions in ", stats->num_tests, stats->num_assertions);
-    str.AppendTime(stats->totaltime);
+    str->Appendf("Ran %d tests, with %d assertions in ", stats->num_tests, stats->num_assertions);
+    str->AppendTime(stats->totaltime);
     if( stats->num_fail)
     {
-        str.Appendf("\n%d tests passed, %d skipped and %d tests %sFAILED%s\n", stats->num_pass, stats->num_skipped, stats->num_fail, JC_TEST_COL(RED), JC_TEST_COL(DEFAULT));
+        str->Appendf("\n%d tests passed, %d skipped and %d tests %sFAILED%s\n", stats->num_pass, stats->num_skipped, stats->num_fail, JC_TEST_COL(RED), JC_TEST_COL(DEFAULT));
     }
     else
     {
-        str.Appendf("\n%d tests %sPASSED%s and %d skipped\n", stats->num_pass, JC_TEST_COL(GREEN), JC_TEST_COL(DEFAULT), stats->num_skipped);
+        str->Appendf("\n%d tests %sPASSED%s and %d skipped\n", stats->num_pass, JC_TEST_COL(GREEN), JC_TEST_COL(DEFAULT), stats->num_skipped);
     }
 
-    fwrite(str.buffer, str.size, 1, stdout);
-    fflush(stdout);
+    FlushBuffer();
 }
 
 void jc_test_print_logger::OnFixtureSetup(const jc_test_fixture* fixture)
 {
-    jc_buffered_string str(1024);
-
-    str.Appendf("%s%s%s\n", JC_TEST_COL(CYAN), fixture->name, JC_TEST_COL(DEFAULT));
-
-    fwrite(str.buffer, str.size, 1, stdout);
-    fflush(stdout);
+    ResetBuffer();
+    str->Appendf("%s%s%s\n", JC_TEST_COL(CYAN), fixture->name, JC_TEST_COL(DEFAULT));
+    FlushBuffer();
 }
 void jc_test_print_logger::OnFixtureTeardown(const jc_test_fixture* fixture)
 {
-    jc_buffered_string str(1024);
+    ResetBuffer();
 
     jc_test_time_t totaltime = fixture->stats.totaltime;
     if (fixture->parent) {
         totaltime = fixture->parent->stats.totaltime;
     }
-    str.Appendf("%s%s%s took ", JC_TEST_COL(CYAN), fixture->name, JC_TEST_COL(DEFAULT));
-    str.AppendTime(totaltime);
-    str.Appendf("\n");
+    str->Appendf("%s%s%s took ", JC_TEST_COL(CYAN), fixture->name, JC_TEST_COL(DEFAULT));
+    str->AppendTime(totaltime);
+    str->Appendf("\n");
 
-    fwrite(str.buffer, str.size, 1, stdout);
-    fflush(stdout);
+    FlushBuffer();
 }
 
 void jc_test_print_logger::OnTestSetup(const jc_test_fixture* fixture, const jc_test_entry* test)
 {
-    jc_buffered_string str(1024);
+    ResetBuffer();
 
-    str.Appendf("%s%s%s", JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
+    str->Appendf("%s%s%s", JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
 
     if (fixture->index != 0xFFFFFFFF) {
-        str.Appendf("/%d ", fixture->index);
+        str->Appendf("/%d ", fixture->index);
     }
-    str.Append("\n");
+    str->Append("\n");
 
-    fwrite(str.buffer, str.size, 1, stdout);
-    fflush(stdout);
+    FlushBuffer();
 }
 
 void jc_test_print_logger::OnTestTeardown(const jc_test_fixture* fixture, const jc_test_entry* test)
 {
-    jc_buffered_string str(1024);
+    ResetBuffer();
 
-    str.Appendf("%s%s%s", JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
+    str->Appendf("%s%s%s", JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
     if (fixture->index != 0xFFFFFFFF) {
-        str.Append("/%d ", fixture->index);
+        str->Append("/%d ", fixture->index);
     }
     if (test->fail)
-        str.Appendf(" %s%s%s (", JC_TEST_COL(FAIL), "FAIL", JC_TEST_COL(DEFAULT));
+        str->Appendf(" %s%s%s (", JC_TEST_COL(FAIL), "FAIL", JC_TEST_COL(DEFAULT));
     else if (test->skipped)
-        str.Appendf(" %s%s%s (", JC_TEST_COL(SKIP), "PASS", JC_TEST_COL(DEFAULT));
+        str->Appendf(" %s%s%s (", JC_TEST_COL(SKIP), "PASS", JC_TEST_COL(DEFAULT));
     else
-        str.Appendf(" %s%s%s (", JC_TEST_COL(SKIP), "SKIPPED", JC_TEST_COL(DEFAULT));
-    str.AppendTime(test->time);
-    str.Append(")\n");
+        str->Appendf(" %s%s%s (", JC_TEST_COL(SKIP), "SKIPPED", JC_TEST_COL(DEFAULT));
+    str->AppendTime(test->time);
+    str->Append(")\n");
 
-    fwrite(str.buffer, str.size, 1, stdout);
-    fflush(stdout);
+    FlushBuffer();
 }
 
 void jc_test_print_logger::OnTestFailed(const jc_test_fixture* fixture, const jc_test_entry* test, const char* format, ...)
 {
     (void)test;
-    jc_buffered_string str(1024);
+    ResetBuffer();
 
-    str.Appendf("\n%s%s%s:%d:", JC_TEST_COL(MAGENTA), fixture->filename, JC_TEST_COL(DEFAULT), fixture->line);
+    str->Appendf("\n%s%s%s:%d:", JC_TEST_COL(MAGENTA), fixture->filename, JC_TEST_COL(DEFAULT), fixture->line);
     if (format) {
         va_list args;
         va_start(args, format);
-        str.AppendList(format, args);
+        str->AppendList(format, args);
         va_end(args);
     }
 
-    fwrite(str.buffer, str.size, 1, stdout);
-    fflush(stdout);
+    FlushBuffer();
 }
 
 int jc_test_cmp_array(const uint8_t* a, const uint8_t* b, size_t len, size_t typesize, int valuetype, const char* exprA, const char* exprB) {
