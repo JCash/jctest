@@ -1,86 +1,23 @@
-/* test.h    Copyright 2018-2022 Mathias Westerdahl
+/* test.h    Copyright 2018-2023 Mathias Westerdahl
  *
  * https://github.com/JCash/jctest
  * https://jcash.github.io/jctest
  *
  * BRIEF:
  *
- *      A small, single header only C++-11 test framework
- *      Made sure to compile with highest warning/error levels possible
- *
- * HISTORY:
- *      0.9     2022-12-22  Fixed proper printout for pointer values
- *                          Minimum version is now C++11 due to usage of <type_traits>
- *                          Removed doctest support
- *      0.8     2021-04-03  Added fflush to logging to prevent test output becoming out of order
- *      0.7     2021-02-07  Fixed null pointer warning on C++0x and above
- *                          Test filtering now works on parameterized tests
- *      0.6     2020-03-12  Fixed bootstrap issue w/static initializers
- *                          Added support for JC_TEST_USE_COLORS to force color on/off
- *                          Added support for JC_TEST_USE_DEFAULT_MAIN
- *      0.5     2019-11-10  Added support for logging enum values
- *                          Added ASSERT_ARRAY_EQ
- *      0.4     2019-08-10  Fix for outputting 64 bit integer values upon error
- *                          Skipping tests now doesn't output extraneous info
- *      0.3     2019-04-25  Ansi colors for Win32
- *                          Msys2 + Cygwin support
- *                          setjmp fix for Emscripten
- *                          Removed limit on number of tests
- *      0.2     2019-04-14  Fixed ASSERT_EQ for single precision floats
- *      0.1     2019-01-19  Added GTEST-like C++ interface
- *
- * LICENSE:
- *
- *     The MIT License (MIT)
- *
- *     Copyright (c) 2018-2022 Mathias Westerdahl
- *
- *     Permission is hereby granted, free of charge, to any person obtaining a copy
- *     of this software and associated documentation files (the "Software"), to deal
- *     in the Software without restriction, including without limitation the rights
- *     to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *     copies of the Software, and to permit persons to whom the Software is
- *     furnished to do so, subject to the following conditions:
- *
- *     The above copyright notice and this permission notice shall be included in all
- *     copies or substantial portions of the Software.
- *
- *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *     AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *     SOFTWARE.
+ *      A small, single header only C++11 test framework
  *
  * DISCLAIMER:
  *
  *      This software is supplied "AS IS" without any warranties and support
  *
- *      This software was designed to be a (non complete) replacement for GTEST,
- *      with the intent to replace the library in an existing code base.
- *      Although the supported features were implemented in the same spirit as the GTEST
- *      fixtures/functions, there will be discprepancies. However, those differences have
- *      been chosen from a pragmatic standpoint, in favor of making porting of the existing
- *      tests feasible with minimal changes, as well as keeping this library
- *      as light weight as possible.
- *
+ * LICENSE:
+ *     The MIT License (MIT)
+ *     Copyright (c) 2018-2022 Mathias Westerdahl
+ *     (For full text, see bottom of document)
  *
  * USAGE:
  *      For more use cases, see end of document
-
-// Smallest test case
-#define JC_TEST_IMPLEMENTATION
-#include <jc_test.h>
-
-TEST(FixtureName, TestName) {
-    ASSERT_EQ(4, 2*2);
-}
-
-int main(int argc, char** argv) {
-    jc_test_init(&argc, argv);
-    return jc_test_run_all();
-}
  */
 
 #ifndef JC_TEST_H
@@ -120,6 +57,20 @@ struct jc_test_params_class : public jc_test_base_class {
 
 // ***************************************************************************************
 // TEST API
+
+// Smallest test case:
+//
+// #define JC_TEST_IMPLEMENTATION
+// #include <jc_test.h>
+//
+// TEST(FixtureName, TestName) {
+//     ASSERT_EQ(4, 2*2);
+// }
+//
+// int main(int argc, char** argv) {
+//     jc_test_init(&argc, argv);
+//     return jc_test_run_all();
+// }
 
 // Basic test
 // #define TEST(testfixture,testfn)
@@ -1013,7 +964,6 @@ struct jc_buffered_string
                 return;
             }
             // the string was truncated, so let's try again, with more memory
-            printf("%d\n", __LINE__);
             Grow((size_t)n - (capacity - size) + 1);
         }
         assert(false); // Should never get here
@@ -1026,18 +976,6 @@ struct jc_buffered_string
         AppendList(format, args);
         va_end(args);
     }
-
-    void AppendValues(double v)     { Appendf("%f", v); }
-    void AppendValues(int8_t v)     { Appendf("%hhd", v); }
-    void AppendValues(int16_t v)    { Appendf("%hd", v); }
-    void AppendValues(int32_t v)    { Appendf("%d", v); }
-    void AppendValues(uint8_t v)    { Appendf("%hhu", v); }
-    void AppendValues(uint16_t v)   { Appendf("%hu", v); }
-    void AppendValues(uint32_t v)   { Appendf("%u", v); }
-    void AppendValues(uint64_t v)   { Appendf(JC_FMT_U64, v); }
-    void AppendValues(int64_t v)    { Appendf(JC_FMT_I64, v); }
-    void AppendValues(char* v)      { Appendf("%s", v); }
-
 };
 
 #define JC_TEST_PRINT_TYPE_FN(TYPE, FORMAT) \
@@ -1982,3 +1920,68 @@ TEST_P(MyParamTest, IsEven) {
 // Creates a new fixture for each test param
 INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
 */
+
+/*
+ * BRIEF:
+ *
+ *      A small, single header only C++-11 test framework
+ *      Made sure to compile with highest warning/error levels possible
+ *
+ * HISTORY:
+ *      0.10    2023-05-19  Introduced JC_TEXT_LOGGER_CLASS for easier log printing
+ *      0.9     2022-12-22  Fixed proper printout for pointer values
+ *                          Minimum version is now C++11 due to usage of <type_traits>
+ *                          Removed doctest support
+ *      0.8     2021-04-03  Added fflush to logging to prevent test output becoming out of order
+ *      0.7     2021-02-07  Fixed null pointer warning on C++0x and above
+ *                          Test filtering now works on parameterized tests
+ *      0.6     2020-03-12  Fixed bootstrap issue w/static initializers
+ *                          Added support for JC_TEST_USE_COLORS to force color on/off
+ *                          Added support for JC_TEST_USE_DEFAULT_MAIN
+ *      0.5     2019-11-10  Added support for logging enum values
+ *                          Added ASSERT_ARRAY_EQ
+ *      0.4     2019-08-10  Fix for outputting 64 bit integer values upon error
+ *                          Skipping tests now doesn't output extraneous info
+ *      0.3     2019-04-25  Ansi colors for Win32
+ *                          Msys2 + Cygwin support
+ *                          setjmp fix for Emscripten
+ *                          Removed limit on number of tests
+ *      0.2     2019-04-14  Fixed ASSERT_EQ for single precision floats
+ *      0.1     2019-01-19  Added GTEST-like C++ interface
+ *
+ * LICENSE:
+ *
+ *     The MIT License (MIT)
+ *
+ *     Copyright (c) 2018-2022 Mathias Westerdahl
+ *
+ *     Permission is hereby granted, free of charge, to any person obtaining a copy
+ *     of this software and associated documentation files (the "Software"), to deal
+ *     in the Software without restriction, including without limitation the rights
+ *     to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *     copies of the Software, and to permit persons to whom the Software is
+ *     furnished to do so, subject to the following conditions:
+ *
+ *     The above copyright notice and this permission notice shall be included in all
+ *     copies or substantial portions of the Software.
+ *
+ *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *     AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *     SOFTWARE.
+ *
+ * DISCLAIMER:
+ *
+ *      This software is supplied "AS IS" without any warranties and support
+ *
+ *      This software was designed to be a (non complete) replacement for GTEST,
+ *      with the intent to replace the library in an existing code base.
+ *      Although the supported features were implemented in the same spirit as the GTEST
+ *      fixtures/functions, there will be discprepancies. However, those differences have
+ *      been chosen from a pragmatic standpoint, in favor of making porting of the existing
+ *      tests feasible with minimal changes, as well as keeping this library
+ *      as light weight as possible.
+ */
