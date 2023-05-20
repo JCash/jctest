@@ -151,6 +151,19 @@ struct jc_test_params_class : public jc_test_base_class {
 #endif
 #endif
 
+#ifndef JC_TEST_DBG_BREAK
+    #if defined(_MSC_VER)
+        #include <intrin.h>
+        #define JC_TEST_DBG_BREAK() __debugbreak()
+    #elif __has_builtin(__builtin_debugtrap)
+        #warning "Using __builtin_trap()"
+        #define JC_TEST_DBG_BREAK() __builtin_trap()
+    #else
+        #include <stdlib.h>
+        #define JC_TEST_DBG_BREAK() abort()
+    #endif
+#endif
+
 #include <type_traits> // painful
 
 // C++0x and above
@@ -303,16 +316,17 @@ typedef struct jc_test_state {
     unsigned char _pad[sizeof(jmp_buf)+sizeof(void*) - (sizeof(jmp_buf)/sizeof(void*))*sizeof(void*)];
     #endif
 
+    jc_test_stats       stats;
     JC_TEST_LOGGER_CLASS* logger;
     jc_test_entry*      current_test;
     jc_test_fixture*    current_fixture;
     jc_test_fixture*    fixtures;
-    jc_test_stats       stats;
     char**              filter_patterns;
-    unsigned int        num_filter_patterns:8;
-    unsigned int        :24;
-    int                 num_fixtures:31;
-    unsigned int        use_colors:1;
+    uint32_t            num_filter_patterns:8;
+    uint32_t            use_colors:1;
+    uint32_t            break_on_failure:1;
+    uint32_t            num_fixtures:22;
+    uint32_t            :32;
 } jc_test_state;
 
 // ***************************************************************************************
@@ -1485,10 +1499,19 @@ void jc_test_exit() {
     delete[] state->filter_patterns;
 }
 
+static void jc_test_dbg_break()
+{
+    if (!jc_test_get_state()->break_on_failure)
+        return;
+    JC_TEST_DBG_BREAK();
+}
+
 void jc_test_set_test_fail(int fatal) {
     jc_test_get_test()->fail = 1;
     jc_test_get_fixture()->fail = 1;
     jc_test_get_fixture()->fatal |= fatal;
+
+    jc_test_dbg_break(); // break if enabled
 }
 
 void jc_test_set_test_skipped() {
@@ -1752,7 +1775,6 @@ static void jc_test_add_test_filter(jc_test_state* state, const char* pattern) {
 
 // checks for jctest specific command line arguments: e.g. "--test-filter Foo"
 static int jc_test_parse_commandline(int* argc, char** argv) {
-    int count=0;
     for (int i = 0; i < *argc; ++i) {
         const char* arg = argv[i];
         if (jc_test_streq(arg, "--test-filter")) {
@@ -1763,8 +1785,9 @@ static int jc_test_parse_commandline(int* argc, char** argv) {
             }
             *argc -= 2;
             jc_test_add_test_filter(jc_test_get_state(), pattern);
-        } else {
-            ++count;
+        }
+        else if(jc_test_streq(arg, "--test-break-on-fail")) {
+            jc_test_get_state()->break_on_failure = 1;
         }
     }
     return 0;
@@ -1866,7 +1889,7 @@ static int _jc_get_tty_color_support() {
 }
 
 void jc_test_init(int* argc, char** argv) {
-    jc_test_get_state()->use_colors = JC_TEST_STATIC_CAST(unsigned int, _jc_get_tty_color_support());
+    jc_test_get_state()->use_colors = (uint32_t)_jc_get_tty_color_support();
 
     if (jc_test_parse_commandline(argc, argv)) {
         jc_test_usage();
@@ -1928,7 +1951,9 @@ INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
  *      Made sure to compile with highest warning/error levels possible
  *
  * HISTORY:
- *      0.10    2023-05-19  Introduced JC_TEXT_LOGGER_CLASS for easier log printing
+ *      0.10    2023-05-19  * Introduced JC_TEXT_LOGGER_CLASS for easier log printing
+ *                          * Added --test-break-on-fail for breaking into the debugger.
+ *                          Can be configured with JC_TEST_DBG_BREAK define.
  *      0.9     2022-12-22  Fixed proper printout for pointer values
  *                          Minimum version is now C++11 due to usage of <type_traits>
  *                          Removed doctest support
