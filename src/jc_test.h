@@ -156,7 +156,6 @@ struct jc_test_params_class : public jc_test_base_class {
         #include <intrin.h>
         #define JC_TEST_DBG_BREAK() __debugbreak()
     #elif __has_builtin(__builtin_debugtrap)
-        #warning "Using __builtin_trap()"
         #define JC_TEST_DBG_BREAK() __builtin_trap()
     #else
         #include <stdlib.h>
