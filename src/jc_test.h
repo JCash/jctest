@@ -1519,8 +1519,8 @@ void jc_test_exit() {
         // we're looking for information about a specific process ID.
         int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
 
-        size_t size = sizeof(info);
         struct kinfo_proc   info;
+        size_t size = sizeof(info);
         // Initialize the flags so that, if sysctl fails for some bizarre
         // reason, we get a predictable result.
         info.kp_proc.p_flag = 0;
