@@ -59,7 +59,7 @@ TEST(Assertions, Print)
 
     #define TEST_PRINT(VALUE, EXPECTEDSTR) \
         jc_test_print_value(buffer, sizeof(buffer), VALUE); \
-        EXPECT_STREQ(EXPECTEDSTR, buffer);
+        EXPECT_STREQ(EXPECTEDSTR, buffer)
 
     TEST_PRINT(float(3), "3.000000");
     TEST_PRINT(double(4), "4.000000");
