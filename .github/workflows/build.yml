@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      # - name: Install
-      #   run: sudo apt-get install -y gcc-multilib g++-multilib
+      - name: Install
+        run: sudo apt-get install -y gcc-9-multilib g++-9-multilib
       - name: Build tests
         run: CXX=${{ matrix.compiler }} STDVERSION=${{ matrix.platform }} ARCH=${{ matrix.arch }} ${{ matrix.feature }} ./scripts/compile.sh
       - name: Run Tests
