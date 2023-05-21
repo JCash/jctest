@@ -1514,24 +1514,18 @@ void jc_test_exit() {
     static int jct_is_debugger_attached()
     {
         // From https://developer.apple.com/library/archive/qa/qa1361/_index.html
-        int                 junk;
-        int                 mib[4];
-        struct kinfo_proc   info;
-        size_t              size;
 
+        // Initialize mib, which tells sysctl the info we want, in this case
+        // we're looking for information about a specific process ID.
+        int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
+
+        size_t size = sizeof(info);
+        struct kinfo_proc   info;
         // Initialize the flags so that, if sysctl fails for some bizarre
         // reason, we get a predictable result.
         info.kp_proc.p_flag = 0;
 
-        // Initialize mib, which tells sysctl the info we want, in this case
-        // we're looking for information about a specific process ID.
-        mib[0] = CTL_KERN;
-        mib[1] = KERN_PROC;
-        mib[2] = KERN_PROC_PID;
-        mib[3] = getpid();
-
-        size = sizeof(info);
-        junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
+        int junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
         if (junk != 0)
             return 0;
 
