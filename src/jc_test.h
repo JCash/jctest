@@ -115,6 +115,10 @@ struct jc_test_params_class : public jc_test_base_class {
 
  #include <string.h> // memcpy
 
+#if defined(_MSC_VER)
+    #include <Windows.h>
+#endif
+
 // Can be used to override the logging entirely (e.g. for writing html output)
 #ifndef JC_TEST_LOGGER_CLASS
     #include <stdarg.h> //va_list
@@ -149,6 +153,18 @@ struct jc_test_params_class : public jc_test_base_class {
 #else
     #define JC_TEST_SETJMP _setjmp
 #endif
+#endif
+
+#ifndef JC_TEST_DBG_BREAK
+    #if defined(_MSC_VER)
+        #include <intrin.h>
+        #define JC_TEST_DBG_BREAK() __debugbreak()
+    #elif __has_builtin(__builtin_debugtrap)
+        #define JC_TEST_DBG_BREAK() __builtin_trap()
+    #else
+        #include <stdlib.h>
+        #define JC_TEST_DBG_BREAK() abort()
+    #endif
 #endif
 
 #include <type_traits> // painful
@@ -268,9 +284,9 @@ typedef struct jc_test_fixture {
 } jc_test_fixture;
 
 #if defined(__GNUC__) || defined(__clang__)
-    #define _JCT_PRINTF_CHECK(_JCT_IDX_FMT, _JCT_IDX_ARGS) __attribute__ ((format (printf, _JCT_IDX_FMT, _JCT_IDX_ARGS)))
+    #define JCT_PRINTF_CHECK(_JCT_IDX_FMT, _JCT_IDX_ARGS) __attribute__ ((format (printf, _JCT_IDX_FMT, _JCT_IDX_ARGS)))
 #else
-    #define _JCT_PRINTF_CHECK(_JCT_IDX_FMT, _JCT_IDX_ARGS)
+    #define JCT_PRINTF_CHECK(_JCT_IDX_FMT, _JCT_IDX_ARGS)
 #endif
 
 struct jc_test_print_logger
@@ -281,11 +297,11 @@ struct jc_test_print_logger
     void OnTestSetup(const jc_test_fixture* fixture, const jc_test_entry* test);
     void OnTestTeardown(const jc_test_fixture* fixture, const jc_test_entry* test);
     void OnSummary(const jc_test_stats* stats, const struct jc_test_state* state);
-    void OnTestFailed(const jc_test_fixture* fixture, const jc_test_entry* test, const char* format, ...) _JCT_PRINTF_CHECK(4, 5);
+    void OnTestFailed(const jc_test_fixture* fixture, const jc_test_entry* test, const char* format, ...) JCT_PRINTF_CHECK(4, 5);
 
     void Log(const char* str);
     void Log(const char* str, size_t len);
-    void Logf(const char* format, ...) _JCT_PRINTF_CHECK(2, 3);
+    void Logf(const char* format, ...) JCT_PRINTF_CHECK(2, 3);
 
     jc_test_print_logger();
     ~jc_test_print_logger();
@@ -303,16 +319,17 @@ typedef struct jc_test_state {
     unsigned char _pad[sizeof(jmp_buf)+sizeof(void*) - (sizeof(jmp_buf)/sizeof(void*))*sizeof(void*)];
     #endif
 
+    jc_test_stats       stats;
     JC_TEST_LOGGER_CLASS* logger;
     jc_test_entry*      current_test;
     jc_test_fixture*    current_fixture;
     jc_test_fixture*    fixtures;
-    jc_test_stats       stats;
     char**              filter_patterns;
-    unsigned int        num_filter_patterns:8;
-    unsigned int        :24;
-    int                 num_fixtures:31;
-    unsigned int        use_colors:1;
+    uint32_t            num_filter_patterns:8;
+    uint32_t            use_colors:1;
+    uint32_t            break_on_failure:1;
+    uint32_t            num_fixtures:22;
+    uint32_t            :32;
 } jc_test_state;
 
 // ***************************************************************************************
@@ -376,7 +393,7 @@ template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const int
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const uint64_t value);
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const char* value);
 template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const std::nullptr_t value);
-template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const struct _jc_test_null_literal* value);
+template <> char* jc_test_print_value(char* buffer, size_t buffer_len, const struct jct_test_null_literal* value);
 
 template <typename T1, typename T2>
 static inline void jc_test_log_failure(T1 a, T2 b, const char* exprA, const char* exprB, const char* op) {
@@ -484,7 +501,7 @@ struct jc_test_cmp_eq_helper {
     // }
 
     template<typename T>
-    static int compare(_jc_test_null_literal*, T* b, const char* exprA, const char* exprB) {
+    static int compare(jct_test_null_literal*, T* b, const char* exprA, const char* exprB) {
         return jc_test_cmp_EQ(JC_TEST_STATIC_CAST(T*, 0), b, exprA, exprB);
     }
 };
@@ -790,7 +807,7 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
 
 #define JC_TEST_MAKE_NAME2(X,Y)                 X ## _ ## Y
 #define JC_TEST_MAKE_NAME3(X,Y,Z)               X ## _ ## Y ## _ ## Z
-#define JC_TEST_MAKE_CLASS_NAME(X, Y)           JC_TEST_MAKE_NAME3(X, Y, _TestCase)
+#define JC_TEST_MAKE_CLASS_NAME(X, Y)           JC_TEST_MAKE_NAME3(X, Y, TestCase)
 #define JC_TEST_MAKE_FUNCTION_NAME(X, Y)        JC_TEST_MAKE_NAME2(X, Y)
 #define JC_TEST_MAKE_UNIQUE_NAME(X, Y, LINE)    JC_TEST_MAKE_NAME3(X, Y, LINE)
 
@@ -866,7 +883,11 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 #ifdef JC_TEST_IMPLEMENTATION
 #undef JC_TEST_IMPLEMENTATION
 
-#if !defined(_MSC_VER)
+#if defined(_MSC_VER)
+    #include <debugapi.h> // OutputDebugString, IsDebuggerPresent
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
     #pragma GCC diagnostic push
     #if !defined(__GNUC__)
         #if __cplusplus >= 199711L
@@ -943,9 +964,9 @@ struct jc_buffered_string
         if( us < 5000 )
             Appendf("%g %s", (double)(us), JC_TEST_MICROSECONDS_STR);
         else if( us < 500000 )
-            Appendf("%g %s", us / 1000.0, "ms");
+            Appendf("%g %s", (double)us / 1000.0, "ms");
         else
-            Appendf("%g %s", us / 1000000.0, "s");
+            Appendf("%g %s", (double)us / 1000000.0, "s");
     }
 
     void AppendList(const char* const format, va_list args)
@@ -969,7 +990,7 @@ struct jc_buffered_string
         assert(false); // Should never get here
     }
 
-    void Appendf(const char* const format, ...) _JCT_PRINTF_CHECK(2,3)
+    void Appendf(const char* const format, ...) JCT_PRINTF_CHECK(2,3)
     {
         va_list args;
         va_start(args, format);
@@ -1061,17 +1082,31 @@ void jc_test_print_logger::ResetBuffer()
     str->Reset();
 }
 
+#if defined(_MSC_VER)
+static void jc_write_output(const char* text, size_t text_len)
+{
+    OutputDebugStringA(text);
+
+    fwrite(text, text_len, 1, stdout);
+    fflush(stdout);
+}
+#else
+static void jc_write_output(const char* text, size_t text_len)
+{
+    fwrite(text, text_len, 1, stdout);
+    fflush(stdout);
+}
+#endif
+
 void jc_test_print_logger::FlushBuffer()
 {
-    fwrite(str->buffer, str->size, 1, stdout);
-    fflush(stdout);
+    jc_write_output(str->buffer, str->size);
     str->Reset();
 }
 
 void jc_test_print_logger::Log(const char* text, size_t text_len)
 {
-    fwrite(text, text_len, 1, stdout);
-    fflush(stdout);
+    jc_write_output(text, text_len);
 }
 
 void jc_test_print_logger::Log(const char* text)
@@ -1479,16 +1514,97 @@ void jc_test_exit() {
         delete tmp_fixture;
     }
 
-    for (int i = 0; i < state->num_filter_patterns; ++i) {
+    for (uint32_t i = 0; i < state->num_filter_patterns; ++i) {
         delete[] state->filter_patterns[i];
     }
     delete[] state->filter_patterns;
+}
+
+#if defined(_MSC_VER)
+    static int jct_is_debugger_attached()
+    {
+        return IsDebuggerPresent();
+    }
+
+#elif defined(__MACH__)
+
+    #include <sys/types.h>
+    #include <sys/sysctl.h>
+    #include <unistd.h>
+
+    static int jct_is_debugger_attached()
+    {
+        // From https://developer.apple.com/library/archive/qa/qa1361/_index.html
+
+        // Initialize mib, which tells sysctl the info we want, in this case
+        // we're looking for information about a specific process ID.
+        int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
+
+        struct kinfo_proc   info;
+        size_t size = sizeof(info);
+        // Initialize the flags so that, if sysctl fails for some bizarre
+        // reason, we get a predictable result.
+        info.kp_proc.p_flag = 0;
+
+        int junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
+        if (junk != 0)
+            return 0;
+
+        // We're being debugged if the P_TRACED flag is set.
+        return ( (info.kp_proc.p_flag & P_TRACED) != 0 );
+    }
+
+#elif defined(__linux__)
+    #include <stdio.h> // FILE
+    #include <stdlib.h> // atoi
+
+    static int jct_is_debugger_attached()
+    {
+        FILE* f = fopen("/proc/self/status", "rt");
+        if (!f)
+            return 0;
+
+        const char* kTracerPid = "TracerPid:";
+
+        size_t linesize = 1024;
+        char* line = (char*)malloc(linesize);
+        int tracer_pid = 0;
+        while ( !feof(f) )
+        {
+            ssize_t nread = getline(&line, &linesize, f);
+            if (nread < 0)
+                break;
+
+            if (strstr(line, kTracerPid) != 0)
+            {
+                tracer_pid = atoi(line + 10);
+                break;
+            }
+        }
+        fclose(f);
+        free(line);
+        return tracer_pid != 0 ? 1 : 0;
+    }
+#else
+    static int jct_is_debugger_attached()
+    {
+        return 0;
+    }
+#endif
+
+static void jc_test_dbg_break()
+{
+    if (!jc_test_get_state()->break_on_failure)
+        return;
+    JC_TEST_DBG_BREAK();
 }
 
 void jc_test_set_test_fail(int fatal) {
     jc_test_get_test()->fail = 1;
     jc_test_get_fixture()->fail = 1;
     jc_test_get_fixture()->fatal |= fatal;
+
+    jc_test_dbg_break(); // break if enabled
 }
 
 void jc_test_set_test_skipped() {
@@ -1625,7 +1741,6 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
 }
 
 #if defined(_WIN32)
-    #include <Windows.h>
     jc_test_time_t jc_test_get_time(void) {
         LARGE_INTEGER tickPerSecond;
         LARGE_INTEGER tick;
@@ -1657,7 +1772,7 @@ static void jc_test_signal_handler(int) {
 
 #if defined(_WIN32) || defined(__CYGWIN__)
     typedef void (*jc_test_signal_handler_fn)(int);
-    jc_test_signal_handler_fn g_signal_handlers[4];
+    static jc_test_signal_handler_fn g_signal_handlers[4];
     void jc_test_set_signal_handler() {
         g_signal_handlers[0] = signal(SIGILL, jc_test_signal_handler);
         g_signal_handlers[1] = signal(SIGABRT, jc_test_signal_handler);
@@ -1721,7 +1836,7 @@ static void jc_test_usage() {
 int jc_test_keep_test(jc_test_state* state, const char* name) {
     if (state->num_filter_patterns == 0)
         return 1;
-    for (int i = 0; i < state->num_filter_patterns; ++i) {
+    for (uint32_t i = 0; i < state->num_filter_patterns; ++i) {
         if (jc_test_strstr(name, state->filter_patterns[i]) != 0)
             return 1; // it matched the pattern, so let's keep it
     }
@@ -1752,7 +1867,6 @@ static void jc_test_add_test_filter(jc_test_state* state, const char* pattern) {
 
 // checks for jctest specific command line arguments: e.g. "--test-filter Foo"
 static int jc_test_parse_commandline(int* argc, char** argv) {
-    int count=0;
     for (int i = 0; i < *argc; ++i) {
         const char* arg = argv[i];
         if (jc_test_streq(arg, "--test-filter")) {
@@ -1763,8 +1877,9 @@ static int jc_test_parse_commandline(int* argc, char** argv) {
             }
             *argc -= 2;
             jc_test_add_test_filter(jc_test_get_state(), pattern);
-        } else {
-            ++count;
+        }
+        else if(jc_test_streq(arg, "--test-break-on-fail")) {
+            jc_test_get_state()->break_on_failure = 1;
         }
     }
     return 0;
@@ -1801,7 +1916,6 @@ int jc_test_run_all() {
 #else // _WIN32
     #include <io.h>     // _isatty
     #include <string.h>
-    #include <Windows.h>
 #endif
 
 #if !defined(_WIN32)
@@ -1845,7 +1959,7 @@ int jc_test_run_all() {
 #endif // JC_TEST_ISATTY
 #endif // JC_TEST_USE_COLORS
 
-static int _jc_get_tty_color_support() {
+static int jct_get_tty_color_support() {
     #if defined(JC_TEST_USE_COLORS)
         return JC_TEST_USE_COLORS;
     #else
@@ -1866,7 +1980,8 @@ static int _jc_get_tty_color_support() {
 }
 
 void jc_test_init(int* argc, char** argv) {
-    jc_test_get_state()->use_colors = JC_TEST_STATIC_CAST(unsigned int, _jc_get_tty_color_support());
+    jc_test_get_state()->use_colors = (uint32_t)jct_get_tty_color_support();
+    jc_test_get_state()->break_on_failure = (uint32_t)jct_is_debugger_attached();
 
     if (jc_test_parse_commandline(argc, argv)) {
         jc_test_usage();
@@ -1928,7 +2043,10 @@ INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
  *      Made sure to compile with highest warning/error levels possible
  *
  * HISTORY:
- *      0.10    2023-05-19  Introduced JC_TEXT_LOGGER_CLASS for easier log printing
+ *      0.10    2023-05-19  * Introduced JC_TEXT_LOGGER_CLASS for easier log printing
+ *                          * Added --test-break-on-fail for breaking into the debugger.
+ *                          Can be configured with JC_TEST_DBG_BREAK define.
+ *                          * Added automatic check for an attached debugger
  *      0.9     2022-12-22  Fixed proper printout for pointer values
  *                          Minimum version is now C++11 due to usage of <type_traits>
  *                          Removed doctest support
