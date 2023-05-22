@@ -5,20 +5,24 @@ if [ ! -e build ]; then
     mkdir -p build
 fi
 
-OPT="-g -O2"
 #DISASSEMBLY="-S -masm=intel"
 #PREPROCESS="-E"
-#OPT="-g -O0"
 
 if [ "$USE_ASAN" != "" ]; then
     if [ "$CXX" != "g++" ]; then
         ASAN="-fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope -fsanitize=undefined"
         ASAN_LDFLAGS="-fsanitize=address "
+        echo "Using ASAN"
     fi
 fi
 
+if [ "$OPT" == "" ]; then
+    OPT="-O2"
+fi
+echo "Using OPT=${OPT}"
+
 if [ "$STDVERSION" == "" ]; then
-    STDVERSION=c++98
+    STDVERSION=c++11
 fi
 echo Using -std=$STDVERSION
 
@@ -35,7 +39,7 @@ if [ "$ARCH" == "" ]; then
 fi
 echo Using ARCH=$ARCH
 
-CXXFLAGS="$CXXFLAGS -std=$STDVERSION -Wall -pedantic -fno-exceptions -Werror=format -Isrc -I. $ASAN $PREPROCESS"
+CXXFLAGS="$CXXFLAGS -std=$STDVERSION -g -Wall -pedantic -fno-exceptions -Werror=format -Isrc -I. $ASAN $PREPROCESS -Wno-old-style-cast"
 
 if [ "$CXX" == "clang++" ]; then
     CXXFLAGS="$CXXFLAGS -Weverything -Wno-global-constructors"
@@ -87,6 +91,7 @@ function compile_test {
 function compile_test_with_main {
     local name=$1
     shift
+    echo "Compiling test $name"
     $CXX -o ./build/${PREFIX}_test_${name}.o $OPT $DISASSEMBLY $ARCH $SYSROOT $CXXFLAGS $* -c test/test_${name}.cpp
     $CXX -o ./build/${PREFIX}_${name} $OPT $ARCH ./build/${PREFIX}_test_${name}.o $LDFLAGS
 }

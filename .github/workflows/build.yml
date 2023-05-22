@@ -1,6 +1,6 @@
 name: Build
 
-on: [push, pull_request_target]
+on: [push, pull_request]
 
 jobs:
   build-linux:
@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install
-        run: sudo apt-get install -y gcc-multilib g++-multilib
+        run: sudo apt-get update && sudo apt-get install -y gcc-multilib g++-multilib
       - name: Build tests
         run: CXX=${{ matrix.compiler }} STDVERSION=${{ matrix.platform }} ARCH=${{ matrix.arch }} ${{ matrix.feature }} ./scripts/compile.sh
       - name: Run Tests
