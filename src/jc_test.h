@@ -153,6 +153,14 @@ struct jc_test_params_class : public jc_test_base_class {
 
 #ifndef JC_TEST_DBG_BREAK
     #if defined(_MSC_VER)
+        // Instead of including the massive Windows.h
+        #if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
+            #define _AMD64_
+        #elif defined(i386) || defined(__i386) || defined(__i386__) || defined(__i386__) || defined(_M_IX86)
+            #define _X86_
+        #elif defined(__arm__) || defined(_M_ARM) || defined(_M_ARMT)
+            #define _ARM_
+        #endif
         #include <intrin.h>
         #define JC_TEST_DBG_BREAK() __debugbreak()
     #elif __has_builtin(__builtin_debugtrap)
@@ -1492,7 +1500,7 @@ void jc_test_exit() {
         delete tmp_fixture;
     }
 
-    for (int i = 0; i < state->num_filter_patterns; ++i) {
+    for (uint32_t i = 0; i < state->num_filter_patterns; ++i) {
         delete[] state->filter_patterns[i];
     }
     delete[] state->filter_patterns;
@@ -1502,7 +1510,7 @@ void jc_test_exit() {
     #include <debugapi.h>
     static int jct_is_debugger_attached()
     {
-        return IsDebuggerPresent()
+        return IsDebuggerPresent();
     }
 
 #elif defined(__MACH__)
@@ -1816,7 +1824,7 @@ static void jc_test_usage() {
 int jc_test_keep_test(jc_test_state* state, const char* name) {
     if (state->num_filter_patterns == 0)
         return 1;
-    for (int i = 0; i < state->num_filter_patterns; ++i) {
+    for (uint32_t i = 0; i < state->num_filter_patterns; ++i) {
         if (jc_test_strstr(name, state->filter_patterns[i]) != 0)
             return 1; // it matched the pattern, so let's keep it
     }
