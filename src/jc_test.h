@@ -887,7 +887,9 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 #ifdef JC_TEST_IMPLEMENTATION
 #undef JC_TEST_IMPLEMENTATION
 
-#if !defined(_MSC_VER)
+#if defined(_MSC_VER)
+    #include <debugapi.h> // OutputDebugString, IsDebuggerPresent
+#else
     #pragma GCC diagnostic push
     #if !defined(__GNUC__)
         #if __cplusplus >= 199711L
@@ -1082,17 +1084,31 @@ void jc_test_print_logger::ResetBuffer()
     str->Reset();
 }
 
+#if defined(_MSC_VER)
+static void jc_write_output(const char* text, size_t text_len)
+{
+    OutputDebugStringA(text);
+
+    fwrite(text, text_len, 1, stdout);
+    fflush(stdout);
+}
+#else
+static void jc_write_output(const char* text, size_t text_len)
+{
+    fwrite(text, text_len, 1, stdout);
+    fflush(stdout);
+}
+#endif
+
 void jc_test_print_logger::FlushBuffer()
 {
-    fwrite(str->buffer, str->size, 1, stdout);
-    fflush(stdout);
+    jc_write_output(str->buffer, str->size);
     str->Reset();
 }
 
 void jc_test_print_logger::Log(const char* text, size_t text_len)
 {
-    fwrite(text, text_len, 1, stdout);
-    fflush(stdout);
+    jc_write_output(text, text_len);
 }
 
 void jc_test_print_logger::Log(const char* text)
@@ -1507,7 +1523,6 @@ void jc_test_exit() {
 }
 
 #if defined(_MSC_VER)
-    #include <debugapi.h>
     static int jct_is_debugger_attached()
     {
         return IsDebuggerPresent();
