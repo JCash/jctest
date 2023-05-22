@@ -115,6 +115,10 @@ struct jc_test_params_class : public jc_test_base_class {
 
  #include <string.h> // memcpy
 
+#if defined(_MSC_VER)
+    #include <Windows.h>
+#endif
+
 // Can be used to override the logging entirely (e.g. for writing html output)
 #ifndef JC_TEST_LOGGER_CLASS
     #include <stdarg.h> //va_list
@@ -153,14 +157,6 @@ struct jc_test_params_class : public jc_test_base_class {
 
 #ifndef JC_TEST_DBG_BREAK
     #if defined(_MSC_VER)
-        // Instead of including the massive Windows.h
-        #if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
-            #define _AMD64_
-        #elif defined(i386) || defined(__i386) || defined(__i386__) || defined(__i386__) || defined(_M_IX86)
-            #define _X86_
-        #elif defined(__arm__) || defined(_M_ARM) || defined(_M_ARMT)
-            #define _ARM_
-        #endif
         #include <intrin.h>
         #define JC_TEST_DBG_BREAK() __debugbreak()
     #elif __has_builtin(__builtin_debugtrap)
@@ -889,7 +885,9 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 
 #if defined(_MSC_VER)
     #include <debugapi.h> // OutputDebugString, IsDebuggerPresent
-#else
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
     #pragma GCC diagnostic push
     #if !defined(__GNUC__)
         #if __cplusplus >= 199711L
@@ -1743,7 +1741,6 @@ static void jc_test_run_fixture(jc_test_fixture* fixture) {
 }
 
 #if defined(_WIN32)
-    #include <Windows.h>
     jc_test_time_t jc_test_get_time(void) {
         LARGE_INTEGER tickPerSecond;
         LARGE_INTEGER tick;
@@ -1775,7 +1772,7 @@ static void jc_test_signal_handler(int) {
 
 #if defined(_WIN32) || defined(__CYGWIN__)
     typedef void (*jc_test_signal_handler_fn)(int);
-    jc_test_signal_handler_fn g_signal_handlers[4];
+    static jc_test_signal_handler_fn g_signal_handlers[4];
     void jc_test_set_signal_handler() {
         g_signal_handlers[0] = signal(SIGILL, jc_test_signal_handler);
         g_signal_handlers[1] = signal(SIGABRT, jc_test_signal_handler);
@@ -1919,7 +1916,6 @@ int jc_test_run_all() {
 #else // _WIN32
     #include <io.h>     // _isatty
     #include <string.h>
-    #include <Windows.h>
 #endif
 
 #if !defined(_WIN32)
