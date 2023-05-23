@@ -1213,14 +1213,14 @@ void jc_test_print_logger::OnTestTeardown(const jc_test_fixture* fixture, const 
 
     str->Appendf("%s%s%s", JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
     if (fixture->index != 0xFFFFFFFF) {
-        str->Append("/%d ", fixture->index);
+        str->Appendf("/%d ", fixture->index);
     }
     if (test->fail)
         str->Appendf(" %s%s%s (", JC_TEST_COL(FAIL), "FAIL", JC_TEST_COL(DEFAULT));
     else if (test->skipped)
-        str->Appendf(" %s%s%s (", JC_TEST_COL(SKIP), "PASS", JC_TEST_COL(DEFAULT));
-    else
         str->Appendf(" %s%s%s (", JC_TEST_COL(SKIP), "SKIPPED", JC_TEST_COL(DEFAULT));
+    else
+        str->Appendf(" %s%s%s (", JC_TEST_COL(PASS), "PASS", JC_TEST_COL(DEFAULT));
     str->AppendTime(test->time);
     str->Append(")\n");
 
