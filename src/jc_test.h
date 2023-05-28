@@ -1592,6 +1592,11 @@ void jc_test_exit() {
     }
 #endif
 
+#ifndef JCT_IS_DEBUGGER_ATTACHED
+    #define JCT_IS_DEBUGGER_ATTACHED() jct_is_debugger_attached()
+#endif
+
+
 static void jc_test_dbg_break()
 {
     if (!jc_test_get_state()->break_on_failure)
@@ -1981,7 +1986,7 @@ static int jct_get_tty_color_support() {
 
 void jc_test_init(int* argc, char** argv) {
     jc_test_get_state()->use_colors = (uint32_t)jct_get_tty_color_support();
-    jc_test_get_state()->break_on_failure = (uint32_t)jct_is_debugger_attached();
+    jc_test_get_state()->break_on_failure = (uint32_t)JCT_IS_DEBUGGER_ATTACHED();
 
     if (jc_test_parse_commandline(argc, argv)) {
         jc_test_usage();
@@ -2047,6 +2052,7 @@ INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
  *                          * Added --test-break-on-fail for breaking into the debugger.
  *                          Can be configured with JC_TEST_DBG_BREAK define.
  *                          * Added automatic check for an attached debugger
+ *              2023-05-27  * Added JCT_IS_DEBUGGER_ATTACHED for easier overrides
  *      0.9     2022-12-22  Fixed proper printout for pointer values
  *                          Minimum version is now C++11 due to usage of <type_traits>
  *                          Removed doctest support
