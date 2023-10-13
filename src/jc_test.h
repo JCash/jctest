@@ -2055,6 +2055,7 @@ INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
  *
  * HISTORY:
  *      0.11    2023-10-13  * Added JC_TEST_OUTPUT_FN for customizing log output
+ *                          * Added JC_TEST_USE_PRINTF to choose printf() over write()
  *      0.10    2023-05-19  * Introduced JC_TEXT_LOGGER_CLASS for easier log printing
  *                          * Added --test-break-on-fail for breaking into the debugger.
  *                          Can be configured with JC_TEST_DBG_BREAK define.
