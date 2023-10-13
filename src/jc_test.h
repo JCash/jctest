@@ -1082,31 +1082,37 @@ void jc_test_print_logger::ResetBuffer()
     str->Reset();
 }
 
+#if !defined(JC_TEST_OUTPUT_FN)
+    static void jc_write_output(const char* text, size_t text_len)
+    {
 #if defined(_MSC_VER)
-static void jc_write_output(const char* text, size_t text_len)
-{
-    OutputDebugStringA(text);
+        OutputDebugStringA(text);
+#endif
 
-    fwrite(text, text_len, 1, stdout);
-    fflush(stdout);
-}
+#if defined(JC_TEST_USE_PRINTF)
+        (void)text_len;
+        printf("%s", text);
 #else
-static void jc_write_output(const char* text, size_t text_len)
-{
-    fwrite(text, text_len, 1, stdout);
-    fflush(stdout);
-}
+        fwrite(text, text_len, 1, stdout);
+#endif
+        fflush(stdout);
+    }
+#endif
+
+#ifndef JC_TEST_OUTPUT_FN
+    #include <assert.h>
+    #define JC_TEST_OUTPUT_FN jc_write_output
 #endif
 
 void jc_test_print_logger::FlushBuffer()
 {
-    jc_write_output(str->buffer, str->size);
+    JC_TEST_OUTPUT_FN(str->buffer, str->size);
     str->Reset();
 }
 
 void jc_test_print_logger::Log(const char* text, size_t text_len)
 {
-    jc_write_output(text, text_len);
+    JC_TEST_OUTPUT_FN(text, text_len);
 }
 
 void jc_test_print_logger::Log(const char* text)
@@ -2048,6 +2054,7 @@ INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
  *      Made sure to compile with highest warning/error levels possible
  *
  * HISTORY:
+ *      0.11    2023-10-13  * Added JC_TEST_OUTPUT_FN for customizing log output
  *      0.10    2023-05-19  * Introduced JC_TEXT_LOGGER_CLASS for easier log printing
  *                          * Added --test-break-on-fail for breaking into the debugger.
  *                          Can be configured with JC_TEST_DBG_BREAK define.
