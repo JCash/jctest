@@ -202,18 +202,31 @@ struct jc_test_params_class : public jc_test_base_class {
 #endif
 
 #if !defined(JC_FMT_U64)
-    #if defined(__ANDROID__)
-        #define JC_FMT_U64 "%llu"
-        #define JC_FMT_I64 "%lld"
-    #else
-        #if __cplusplus == 199711L && (defined(__GNUC__) && !defined(__clang__))
-            // For some reason GCC would always warn about the format not working in c++98 (it does though)
-            #pragma GCC diagnostic ignored "-Wformat"
+    #if defined(__has_include)
+        #if __has_include(<inttypes.h>)
+            #include <inttypes.h>
+            #warning "Case 1"
         #endif
-        #include <inttypes.h>
-        #define JC_FMT_U64 "%" PRIu64
-        #define JC_FMT_I64 "%" PRId64
     #endif
+
+    #if !defined(PRId64)
+        #warning "Case 2"
+        #if defined(_MSC_VER)
+            #warning "Case 2.a"
+            #define PRId64 "I64d"
+            #define PRIi64 "I64i"
+            #define PRIu64 "I64u"
+            #define PRIx64 "I64x"
+        #else
+            #warning "Case 2.b"
+
+            #define PRIu64 "llu"
+            #define PRIx64 "lld"
+        #endif
+    #endif
+
+    #define JC_FMT_U64 "%" PRIu64
+    #define JC_FMT_I64 "%" PRId64
 #endif
 
 #if defined(__x86_64__) || defined(__arm64) || defined(__aarch64__) || defined(__ppc64__) || defined(_WIN64)
