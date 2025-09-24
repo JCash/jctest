@@ -1050,7 +1050,7 @@ template <> char* jc_test_print_value(char* buffer, size_t buffer_len, std::null
 
 static int jc_get_formatted_test_name(char* buffer, size_t buffer_len, const jc_test_fixture* fixture, const jc_test_entry* test, int usecolor) {
     if (fixture->index != 0xFFFFFFFF)
-        return JC_TEST_SNPRINTF(buffer, buffer_len, "%s%s%s.%s%s%s/%d", JC_TEST_COL2(CYAN,usecolor), fixture->name, JC_TEST_COL2(DEFAULT,usecolor), JC_TEST_COL2(YELLOW,usecolor), test->name, JC_TEST_COL2(DEFAULT,usecolor), fixture->index);
+        return JC_TEST_SNPRINTF(buffer, buffer_len, "%s%s%s.%s%s%s/%u", JC_TEST_COL2(CYAN,usecolor), fixture->name, JC_TEST_COL2(DEFAULT,usecolor), JC_TEST_COL2(YELLOW,usecolor), test->name, JC_TEST_COL2(DEFAULT,usecolor), fixture->index);
     else
         return JC_TEST_SNPRINTF(buffer, buffer_len, "%s%s%s.%s%s%s", JC_TEST_COL2(CYAN,usecolor), fixture->name, JC_TEST_COL2(DEFAULT,usecolor), JC_TEST_COL2(YELLOW,usecolor), test->name, JC_TEST_COL2(DEFAULT,usecolor));
 }
@@ -1214,7 +1214,7 @@ void jc_test_print_logger::OnTestSetup(const jc_test_fixture* fixture, const jc_
     str->Appendf("%s%s%s", JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
 
     if (fixture->index != 0xFFFFFFFF) {
-        str->Appendf("/%d ", fixture->index);
+        str->Appendf("/%u ", fixture->index);
     }
     str->Append("\n");
 
@@ -1227,7 +1227,7 @@ void jc_test_print_logger::OnTestTeardown(const jc_test_fixture* fixture, const 
 
     str->Appendf("%s%s%s", JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
     if (fixture->index != 0xFFFFFFFF) {
-        str->Appendf("/%d ", fixture->index);
+        str->Appendf("/%u ", fixture->index);
     }
     if (test->fail)
         str->Appendf(" %s%s%s (", JC_TEST_COL(FAIL), "FAIL", JC_TEST_COL(DEFAULT));
