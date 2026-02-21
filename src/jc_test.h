@@ -787,6 +787,10 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
         // Allocate a new fixture, and create the test class
         jc_test_fixture_with_param<ParamType>* fixture = JC_TEST_CAST(jc_test_fixture_with_param<ParamType>*,
                                 jc_test_alloc_fixture_with_param<ParamType>(fixture_name, JC_TEST_FIXTURE_TYPE_CLASS) );
+        if (!fixture) {
+            delete values;
+            return 1;
+        }
 
         fixture->first = first_fixture == 0 ? 1 : 0;
         if (!first_fixture) {
@@ -936,6 +940,7 @@ struct jc_buffered_string
     {
         capacity += _size;
         buffer = (char*)realloc(buffer, capacity);
+        assert(buffer != 0);
     }
 
     void Append(const char* str, size_t len)
