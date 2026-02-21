@@ -20,6 +20,28 @@ jobs:
       - name: Run Tests
         run: ./scripts/run_tests.sh
 
+  build-linux-ubsan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install
+        run: sudo apt-get update && sudo apt-get install -y clang
+      - name: Build tests
+        run: CXX=clang++ STDVERSION=c++17 ARCH=-m64 USE_UBSAN=1 ./scripts/compile.sh
+      - name: Run Tests
+        run: ./scripts/run_tests.sh
+
+  build-linux-msan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install
+        run: sudo apt-get update && sudo apt-get install -y clang
+      - name: Build tests
+        run: CXX=clang++ STDVERSION=c++17 ARCH=-m64 USE_MSAN=1 ./scripts/compile.sh
+      - name: Run Tests
+        run: ./scripts/run_tests.sh
+
   build-macos:
     strategy:
       matrix:
@@ -30,6 +52,26 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build tests
         run: STDVERSION=${{ matrix.platform }} ${{ matrix.feature }} ./scripts/compile.sh
+      - name: Run Tests
+        run: ./scripts/run_tests.sh
+
+  build-linux-staticanalyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install
+        run: sudo apt-get update && sudo apt-get install -y clang
+      - name: Build tests
+        run: CXX=clang++ STDVERSION=c++17 ARCH=-m64 USE_STATICANALYZE=1 ./scripts/compile.sh
+      - name: Run Tests
+        run: ./scripts/run_tests.sh
+
+  build-macos-staticanalyze:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build tests
+        run: CXX=clang++ STDVERSION=c++17 ARCH=-m64 USE_STATICANALYZE=1 ./scripts/compile.sh
       - name: Run Tests
         run: ./scripts/run_tests.sh
 
@@ -44,6 +86,20 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
       - name: Build tests
+        run: ./scripts/compile_cl.bat
+      - name: Run Tests
+        run: ./scripts/run_tests.bat
+
+  build-windows-staticanalyze:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+      - name: Build tests
+        env:
+          USE_STATICANALYZE: 1
         run: ./scripts/compile_cl.bat
       - name: Run Tests
         run: ./scripts/run_tests.bat

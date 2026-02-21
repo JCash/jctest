@@ -1042,7 +1042,7 @@ template <> char* jc_test_print_value(char* buffer, size_t buffer_len, std::null
 
 static int jc_get_formatted_test_name(char* buffer, size_t buffer_len, const jc_test_fixture* fixture, const jc_test_entry* test, int usecolor) {
     if (fixture->index != 0xFFFFFFFF)
-        return JC_TEST_SNPRINTF(buffer, buffer_len, "%s%s%s.%s%s%s/%d", JC_TEST_COL2(CYAN,usecolor), fixture->name, JC_TEST_COL2(DEFAULT,usecolor), JC_TEST_COL2(YELLOW,usecolor), test->name, JC_TEST_COL2(DEFAULT,usecolor), fixture->index);
+        return JC_TEST_SNPRINTF(buffer, buffer_len, "%s%s%s.%s%s%s/%u", JC_TEST_COL2(CYAN,usecolor), fixture->name, JC_TEST_COL2(DEFAULT,usecolor), JC_TEST_COL2(YELLOW,usecolor), test->name, JC_TEST_COL2(DEFAULT,usecolor), fixture->index);
     else
         return JC_TEST_SNPRINTF(buffer, buffer_len, "%s%s%s.%s%s%s", JC_TEST_COL2(CYAN,usecolor), fixture->name, JC_TEST_COL2(DEFAULT,usecolor), JC_TEST_COL2(YELLOW,usecolor), test->name, JC_TEST_COL2(DEFAULT,usecolor));
 }
@@ -1206,7 +1206,7 @@ void jc_test_print_logger::OnTestSetup(const jc_test_fixture* fixture, const jc_
     str->Appendf("%s%s%s", JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
 
     if (fixture->index != 0xFFFFFFFF) {
-        str->Appendf("/%d ", fixture->index);
+        str->Appendf("/%u ", fixture->index);
     }
     str->Append("\n");
 
@@ -1219,7 +1219,7 @@ void jc_test_print_logger::OnTestTeardown(const jc_test_fixture* fixture, const 
 
     str->Appendf("%s%s%s", JC_TEST_COL(YELLOW), test->name, JC_TEST_COL(DEFAULT));
     if (fixture->index != 0xFFFFFFFF) {
-        str->Appendf("/%d ", fixture->index);
+        str->Appendf("/%u ", fixture->index);
     }
     if (test->fail)
         str->Appendf(" %s%s%s (", JC_TEST_COL(FAIL), "FAIL", JC_TEST_COL(DEFAULT));
@@ -1848,7 +1848,8 @@ int jc_test_keep_test(jc_test_state* state, const char* name) {
     if (state->num_filter_patterns == 0)
         return 1;
     for (uint32_t i = 0; i < state->num_filter_patterns; ++i) {
-        if (jc_test_strstr(name, state->filter_patterns[i]) != 0)
+        const char* pattern = state->filter_patterns[i];
+        if (pattern != 0 && jc_test_strstr(name, pattern) != 0)
             return 1; // it matched the pattern, so let's keep it
     }
     return 0;
@@ -1869,8 +1870,10 @@ static char* jc_test_strdup(const char* s) {
 }
 
 static void jc_test_add_test_filter(jc_test_state* state, const char* pattern) {
-    if (state->filter_patterns == 0)
+    if (state->filter_patterns == 0) {
         state->filter_patterns = new char*[255];
+        jc_test_memset(state->filter_patterns, 0, sizeof(char*) * 255);
+    }
     if (state->num_filter_patterns == 255)
         return;
     state->filter_patterns[state->num_filter_patterns++] = jc_test_strdup(pattern);

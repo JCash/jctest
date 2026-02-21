@@ -14,6 +14,10 @@ set TIMEIT
 mkdir build
 
 set FLAGS=/Od /Zi /D_CRT_SECURE_NO_WARNINGS /nologo /D_HAS_EXCEPTIONS=0 /EHsc /W4 /wd4611 /Isrc
+if not "%USE_STATICANALYZE%"=="" (
+    set FLAGS=%FLAGS% /analyze /WX
+    echo Using STATIC ANALYZER (msvc)
+)
 
 call %TIMEIT% cl.exe %FLAGS% test\test_params.cpp test\main.cpp /link /out:.\build\test_params.exe
 call %TIMEIT% cl.exe %FLAGS% test\test_typed_test.cpp test\main.cpp /link /out:.\build\test_typed_test.exe
