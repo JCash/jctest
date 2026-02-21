@@ -939,6 +939,10 @@ struct jc_buffered_string
     void Grow(size_t _size)
     {
         capacity += _size;
+#if defined(_MSC_VER)
+        // C6308: realloc may return null and overwrite the original pointer, causing a leak.
+        #pragma warning(suppress:6308)
+#endif
         buffer = (char*)realloc(buffer, capacity);
         assert(buffer != 0);
     }
