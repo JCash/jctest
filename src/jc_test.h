@@ -732,7 +732,7 @@ struct jc_test_register_typed_class_test<BaseClassSelector,jc_test_type0> {
 
 template<typename ParamType>
 jc_test_fixture* jc_test_alloc_fixture_with_param(const char* name, unsigned int type) {
-    return jc_test_create_fixture(new jc_test_fixture_with_param<ParamType>, name, type);
+    return jc_test_create_fixture(new jc_test_fixture_with_param<ParamType>(), name, type);
 }
 
 template<typename ParamType>
@@ -753,10 +753,11 @@ void jc_test_create_from_prototype(jc_test_fixture_with_param<ParamType>* fixtur
     jc_test_entry* first = 0;
     jc_test_entry* prev = 0;
     while (prototype_test) {
-        jc_test_entry* test = new jc_test_entry;
+        jc_test_entry* test = new jc_test_entry();
         test->next = 0;
         test->name = prototype_test->name;
         test->factory = 0;
+        test->time = 0;
         test->fail = 0;
         test->skipped = 0;
 
@@ -1436,6 +1437,8 @@ jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* na
     fixture->next = 0;
     fixture->tests = 0;
     fixture->name = name;
+    fixture->filename = 0;
+    fixture->prototype = 0;
     fixture->type = fixture_type;
     fixture->parent = 0;
     fixture->fail = 0;
@@ -1445,6 +1448,8 @@ jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* na
     fixture->num_tests = 0;
     fixture->first = fixture->last = 1;
     fixture->signum = 0;
+    fixture->line = 0;
+    fixture->_pad = 0;
     fixture->fixture_setup = 0;
     fixture->fixture_teardown = 0;
     jc_test_memset(&fixture->stats, 0, sizeof(fixture->stats));
@@ -1459,11 +1464,12 @@ jc_test_fixture* jc_test_create_fixture(jc_test_fixture* fixture, const char* na
 }
 
 jc_test_entry* jc_test_add_test_to_fixture(jc_test_fixture* fixture, const char* test_name, jc_test_base_class* instance, jc_test_factory_base_interface* factory) {
-    jc_test_entry* test = new jc_test_entry;
+    jc_test_entry* test = new jc_test_entry();
     test->next = 0;
     test->name = test_name;
     test->instance = instance;
     test->factory = factory;
+    test->time = 0;
     test->fail = 0;
     test->skipped = 0;
     jc_test_entry* prev = fixture->tests;
@@ -1487,7 +1493,7 @@ jc_test_fixture* jc_test_find_fixture(const char* name, unsigned int fixture_typ
 }
 
 jc_test_fixture* jc_test_alloc_fixture(const char* name, unsigned int fixture_type) {
-    return jc_test_create_fixture(new jc_test_fixture, name, fixture_type);
+    return jc_test_create_fixture(new jc_test_fixture(), name, fixture_type);
 }
 
 int jc_test_register_class_test(const char* fixture_name, const char* test_name,
