@@ -6,3 +6,4 @@ if __name__ == '__main__':
     p.wait()
     tend = time.time()
     print("%s took %f ms" % (sys.argv[1], (tend-tstart)*1000.0))
+    sys.exit(p.returncode)
