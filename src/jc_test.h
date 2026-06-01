@@ -988,7 +988,7 @@ struct jc_buffered_string
 
     void Append(const char* str)
     {
-        Append(str, strlen(str)+1);
+        Append(str, strlen(str));
     }
 
     void AppendTime(jc_test_time_t us) // Micro seconds

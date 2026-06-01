@@ -15,3 +15,16 @@ TEST(BufferedString, AppendExactFitKeepsTerminatorInBounds)
     ASSERT_EQ(0, str.buffer[str.Size()]);
     ASSERT_EQ(0, memcmp(str.buffer, text, sizeof(text)));
 }
+
+TEST(BufferedString, AppendStringDoesNotStoreTerminator)
+{
+    jc_buffered_string str(4);
+    const char* expected = "one\ntwo\n";
+
+    str.Append("one\n");
+    str.Append("two\n");
+
+    ASSERT_EQ(strlen(expected), str.Size());
+    ASSERT_EQ(0, memcmp(str.buffer, expected, str.Size()));
+    ASSERT_EQ(0, str.buffer[str.Size()]);
+}
