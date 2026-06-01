@@ -31,6 +31,8 @@ call %TIMEIT% cl.exe %FLAGS% test\test_empty.cpp test\main.cpp /link /out:.\buil
 if errorlevel 1 exit /b %errorlevel%
 call %TIMEIT% cl.exe %FLAGS% test\test_array.cpp test\main.cpp /link /out:.\build\test_array.exe
 if errorlevel 1 exit /b %errorlevel%
+call %TIMEIT% cl.exe %FLAGS% test\test_buffered_string.cpp /link /out:.\build\test_buffered_string.exe
+if errorlevel 1 exit /b %errorlevel%
 call %TIMEIT% cl.exe %FLAGS% test\test_color_off.cpp /link /out:.\build\test_color_off.exe
 if errorlevel 1 exit /b %errorlevel%
 call %TIMEIT% cl.exe %FLAGS% test\test_color_on.cpp /link /out:.\build\test_color_on.exe
