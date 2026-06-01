@@ -161,6 +161,7 @@ time compile_test death
 time compile_test empty
 time compile_test array
 time compile_test_with_main buffered_string
+time compile_test_with_main reporting -Wno-sign-compare
 time compile_test_with_main color_on
 time compile_test_with_main color_off
 

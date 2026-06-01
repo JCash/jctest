@@ -383,7 +383,25 @@ jc_test_print_value(char* buffer, size_t buffer_len, const T value) {
 }
 
 template <typename T>
-typename std::enable_if< !std::is_enum<T>::value && !std::is_pointer<T>::value, char*>::type
+typename std::enable_if< !std::is_enum<T>::value && !std::is_pointer<T>::value && std::is_integral<T>::value && std::is_signed<T>::value, char*>::type
+jc_test_print_value(char* buffer, size_t buffer_len, const T value) {
+    return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, JC_FMT_I64, JC_TEST_STATIC_CAST(int64_t, value));
+}
+
+template <typename T>
+typename std::enable_if< !std::is_enum<T>::value && !std::is_pointer<T>::value && std::is_integral<T>::value && !std::is_signed<T>::value, char*>::type
+jc_test_print_value(char* buffer, size_t buffer_len, const T value) {
+    return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, JC_FMT_U64, JC_TEST_STATIC_CAST(uint64_t, value));
+}
+
+template <typename T>
+typename std::enable_if< !std::is_enum<T>::value && !std::is_pointer<T>::value && std::is_floating_point<T>::value, char*>::type
+jc_test_print_value(char* buffer, size_t buffer_len, const T value) {
+    return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, "%f", JC_TEST_STATIC_CAST(double, value));
+}
+
+template <typename T>
+typename std::enable_if< !std::is_enum<T>::value && !std::is_pointer<T>::value && !std::is_integral<T>::value && !std::is_floating_point<T>::value, char*>::type
 jc_test_print_value(char* buffer, size_t, const T) {
     buffer[0] = '?'; buffer[1] = 0;
     return buffer+2;
