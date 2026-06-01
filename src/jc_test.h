@@ -957,9 +957,10 @@ struct jc_buffered_string
 
     void Append(const char* str, size_t len)
     {
-        if ( (capacity - size) < len)
+        size_t left = capacity - size;
+        if ( left <= len )
         {
-            Grow(len - (capacity - size) + 1);
+            Grow(len - left + 1);
         }
 
         memcpy(buffer+size, str, len);
@@ -2080,6 +2081,8 @@ INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
  *      Made sure to compile with highest warning/error levels possible
  *
  * HISTORY:
+ *      0.14    2026-06-01  * Fix for log buffer overrun
+ *      0.13    2026-02-21  * Fix for uninitialized values
  *      0.12    2025-09-24  * Added more robust way to check for PRIu64 etc
  *      0.11    2023-10-13  * Added JC_TEST_OUTPUT_FN for customizing log output
  *                          * Added JC_TEST_USE_PRINTF to choose printf() over write()
