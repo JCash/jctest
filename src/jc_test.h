@@ -1,4 +1,4 @@
-/* test.h    Copyright 2018-2023 Mathias Westerdahl
+/* test.h    Copyright 2018-2026 Mathias Westerdahl
  *
  * https://github.com/JCash/jctest
  * https://jcash.github.io/jctest
@@ -13,7 +13,7 @@
  *
  * LICENSE:
  *     The MIT License (MIT)
- *     Copyright (c) 2018-2022 Mathias Westerdahl
+ *     Copyright (c) 2018-2026 Mathias Westerdahl
  *     (For full text, see bottom of document)
  *
  * USAGE:
@@ -2115,7 +2115,7 @@ INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
  *
  *     The MIT License (MIT)
  *
- *     Copyright (c) 2018-2022 Mathias Westerdahl
+ *     Copyright (c) 2018-2026 Mathias Westerdahl
  *
  *     Permission is hereby granted, free of charge, to any person obtaining a copy
  *     of this software and associated documentation files (the "Software"), to deal
