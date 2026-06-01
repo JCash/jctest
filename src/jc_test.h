@@ -2100,6 +2100,7 @@ INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
  *
  * HISTORY:
  *      0.14    2026-06-01  * Fix for log buffer overrun
+ *                          * Fir for numeric formatting in messages
  *      0.13    2026-02-21  * Fix for uninitialized values
  *      0.12    2025-09-24  * Added more robust way to check for PRIu64 etc
  *      0.11    2023-10-13  * Added JC_TEST_OUTPUT_FN for customizing log output
