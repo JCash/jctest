@@ -223,7 +223,7 @@ static inline jc_test_value jc_test_value_pointer(const void* value, unsigned in
 #endif
 
 #define JC_TEST_C_VALUE(_VALUE)                                                \
-    _Generic((_VALUE),                                                        \
+    _Generic((1 ? (_VALUE) : 0),                                              \
         _Bool: jc_test_value_unsigned,                                         \
         char: JC_TEST_C_CHAR_VALUE,                                            \
         signed char: jc_test_value_signed,                                     \
@@ -240,10 +240,11 @@ static inline jc_test_value jc_test_value_pointer(const void* value, unsigned in
         double: jc_test_value_double,                                          \
         long double: jc_test_value_long_double,                                \
         default: jc_test_value_pointer                                         \
-    )((_VALUE), (unsigned int)(sizeof(_VALUE) * CHAR_BIT))
+    )((1 ? (_VALUE) : 0),                                                     \
+      (unsigned int)(sizeof(1 ? (_VALUE) : 0) * CHAR_BIT))
 
 #define JC_TEST_C_IS_NUMERIC(_VALUE)                                           \
-    _Generic((_VALUE),                                                        \
+    _Generic((1 ? (_VALUE) : 0),                                              \
         _Bool: 1, char: 1, signed char: 1, unsigned char: 1,                   \
         short: 1, unsigned short: 1, int: 1, unsigned int: 1,                  \
         long: 1, unsigned long: 1, long long: 1,                               \

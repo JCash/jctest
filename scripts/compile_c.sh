@@ -21,11 +21,17 @@ fi
 
 echo "COMPILING C TESTS"
 echo "Using CC=$CC"
-echo "Using -std=$CSTDVERSION"
 echo "Using ARCH=$ARCH"
 $CC --version
 
-C_TEST_FLAGS="$CFLAGS -std=$CSTDVERSION -g -Wall -Wextra -pedantic -Werror=format -Isrc -I. $SANITIZER_CFLAGS"
+CSTD_FLAG=$CSTDVERSION
+if [ "$CSTDVERSION" == "c23" ] && \
+   ! $CC -std=c23 -E -x c /dev/null -o /dev/null 2>/dev/null; then
+    CSTD_FLAG=c2x
+fi
+echo "Using -std=$CSTD_FLAG"
+
+C_TEST_FLAGS="$CFLAGS -std=$CSTD_FLAG -g -Wall -Wextra -pedantic -Werror=format -Isrc -I. $SANITIZER_CFLAGS"
 
 $CC -o ./build/jctest_c $OPT $ARCH $SYSROOT $C_TEST_FLAGS \
     test/c/main.c test/c/test_assertions.c test/c/test_fixture.c $LDFLAGS

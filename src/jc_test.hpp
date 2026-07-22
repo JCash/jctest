@@ -955,6 +955,12 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
     #endif
 #endif
 
+#if defined(_MSC_VER)
+#define JC_TEST_VA_COPY(_DST, _SRC) ((_DST) = (_SRC))
+#else
+#define JC_TEST_VA_COPY(_DST, _SRC) va_copy((_DST), (_SRC))
+#endif
+
 
 struct jc_buffered_string
 {
@@ -1034,7 +1040,10 @@ struct jc_buffered_string
         {
             uint32_t left = (uint32_t)(capacity - size);
 
-            int n = vsnprintf(buffer+size, capacity-size, format, args);
+            va_list copy;
+            JC_TEST_VA_COPY(copy, args);
+            int n = vsnprintf(buffer+size, capacity-size, format, copy);
+            va_end(copy);
 
             if (n < 0)
                 return; // Something went really wrong
@@ -1105,12 +1114,6 @@ static int jc_get_formatted_test_name(char* buffer, size_t buffer_len, const jc_
     else
         return JC_TEST_SNPRINTF(buffer, buffer_len, "%s%s%s.%s%s%s", JC_TEST_COL2(CYAN,usecolor), fixture->name, JC_TEST_COL2(DEFAULT,usecolor), JC_TEST_COL2(YELLOW,usecolor), test->name, JC_TEST_COL2(DEFAULT,usecolor));
 }
-
-#if defined(_MSC_VER)
-#define JC_TEST_VA_COPY(_DST, _SRC) ((_DST) = (_SRC))
-#else
-#define JC_TEST_VA_COPY(_DST, _SRC) va_copy((_DST), (_SRC))
-#endif
 
 static char* jc_test_format_failure_message(const char* format, va_list args)
 {
