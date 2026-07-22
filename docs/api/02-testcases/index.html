@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <meta name="generator" content="Hugo 0.59.1" />
+  <meta name="generator" content="Hugo 0.164.0">
   <link rel="canonical" href="/jctest/api/02-testcases/">
 
   
@@ -132,12 +132,12 @@
       <header class="intro-and-nav" role="banner">
   <div>
     <div class="intro">
-      <a class="logo" href="/jctest" aria-label="jctest home page">
+      <a class="logo" href="/jctest/" aria-label="jctest home page">
         <img src="/jctest/images/logo.svg" alt="">
       </a>
       <p class="library-desc">
         
-          A small but powerful C++ unit test framework
+          Small but powerful C11 and C++11 unit test frameworks
         
       </p>
     </div>
@@ -307,6 +307,7 @@
 <div id="view-size-normal">
 
 </div>
+
   </div>
 </header>
       <div class="main-and-footer">
@@ -314,108 +315,105 @@
           
   <main id="main">
     <h1>Test Cases</h1>
-    
-
-<h2 id="test-fixtures">Test Fixtures</h2>
-
-<h3 id="test-fixturename-testname">TEST(FixtureName, TestName)</h3>
-
+    <h2 id="test-fixtures">Test Fixtures</h2>
+<p><code>TEST</code> has the same spelling in C and C++. C uses function-pointer test descriptors; C++ uses
+the class-based implementation in <code>jc_test.hpp</code>.</p>
+<h3 id="testfixturename-testname">TEST(FixtureName, TestName)</h3>
 <p>Tests a single function.</p>
-
-<pre><code class="language-cpp">TEST(MyTest, TestName) {
-    ASSERT_EQ(4, 2*2);
-    ASSERT_STREQ(&quot;a&quot;, &quot;b&quot;);
-}
-</code></pre>
-
-<h3 id="test-f-fixturename-testname">TEST_F(FixtureName, TestName)</h3>
-
-<p>Uses a base class:</p>
-
-<pre><code class="language-cpp">struct MyTest : public jc_test_base_class {
-    static void SetUpTestCase()     {};
-    static void TearDownTestCase()  {};
-    void SetUp()                    {};
-    void TearDown()                 {};
-};
-TEST_F(MyTest, TestName) {
-    ASSERT_EQ(4, 2*2);
-    ASSERT_STREQ(&quot;a&quot;, &quot;b&quot;);
-}
-</code></pre>
-
-<h3 id="test-p-instantiate-test-case-p">TEST_P + INSTANTIATE_TEST_CASE_P</h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>TEST(MyTest, TestName) {
+</span></span><span style="display:flex;"><span>    ASSERT_EQ(<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>    ASSERT_STREQ(<span style="color:#e6db74">&#34;a&#34;</span>, <span style="color:#e6db74">&#34;b&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="test_ffixturename-testname">TEST_F(FixtureName, TestName)</h3>
+<p>In C++, <code>TEST_F</code> uses a base class:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">MyTest</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">public</span> jc_test_base_class {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">SetUpTestCase</span>()     {};
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">TearDownTestCase</span>()  {};
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">SetUp</span>()                    {};
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">TearDown</span>()                 {};
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>TEST_F(MyTest, TestName) {
+</span></span><span style="display:flex;"><span>    ASSERT_EQ(<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>    ASSERT_STREQ(<span style="color:#e6db74">&#34;a&#34;</span>, <span style="color:#e6db74">&#34;b&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In C11, fixtures are zero-initialized structures. Setup and teardown definitions are required,
+even when their bodies are empty. Each body receives an explicit, typed <code>jc_test_fixture</code> pointer.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> MyTest {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> value;
+</span></span><span style="display:flex;"><span>} MyTest;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">JC_TEST_FIXTURE_SETUP</span>(MyTest) {
+</span></span><span style="display:flex;"><span>    jc_test_fixture<span style="color:#f92672">-&gt;</span>value <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">JC_TEST_FIXTURE_TEARDOWN</span>(MyTest) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">EXPECT_EQ</span>(<span style="color:#ae81ff">42</span>, jc_test_fixture<span style="color:#f92672">-&gt;</span>value);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">TEST_F</span>(MyTest, TestName) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ASSERT_EQ</span>(<span style="color:#ae81ff">42</span>, jc_test_fixture<span style="color:#f92672">-&gt;</span>value);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Teardown runs after setup begins, including after a fatal setup or test-body assertion. A fatal
+setup assertion skips the body.</p>
+<h3 id="test_p--instantiate_test_case_p">TEST_P + INSTANTIATE_TEST_CASE_P</h3>
+<p>Parameterized tests are available in C++ only.</p>
 <p>Using a templated base class which accepts a parameter type,
 it&rsquo;s easy to use a test case with multiple values.</p>
-
-<pre><code class="language-cpp">struct TestParam {
-    int value;
-};
-struct MyParamTest : public jc_test_params_class&lt;TestParam&gt; {
-public:
-    static void SetUpTestCase()     {};
-    static void TearDownTestCase()  {};
-    void SetUp()                    {};
-    void TearDown()                 {};
-};
-TEST_P(MyParamTest, TestParamIsEven) {
-    ParamType value = GetParam();
-    ASSERT_EQ(0, value &amp; 1);
-}
-const TestParam low_values[] = { {0}, {2}, {4} };
-INSTANTIATE_TEST_CASE_P(LowNumbers, MyParamTest, jc_test_values_in(low_values));
-const TestParam high_values[] = { {100}, {102}, {104} };
-INSTANTIATE_TEST_CASE_P(HighNumbers, MyParamTest, jc_test_values_in(high_values));
-</code></pre>
-
-<h3 id="typed-test-instantiate-test-case-p">TYPED_TEST + INSTANTIATE_TEST_CASE_P</h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">TestParam</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> value;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">MyParamTest</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">public</span> jc_test_params_class<span style="color:#f92672">&lt;</span>TestParam<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> SetUpTestCase()     {};
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">TearDownTestCase</span>()  {};
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">SetUp</span>()                    {};
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">TearDown</span>()                 {};
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>TEST_P(MyParamTest, TestParamIsEven) {
+</span></span><span style="display:flex;"><span>    ParamType value <span style="color:#f92672">=</span> GetParam();
+</span></span><span style="display:flex;"><span>    ASSERT_EQ(<span style="color:#ae81ff">0</span>, value <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> TestParam low_values[] <span style="color:#f92672">=</span> { {<span style="color:#ae81ff">0</span>}, {<span style="color:#ae81ff">2</span>}, {<span style="color:#ae81ff">4</span>} };
+</span></span><span style="display:flex;"><span>INSTANTIATE_TEST_CASE_P(LowNumbers, MyParamTest, jc_test_values_in(low_values));
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> TestParam high_values[] <span style="color:#f92672">=</span> { {<span style="color:#ae81ff">100</span>}, {<span style="color:#ae81ff">102</span>}, {<span style="color:#ae81ff">104</span>} };
+</span></span><span style="display:flex;"><span>INSTANTIATE_TEST_CASE_P(HighNumbers, MyParamTest, jc_test_values_in(high_values));
+</span></span></code></pre></div><h3 id="typed_test--instantiate_test_case_p">TYPED_TEST + INSTANTIATE_TEST_CASE_P</h3>
+<p>Typed tests are available in C++ only.</p>
 <p>If you wish to use a different base class to use with your tests, you can do so.
 You can specify up to 4 classes via the constructs <code>jc_test_type1</code> &hellip; <code>jc_test_type4</code></p>
-
-<pre><code class="language-cpp">// First, create the classes you wish to test:
-struct TestClass1 {
-    int value;
-    TestClass1() : value(2) {}
-};
-struct TestClass2 {
-    int value;
-    TestClass2() : value(4) {}
-};
-typedef jc_test_type2&lt;TestClass1, TestClass2&gt; TestTypes;
-TYPED_TEST_SUITE(TypedTest, TestTypes);
-
-//Then, create the test cases:
-
-TYPED_TEST(TypedTest, NonZero)
-{
-    ASSERT_NE(0, TestFixture::instance.value);
-}
-TYPED_TEST(TypedTest, Even)
-{
-    ASSERT_EQ(0, TestFixture::instance.value &amp; 0x1);
-}
-</code></pre>
-
-<h2 id="base-classes">Base classes</h2>
-
-<h3 id="jc-test-base-class">jc_test_base_class</h3>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">// First, create the classes you wish to test:
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">TestClass1</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> value;
+</span></span><span style="display:flex;"><span>    TestClass1() <span style="color:#f92672">:</span> value(<span style="color:#ae81ff">2</span>) {}
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">TestClass2</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> value;
+</span></span><span style="display:flex;"><span>    TestClass2() <span style="color:#f92672">:</span> value(<span style="color:#ae81ff">4</span>) {}
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> jc_test_type2<span style="color:#f92672">&lt;</span>TestClass1, TestClass2<span style="color:#f92672">&gt;</span> TestTypes;
+</span></span><span style="display:flex;"><span>TYPED_TEST_SUITE(TypedTest, TestTypes);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//Then, create the test cases:
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TYPED_TEST(TypedTest, NonZero)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    ASSERT_NE(<span style="color:#ae81ff">0</span>, TestFixture<span style="color:#f92672">::</span>instance.value);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>TYPED_TEST(TypedTest, Even)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    ASSERT_EQ(<span style="color:#ae81ff">0</span>, TestFixture<span style="color:#f92672">::</span>instance.value <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x1</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="base-classes">Base classes</h2>
+<h3 id="jc_test_base_class">jc_test_base_class</h3>
 <p>Used in conjunction with <code>TEST_F</code></p>
-
-<h3 id="template-typename-paramtype-jc-test-params-class-paramtype">template <typename ParamType> jc_test_params_class<ParamType></h3>
-
+<h3 id="template--jc_test_params_class">template <typename ParamType> jc_test_params_class<ParamType></h3>
 <p>Only used in conjunction with <code>TEST_P</code></p>
-
 <p>This class implements a function <code>GetParam()</code> which is used to get the current parameter value.</p>
-
-<pre><code class="language-cpp">template &lt;typename ParamType&gt;
-jc_test_params_class {
-    const ParamType&amp; GetParam();
-}
-</code></pre>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> ParamType<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>jc_test_params_class {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> ParamType<span style="color:#f92672">&amp;</span> GetParam();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
   </main>
 
           <footer role="contentinfo">
@@ -467,6 +465,7 @@ jc_test_params_class {
   </script>
   <script async src='https://www.google-analytics.com/analytics.js'></script>
   
+
 
   </body>
 </html>

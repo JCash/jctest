@@ -19,23 +19,31 @@ if not "%USE_STATICANALYZE%"=="" (
     echo Using STATIC ANALYZER (msvc)
 )
 
-call %TIMEIT% cl.exe %FLAGS% test\test_params.cpp test\main.cpp /link /out:.\build\test_params.exe
+call %TIMEIT% cl.exe %FLAGS% test\test_params.cpp test\main.cpp /link /out:.\build\jctest_cpp_params.exe
 if errorlevel 1 exit /b %errorlevel%
-call %TIMEIT% cl.exe %FLAGS% test\test_typed_test.cpp test\main.cpp /link /out:.\build\test_typed_test.exe
+call %TIMEIT% cl.exe %FLAGS% test\test_typed_test.cpp test\main.cpp /link /out:.\build\jctest_cpp_typed_test.exe
 if errorlevel 1 exit /b %errorlevel%
-call %TIMEIT% cl.exe %FLAGS% test\test_expect.cpp test\main.cpp /link /out:.\build\test_expect.exe
+call %TIMEIT% cl.exe %FLAGS% test\test_expect.cpp test\main.cpp /link /out:.\build\jctest_cpp_expect.exe
 if errorlevel 1 exit /b %errorlevel%
-call %TIMEIT% cl.exe %FLAGS% test\test_death.cpp test\main.cpp /link /out:.\build\test_death.exe
+call %TIMEIT% cl.exe %FLAGS% test\test_death.cpp test\main.cpp /link /out:.\build\jctest_cpp_death.exe
 if errorlevel 1 exit /b %errorlevel%
-call %TIMEIT% cl.exe %FLAGS% test\test_empty.cpp test\main.cpp /link /out:.\build\test_empty.exe
+call %TIMEIT% cl.exe %FLAGS% test\test_empty.cpp test\main.cpp /link /out:.\build\jctest_cpp_empty.exe
 if errorlevel 1 exit /b %errorlevel%
-call %TIMEIT% cl.exe %FLAGS% test\test_array.cpp test\main.cpp /link /out:.\build\test_array.exe
+call %TIMEIT% cl.exe %FLAGS% test\test_array.cpp test\main.cpp /link /out:.\build\jctest_cpp_array.exe
 if errorlevel 1 exit /b %errorlevel%
-call %TIMEIT% cl.exe %FLAGS% test\test_buffered_string.cpp /link /out:.\build\test_buffered_string.exe
+call %TIMEIT% cl.exe %FLAGS% test\test_buffered_string.cpp /link /out:.\build\jctest_cpp_buffered_string.exe
 if errorlevel 1 exit /b %errorlevel%
-call %TIMEIT% cl.exe %FLAGS% test\test_color_off.cpp /link /out:.\build\test_color_off.exe
+call %TIMEIT% cl.exe %FLAGS% test\test_reporting.cpp /link /out:.\build\jctest_cpp_reporting.exe
 if errorlevel 1 exit /b %errorlevel%
-call %TIMEIT% cl.exe %FLAGS% test\test_color_on.cpp /link /out:.\build\test_color_on.exe
+call %TIMEIT% cl.exe %FLAGS% test\test_color_off.cpp /link /out:.\build\jctest_cpp_color_off.exe
+if errorlevel 1 exit /b %errorlevel%
+call %TIMEIT% cl.exe %FLAGS% test\test_color_on.cpp /link /out:.\build\jctest_cpp_color_on.exe
+if errorlevel 1 exit /b %errorlevel%
+call %TIMEIT% cl.exe %FLAGS% test\test_failure_recap.cpp /link /out:.\build\jctest_cpp_failure_recap.exe
+if errorlevel 1 exit /b %errorlevel%
+call %TIMEIT% cl.exe %FLAGS% test\test_failure_allocation.cpp /link /out:.\build\jctest_cpp_failure_allocation.exe
+if errorlevel 1 exit /b %errorlevel%
+call %TIMEIT% cl.exe %FLAGS% test\test_filtering.cpp /link /out:.\build\jctest_cpp_filtering.exe
 if errorlevel 1 exit /b %errorlevel%
 
 del *.obj

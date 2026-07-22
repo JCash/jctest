@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <meta name="generator" content="Hugo 0.59.1" />
+  <meta name="generator" content="Hugo 0.164.0">
   <link rel="canonical" href="/jctest/benchmarks/">
 
   
@@ -132,12 +132,12 @@
       <header class="intro-and-nav" role="banner">
   <div>
     <div class="intro">
-      <a class="logo" href="/jctest" aria-label="jctest home page">
+      <a class="logo" href="/jctest/" aria-label="jctest home page">
         <img src="/jctest/images/logo.svg" alt="">
       </a>
       <p class="library-desc">
         
-          A small but powerful C++ unit test framework
+          Small but powerful C11 and C++11 unit test frameworks
         
       </p>
     </div>
@@ -307,6 +307,7 @@
 <div id="view-size-normal">
 
 </div>
+
   </div>
 </header>
       <div class="main-and-footer">
@@ -314,125 +315,166 @@
           
   <main id="main">
     <h1>Benchmarks</h1>
-    
-
-<h2 id="minimal-test-example">Minimal test example</h2>
-
+    <h2 id="minimal-test-example">Minimal test example</h2>
 <p>A minimal test example was written specifically for each framework.
 You can find them in the <a href="https://github.com/JCash/jctest/tree/master/test/comparisons">jctest/test/comparisons</a> folder. The tests were compiled with <code>clang++ -O2</code></p>
-
 <p>Comparisons are done using no configurations of the testing framework.
 Also, since the goal was to eliminate a precompiled library, the header only version was chosen where available.</p>
-
 <div class="expandable-section">
-  
-    <button aria-expanded="false" data-expands="js-expandable-4caea0b402710aaaaa0a1f669c1148e0">
-      <span class="expandable-label">example_minimal.cpp</span>
-      <svg aria-hidden="true" focusable="false" viewBox="0 0 70.866142 70.866141">
-        <g transform="translate(0 -981.5)">
-          <rect style="stroke-width:0;fill:currentColor" ry="5" height="60" width="9.8985" y="987.36" x="30.051" class="up-strut" />
-          <rect style="stroke-width:0;fill:currentColor" ry="5" height="10" width="60" y="1012.4" x="5"/>
-        </g>
-      </svg>
-    </button>
-  
-  <div id="js-expandable-4caea0b402710aaaaa0a1f669c1148e0" hidden>
-    <pre><code class="language-cpp">#define JC_TEST_IMPLEMENTATION
-#include &lt;jc_test.h&gt;
-
-TEST(MyTest, Multiplication) {
-    ASSERT_EQ(4, 2 * 2);
-}
-TEST(MyTest, Division) {
-    ASSERT_EQ(2, 4 / 2);
-}
-
-int main(int argc, char *argv[]) {
-    // Parses and removes any jc_test specific arguments
-    jc_test_init(&amp;argc, argv);
-    // ... Do your test initialization
-    return jc_test_run_all();
-}
-
+<pre><code>&lt;button aria-expanded=&quot;false&quot; data-expands=&quot;js-expandable-7b781ebbd423957ced20cf2acf669b6d&quot;&gt;
+  &lt;span class=&quot;expandable-label&quot;&gt;example_minimal.cpp&lt;/span&gt;
+  &lt;svg aria-hidden=&quot;true&quot; focusable=&quot;false&quot; viewBox=&quot;0 0 70.866142 70.866141&quot;&gt;
+    &lt;g transform=&quot;translate(0 -981.5)&quot;&gt;
+      &lt;rect style=&quot;stroke-width:0;fill:currentColor&quot; ry=&quot;5&quot; height=&quot;60&quot; width=&quot;9.8985&quot; y=&quot;987.36&quot; x=&quot;30.051&quot; class=&quot;up-strut&quot; /&gt;
+      &lt;rect style=&quot;stroke-width:0;fill:currentColor&quot; ry=&quot;5&quot; height=&quot;10&quot; width=&quot;60&quot; y=&quot;1012.4&quot; x=&quot;5&quot;/&gt;
+    &lt;/g&gt;
+  &lt;/svg&gt;
+&lt;/button&gt;
 </code></pre>
+  <div id="js-expandable-7b781ebbd423957ced20cf2acf669b6d" hidden>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#define JC_TEST_IMPLEMENTATION
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;jc_test.hpp&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TEST(MyTest, Multiplication) {
+</span></span><span style="display:flex;"><span>    ASSERT_EQ(<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>TEST(MyTest, Division) {
+</span></span><span style="display:flex;"><span>    ASSERT_EQ(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">4</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc, <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>argv[]) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Parses and removes any jc_test specific arguments
+</span></span></span><span style="display:flex;"><span>    jc_test_init(<span style="color:#f92672">&amp;</span>argc, argv);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... Do your test initialization
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> jc_test_run_all();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
   </div>
 </div>
-
 <h2 id="benchmark">Benchmark</h2>
-
 <p><small><small></p>
-
 <table>
-<thead>
-<tr>
-<th align="right"></th>
-<th>jc_test</th>
-<th>gtest</th>
-<th>greatest</th>
-<th>utest</th>
-<th>doctest</th>
-<th>catch2</th>
-<th>snow 2</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td align="right">Size of program</td>
-<td>27292</td>
-<td>414608</td>
-<td>19228</td>
-<td>18280</td>
-<td>146348</td>
-<td>829572</td>
-<td>23144</td>
-</tr>
-
-<tr>
-<td align="right">Compile time</td>
-<td>217ms</td>
-<td>600ms</td>
-<td>141ms</td>
-<td>86ms</td>
-<td>1890ms</td>
-<td>10662ms</td>
-<td>216ms</td>
-</tr>
-
-<tr>
-<td align="right">Run time*</td>
-<td>3ms</td>
-<td>3ms</td>
-<td>6ms</td>
-<td>5ms</td>
-<td>3ms</td>
-<td>4ms</td>
-<td>3ms</td>
-</tr>
-</tbody>
+	<thead>
+			<tr>
+					<th style="text-align: right"></th>
+					<th>jc_test</th>
+					<th>gtest</th>
+					<th>greatest</th>
+					<th>utest</th>
+					<th>doctest</th>
+					<th>catch2</th>
+					<th>snow 2</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: right">Size of program</td>
+					<td>27292</td>
+					<td>414608</td>
+					<td>19228</td>
+					<td>18280</td>
+					<td>146348</td>
+					<td>829572</td>
+					<td>23144</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">Compile time</td>
+					<td>217ms</td>
+					<td>600ms</td>
+					<td>141ms</td>
+					<td>86ms</td>
+					<td>1890ms</td>
+					<td>10662ms</td>
+					<td>216ms</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">Run time*</td>
+					<td>3ms</td>
+					<td>3ms</td>
+					<td>6ms</td>
+					<td>5ms</td>
+					<td>3ms</td>
+					<td>4ms</td>
+					<td>3ms</td>
+			</tr>
+	</tbody>
 </table>
-
 <p></small></small></p>
-
 <p>*) Picking the fastest time.</p>
-
+<h2 id="reproducible-large-suite-benchmark">Reproducible large-suite benchmark</h2>
+<p><code>test/comparisons/benchmark.py</code> generates equivalent C jc_test, C++ jc_test, and utest suites.
+Its default workload follows the 5,000-test comparison: one filtered test, all passing tests, and
+all failing tests. It also reports preprocessed lines, compile time, object size, and executable
+size. Runtime output is suppressed while measuring.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>python3 test/comparisons/benchmark.py <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    --utest-dir /path/to/utest.h-checkout <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    --output build/comparisons/results.md
+</span></span></code></pre></div><p>The report records the platform, compiler versions, flags implied by the script, and utest commit.
+Each runtime metric uses two warmups and the median of ten measured runs. Results are informational
+and are not used as timing gates in CI.</p>
+<h3 id="reference-run-2026-07-22">Reference run: 2026-07-22</h3>
+<p>Apple Clang 21.0.0 on arm64 macOS 27.0, using utest commit
+<code>ebb62ed381c4f32ef2ddafb56890bcae1472ad9d</code>:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Framework</th>
+					<th style="text-align: right">Preprocessed lines</th>
+					<th style="text-align: right">Compile</th>
+					<th style="text-align: right">Object</th>
+					<th style="text-align: right">Executable</th>
+					<th style="text-align: right">Single filter</th>
+					<th style="text-align: right">All pass</th>
+					<th style="text-align: right">All fail</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>jc_test C</td>
+					<td style="text-align: right">8,675</td>
+					<td style="text-align: right">11.821657s</td>
+					<td style="text-align: right">1,729,648</td>
+					<td style="text-align: right">988,608</td>
+					<td style="text-align: right">0.003759s</td>
+					<td style="text-align: right">0.003367s</td>
+					<td style="text-align: right">0.009799s</td>
+			</tr>
+			<tr>
+					<td>jc_test C++</td>
+					<td style="text-align: right">12,530</td>
+					<td style="text-align: right">3.899378s</td>
+					<td style="text-align: right">4,704,784</td>
+					<td style="text-align: right">3,272,496</td>
+					<td style="text-align: right">0.015803s</td>
+					<td style="text-align: right">0.022645s</td>
+					<td style="text-align: right">0.029211s</td>
+			</tr>
+			<tr>
+					<td>utest C</td>
+					<td style="text-align: right">118,315</td>
+					<td style="text-align: right">14.978207s</td>
+					<td style="text-align: right">4,441,472</td>
+					<td style="text-align: right">2,239,112</td>
+					<td style="text-align: right">0.004511s</td>
+					<td style="text-align: right">0.004451s</td>
+					<td style="text-align: right">0.006410s</td>
+			</tr>
+	</tbody>
+</table>
+<p>The jc_test all-fail cases also retain and print every failure again in the final recap, so they
+perform additional allocation and formatting work not present in the utest workload.</p>
 <h2 id="real-life-examples">Real life examples</h2>
-
 <p>In our case (the <a href="www.defold.com">Defold</a> game engine), we wanted to replace <code>GTEST</code> with something new.</p>
-
 <p>Here&rsquo;s a comparison between the <code>GTEST</code> and <code>jctest</code> frameworks when building the game engine tests.
 We see a decrease of the compile time, ending up at ~54% of the original time.</p>
-
 <figure>
     <img src="/jctest/benchmarks/images/benchmark_enginetests.png"
          alt="Compile times"/> <figcaption>
             Compile times
         </figcaption>
 </figure>
-
 <p>The footprint on disc is also important, as it takes up both space but also affects writing/reading times.
 In this scenario the file sizes ended up at ~45% of the original sizes.</p>
-
 <figure>
     <img src="/jctest/benchmarks/images/benchmark_enginetestsizes.png"
          alt="Unit test sizes"/> <figcaption>
@@ -495,6 +537,7 @@ In this scenario the file sizes ended up at ~45% of the original sizes.</p>
   </script>
   <script async src='https://www.google-analytics.com/analytics.js'></script>
   
+
 
   </body>
 </html>

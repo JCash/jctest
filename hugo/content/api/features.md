@@ -6,37 +6,29 @@ weight: 1
 
 ## API
 
-This framework was designed to be a (subset) replacement of the Googletest.
+These frameworks were designed as subset replacements for Googletest. The assertion names are
+shared by C11 and C++11; C generic comparisons accept scalar values, while C++ also accepts types
+that provide the corresponding operator.
 
 <small>
 
-| Features     | jc_test |  gtest |
-|-------------:|---------|--------|
-| ASSERT_EQ    |   Yes   |   Yes  |
-| ASSERT_NE    |   Yes   |   Yes  |
-| ASSERT_GT    |   Yes   |   Yes  |
-| ASSERT_LT    |   Yes   |   Yes  |
-| ASSERT_GE    |   Yes   |   Yes  |
-| ASSERT_LE    |   Yes   |   Yes  |
-| ASSERT_ARRAY_EQ |   Yes   |   No  |
-| ASSERT_ARRAY_EQ_LEN |   Yes   |   No  |
-| ASSERT_STREQ |   Yes   |   Yes  |
-| ASSERT_STRNE |   Yes   |   Yes  |
-| ASSERT_NEAR |   Yes   |   Yes  |
-| ASSERT_DEATH |   Yes   |   Yes  |
-| ASSERT_FLOAT_EQ |   No* | Yes |
-| ASSERT_DOUBLE_EQ |   No* | Yes |
-| ASSERT_TRUE    |   Yes   |   Yes  |
-| ASSERT_FALSE    |   Yes   |   Yes  |
-| EXPECT_* variants   |   Yes   |   Yes  |
-| TEST   |   Yes   |   Yes  |
-| TEST_F   |   Yes   |   Yes  |
-| TEST_P  |   Yes   |   Yes  |
-| TYPED_TEST**  |   Yes   |   Yes  |
+| Features     | jc_test C | jc_test C++ |  gtest |
+|-------------:|-----------|-------------|--------|
+| ASSERT_EQ/NE/LT/GT/LE/GE | Yes | Yes | Yes |
+| ASSERT_ARRAY_EQ / ASSERT_ARRAY_EQ_LEN | Yes | Yes | No |
+| ASSERT_STREQ / ASSERT_STRNE | Yes | Yes | Yes |
+| ASSERT_NEAR | Yes | Yes | Yes |
+| ASSERT_DEATH | Yes | Yes | Yes |
+| ASSERT_TRUE / ASSERT_FALSE | Yes | Yes | Yes |
+| EXPECT_* variants | Yes | Yes | Yes |
+| TEST | Yes | Yes | Yes |
+| TEST_F | Yes | Yes | Yes |
+| TEST_P | No | Yes | Yes |
+| TYPED_TEST** | No | Yes | Yes |
 
 </small>
 
-*) The `ASSERT_FLOAT_EQ` is replaced by `ASSERT_EQ` in this framework, with the same margin of 4 ULP.
+`ASSERT_FLOAT_EQ` and `ASSERT_DOUBLE_EQ` are represented by `ASSERT_EQ`, with a margin of 4 ULP.
 
 **) A maximum number of 4 test types per typed test
 
@@ -51,7 +43,7 @@ regarding compile time and runtime.
 | Feature vs Impl        | jc_test |  gtest  | greatest |  utest  | doctest |  catch2 | snow 2  |
 |-----------------------:|---------|---------|----------|---------|---------|---------|---------|
 | Header only            |   yes   |    no   |    yes   |   yes   |   yes   |   yes   |   yes   |
-| Version                |  C++11  |  C++11  |    C89   |   C89   |  C++11  |  C++11  | c99/c11 |
+| Version                | C11/C++11 | C++11 |    C89   |   C89   |  C++11  |  C++11  | c99/c11 |
 | -Wall                  |   yes   |   yes   |    no    |   no    |   yes   |   yes   |   yes   |
 | -Weverything           |   yes   |    no   |    no    |   no    |   yes   |    no   |    no   |
 | -pedantic              |   yes*  |    no   |    no    |   no    |   yes   |    no   |    no   |

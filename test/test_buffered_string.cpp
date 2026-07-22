@@ -1,7 +1,7 @@
 #include <string.h>
 
 #define JC_TEST_USE_DEFAULT_MAIN
-#include <jc_test.h>
+#include <jc_test.hpp>
 
 TEST(BufferedString, AppendExactFitKeepsTerminatorInBounds)
 {
@@ -27,4 +27,15 @@ TEST(BufferedString, AppendStringDoesNotStoreTerminator)
     ASSERT_EQ(strlen(expected), str.Size());
     ASSERT_EQ(0, memcmp(str.buffer, expected, str.Size()));
     ASSERT_EQ(0, str.buffer[str.Size()]);
+}
+
+TEST(BufferedString, AppendfPreservesArgumentsWhenGrowing)
+{
+    jc_buffered_string str(4);
+    const char* expected = "prefix 42 suffix";
+
+    str.Appendf("%s %d %s", "prefix", 42, "suffix");
+
+    ASSERT_EQ(strlen(expected), str.Size());
+    ASSERT_EQ(0, strcmp(str.buffer, expected));
 }

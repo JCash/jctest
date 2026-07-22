@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <meta name="generator" content="Hugo 0.59.1" />
+  <meta name="generator" content="Hugo 0.164.0">
   <link rel="canonical" href="/jctest/api/03-runtime/">
 
   
@@ -132,12 +132,12 @@
       <header class="intro-and-nav" role="banner">
   <div>
     <div class="intro">
-      <a class="logo" href="/jctest" aria-label="jctest home page">
+      <a class="logo" href="/jctest/" aria-label="jctest home page">
         <img src="/jctest/images/logo.svg" alt="">
       </a>
       <p class="library-desc">
         
-          A small but powerful C++ unit test framework
+          Small but powerful C11 and C++11 unit test frameworks
         
       </p>
     </div>
@@ -307,6 +307,7 @@
 <div id="view-size-normal">
 
 </div>
+
   </div>
 </header>
       <div class="main-and-footer">
@@ -314,17 +315,14 @@
           
   <main id="main">
     <h1>Runtime</h1>
-    
-
-<h2 id="command-line-options">Command line options</h2>
-
-<h3 id="test-filter-substring"><code>--test-filter &lt;substring&gt;</code></h3>
-
-<p>If the substring matches part of the full test name, the test will be included.
-The non matching tests will be skipped.</p>
-
+    <h2 id="command-line-options">Command line options</h2>
+<h3 id="--test-filter-pattern"><code>--test-filter &lt;pattern&gt;</code></h3>
+<p>If a pattern matches the full test name, the test will be included. Patterns containing <code>*</code> use
+wildcard matching. Patterns without <code>*</code> retain substring matching for compatibility. Repeating
+the option combines patterns with OR semantics.</p>
+<p>The equivalent <code>--test-filter=&lt;pattern&gt;</code> and utest-compatible <code>--filter=&lt;pattern&gt;</code> forms are also
+accepted. Recognized test arguments are removed from <code>argv</code>.</p>
 <p>The complete name isn&rsquo;t written out during the tests, but is pieced together from the components making up the test. E.g.:</p>
-
 
 
 
@@ -336,16 +334,13 @@ SecondParamsTest/ParamsTest.<span class='highlight'>Test</span>/0
 SecondParamsTest/ParamsTest.Test/<span class='highlight'>1</span>
 </code></div>
 
-
 <ol>
 <li>Fixture name</li>
 <li>Test case name</li>
 <li>Test name</li>
 <li>Test number (for parameterized tests)</li>
 </ol>
-
 <p>Given the tests above, the option <code>--test-filter Second</code> will match:</p>
-
 
 
 
@@ -355,12 +350,11 @@ SecondParamsTest/ParamsTest.Test/0
 SecondParamsTest/ParamsTest.Test/1
 </code></div>
 
-
 <p>The option <code>--test-filter Test/0</code> will match:</p>
-
 <pre><code>FirstParamsTest/ParamsTest.Test/0
 SecondParamsTest/ParamsTest.Test/0
 </code></pre>
+<p>The option <code>--filter=*ParamsTest.Test1/0</code> uses wildcard matching.</p>
 
   </main>
 
@@ -413,6 +407,7 @@ SecondParamsTest/ParamsTest.Test/0
   </script>
   <script async src='https://www.google-analytics.com/analytics.js'></script>
   
+
 
   </body>
 </html>

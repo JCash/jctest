@@ -1,70 +1,52 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>jctest</title>
-    <link>/jctest/</link>
-    <description>Recent content on jctest</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    
-	<atom:link href="/jctest/index.xml" rel="self" type="application/rss+xml" />
-    
-    
-    <item>
-      <title>Features</title>
-      <link>/jctest/api/features/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/jctest/api/features/</guid>
-      <description>API This framework was designed to be a (subset) replacement of the Googletest.
+	<channel>
+		<title>jctest</title>
+		<link>/jctest/</link>
+		<description>Recent content on jctest</description>
+		<generator>Hugo</generator>
+		<language>en-us</language>
 
-   Features jc_test gtest     ASSERT_EQ Yes Yes   ASSERT_NE Yes Yes   ASSERT_GT Yes Yes   ASSERT_LT Yes Yes   ASSERT_GE Yes Yes   ASSERT_LE Yes Yes   ASSERT_ARRAY_EQ Yes No   ASSERT_ARRAY_EQ_LEN Yes No   ASSERT_STREQ Yes Yes   ASSERT_STRNE Yes Yes   ASSERT_NEAR Yes Yes   ASSERT_DEATH Yes Yes   ASSERT_FLOAT_EQ No*  Yes   ASSERT_DOUBLE_EQ No*  Yes   ASSERT_TRUE Yes Yes   ASSERT_FALSE Yes Yes   EXPECT_* variants Yes Yes   TEST Yes Yes   TEST_F Yes Yes   TEST_P Yes Yes   TYPED_TEST** Yes Yes</description>
-    </item>
-    
-    <item>
-      <title>Assertions</title>
-      <link>/jctest/api/01-assertions/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/jctest/api/01-assertions/</guid>
-      <description>There are two main types of assertions: fatal (ASSERT_*) and non-fatal (EXPECT_*).
-The general format of each assertion is that the expected value is to the left, and the value to test is on the right. This is good to know so that the error reporting doesn&amp;rsquo;t get confusing.
-ASSERT_EQ(expected, actual);  Boolean checks 
-    Fatal Non fatal Expression     True ASSERT_TRUE(V) EXPECT_TRUE(V) V is TRUE   False ASSERT_FALSE(V) EXPECT_FALSE(V) !</description>
-    </item>
-    
-    <item>
-      <title>Test Cases</title>
-      <link>/jctest/api/02-testcases/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/jctest/api/02-testcases/</guid>
-      <description>Test Fixtures TEST(FixtureName, TestName) Tests a single function.
-TEST(MyTest, TestName) { ASSERT_EQ(4, 2*2); ASSERT_STREQ(&amp;quot;a&amp;quot;, &amp;quot;b&amp;quot;); }  TEST_F(FixtureName, TestName) Uses a base class:
-struct MyTest : public jc_test_base_class { static void SetUpTestCase() {}; static void TearDownTestCase() {}; void SetUp() {}; void TearDown() {}; }; TEST_F(MyTest, TestName) { ASSERT_EQ(4, 2*2); ASSERT_STREQ(&amp;quot;a&amp;quot;, &amp;quot;b&amp;quot;); }  TEST_P + INSTANTIATE_TEST_CASE_P Using a templated base class which accepts a parameter type, it&amp;rsquo;s easy to use a test case with multiple values.</description>
-    </item>
-    
-    <item>
-      <title>Runtime</title>
-      <link>/jctest/api/03-runtime/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/jctest/api/03-runtime/</guid>
-      <description>Command line options --test-filter &amp;lt;substring&amp;gt; If the substring matches part of the full test name, the test will be included. The non matching tests will be skipped.
-The complete name isn&amp;rsquo;t written out during the tests, but is pieced together from the components making up the test. E.g.:
- FirstParamsTest/ParamsTest.Test/0 FirstParamsTest/ParamsTest.Test/1 SecondParamsTest/ParamsTest.Test/0 SecondParamsTest/ParamsTest.Test/1   Fixture name Test case name Test name Test number (for parameterized tests)  Given the tests above, the option --test-filter Second will match:</description>
-    </item>
-    
-    <item>
-      <title>Customization</title>
-      <link>/jctest/api/customization/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/jctest/api/customization/</guid>
-      <description>Custom type formatting It&amp;rsquo;s beneficial to be able to convert your custom types to a human readable string. If your type doesn&amp;rsquo;t match any of the supported types, it will default to the &amp;quot;?&amp;quot; output, which isn&amp;rsquo;t very helpful.
-All that is needed it to make a function available for the template matching to find it.
-Here is an example that takes a custom enum and converts that to a readable output:</description>
-    </item>
-    
-  </channel>
+
+
+
+			<lastBuildDate>Fri, 23 Dec 2022 15:08:55 +0100</lastBuildDate>
+
+			<atom:link href="/jctest/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>Features</title>
+				<link>/jctest/api/features/</link>
+				<pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+				<guid>/jctest/api/features/</guid>
+				<description>&lt;h2 id=&#34;api&#34;&gt;API&lt;/h2&gt;&#xA;&lt;p&gt;These frameworks were designed as subset replacements for Googletest. The assertion names are&#xA;shared by C11 and C++11; C generic comparisons accept scalar values, while C++ also accepts types&#xA;that provide the corresponding operator.&lt;/p&gt;&#xA;&lt;small&gt;&#xA;&lt;table&gt;&#xA;&#x9;&lt;thead&gt;&#xA;&#x9;&#x9;&#x9;&lt;tr&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;th style=&#34;text-align: right&#34;&gt;Features&lt;/th&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;th&gt;jc_test C&lt;/th&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;th&gt;jc_test C++&lt;/th&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;th&gt;gtest&lt;/th&gt;&#xA;&#x9;&#x9;&#x9;&lt;/tr&gt;&#xA;&#x9;&lt;/thead&gt;&#xA;&#x9;&lt;tbody&gt;&#xA;&#x9;&#x9;&#x9;&lt;tr&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td style=&#34;text-align: right&#34;&gt;ASSERT_EQ/NE/LT/GT/LE/GE&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&lt;/tr&gt;&#xA;&#x9;&#x9;&#x9;&lt;tr&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td style=&#34;text-align: right&#34;&gt;ASSERT_ARRAY_EQ / ASSERT_ARRAY_EQ_LEN&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;No&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&lt;/tr&gt;&#xA;&#x9;&#x9;&#x9;&lt;tr&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td style=&#34;text-align: right&#34;&gt;ASSERT_STREQ / ASSERT_STRNE&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&lt;/tr&gt;&#xA;&#x9;&#x9;&#x9;&lt;tr&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td style=&#34;text-align: right&#34;&gt;ASSERT_NEAR&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&lt;/tr&gt;&#xA;&#x9;&#x9;&#x9;&lt;tr&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td style=&#34;text-align: right&#34;&gt;ASSERT_DEATH&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&lt;/tr&gt;&#xA;&#x9;&#x9;&#x9;&lt;tr&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td style=&#34;text-align: right&#34;&gt;ASSERT_TRUE / ASSERT_FALSE&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&lt;/tr&gt;&#xA;&#x9;&#x9;&#x9;&lt;tr&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td style=&#34;text-align: right&#34;&gt;EXPECT_* variants&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&lt;/tr&gt;&#xA;&#x9;&#x9;&#x9;&lt;tr&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td style=&#34;text-align: right&#34;&gt;TEST&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&lt;/tr&gt;&#xA;&#x9;&#x9;&#x9;&lt;tr&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td style=&#34;text-align: right&#34;&gt;TEST_F&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&lt;/tr&gt;&#xA;&#x9;&#x9;&#x9;&lt;tr&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td style=&#34;text-align: right&#34;&gt;TEST_P&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;No&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&lt;/tr&gt;&#xA;&#x9;&#x9;&#x9;&lt;tr&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td style=&#34;text-align: right&#34;&gt;TYPED_TEST**&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;No&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;td&gt;Yes&lt;/td&gt;&#xA;&#x9;&#x9;&#x9;&lt;/tr&gt;&#xA;&#x9;&lt;/tbody&gt;&#xA;&lt;/table&gt;&#xA;&lt;/small&gt;&#xA;&lt;p&gt;&lt;code&gt;ASSERT_FLOAT_EQ&lt;/code&gt; and &lt;code&gt;ASSERT_DOUBLE_EQ&lt;/code&gt; are represented by &lt;code&gt;ASSERT_EQ&lt;/code&gt;, with a margin of 4 ULP.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Assertions</title>
+				<link>/jctest/api/01-assertions/</link>
+				<pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+				<guid>/jctest/api/01-assertions/</guid>
+				<description>&lt;p&gt;There are two main types of assertions: fatal (&lt;code&gt;ASSERT_*&lt;/code&gt;) and non-fatal (&lt;code&gt;EXPECT_*&lt;/code&gt;).&lt;/p&gt;&#xA;&lt;p&gt;The macro names are shared by the C11 and C++11 headers. C11 generic comparisons support integer&#xA;types, compatible enums, floating-point values, object pointers, and null pointer comparisons.&#xA;Operands are evaluated once. Ordered comparisons require numeric operands; use the string and&#xA;array macros for those data types.&lt;/p&gt;&#xA;&lt;p&gt;The general format of each assertion is that the expected value is to the left,&#xA;and the value to test is on the right. This is good to know so that the error reporting doesn&amp;rsquo;t get confusing.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Test Cases</title>
+				<link>/jctest/api/02-testcases/</link>
+				<pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+				<guid>/jctest/api/02-testcases/</guid>
+				<description>&lt;h2 id=&#34;test-fixtures&#34;&gt;Test Fixtures&lt;/h2&gt;&#xA;&lt;p&gt;&lt;code&gt;TEST&lt;/code&gt; has the same spelling in C and C++. C uses function-pointer test descriptors; C++ uses&#xA;the class-based implementation in &lt;code&gt;jc_test.hpp&lt;/code&gt;.&lt;/p&gt;&#xA;&lt;h3 id=&#34;testfixturename-testname&#34;&gt;TEST(FixtureName, TestName)&lt;/h3&gt;&#xA;&lt;p&gt;Tests a single function.&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;TEST(MyTest, TestName) {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ASSERT_EQ(&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;);&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ASSERT_STREQ(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;a&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b&amp;#34;&lt;/span&gt;);&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;test_ffixturename-testname&#34;&gt;TEST_F(FixtureName, TestName)&lt;/h3&gt;&#xA;&lt;p&gt;In C++, &lt;code&gt;TEST_F&lt;/code&gt; uses a base class:&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;MyTest&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; jc_test_base_class {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;SetUpTestCase&lt;/span&gt;()     {};&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;TearDownTestCase&lt;/span&gt;()  {};&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;SetUp&lt;/span&gt;()                    {};&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;TearDown&lt;/span&gt;()                 {};&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;TEST_F(MyTest, TestName) {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ASSERT_EQ(&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;);&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ASSERT_STREQ(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;a&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b&amp;#34;&lt;/span&gt;);&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In C11, fixtures are zero-initialized structures. Setup and teardown definitions are required,&#xA;even when their bodies are empty. Each body receives an explicit, typed &lt;code&gt;jc_test_fixture&lt;/code&gt; pointer.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Runtime</title>
+				<link>/jctest/api/03-runtime/</link>
+				<pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+				<guid>/jctest/api/03-runtime/</guid>
+				<description>&lt;h2 id=&#34;command-line-options&#34;&gt;Command line options&lt;/h2&gt;&#xA;&lt;h3 id=&#34;--test-filter-pattern&#34;&gt;&lt;code&gt;--test-filter &amp;lt;pattern&amp;gt;&lt;/code&gt;&lt;/h3&gt;&#xA;&lt;p&gt;If a pattern matches the full test name, the test will be included. Patterns containing &lt;code&gt;*&lt;/code&gt; use&#xA;wildcard matching. Patterns without &lt;code&gt;*&lt;/code&gt; retain substring matching for compatibility. Repeating&#xA;the option combines patterns with OR semantics.&lt;/p&gt;&#xA;&lt;p&gt;The equivalent &lt;code&gt;--test-filter=&amp;lt;pattern&amp;gt;&lt;/code&gt; and utest-compatible &lt;code&gt;--filter=&amp;lt;pattern&amp;gt;&lt;/code&gt; forms are also&#xA;accepted. Recognized test arguments are removed from &lt;code&gt;argv&lt;/code&gt;.&lt;/p&gt;&#xA;&lt;p&gt;The complete name isn&amp;rsquo;t written out during the tests, but is pieced together from the components making up the test. E.g.:&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Customization</title>
+				<link>/jctest/api/customization/</link>
+				<pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+				<guid>/jctest/api/customization/</guid>
+				<description>&lt;h2 id=&#34;custom-type-formatting&#34;&gt;Custom type formatting&lt;/h2&gt;&#xA;&lt;p&gt;Custom value formatters are a C++ feature of &lt;code&gt;jc_test.hpp&lt;/code&gt;. The C11 generic assertions intentionally&#xA;accept the documented scalar set and reject aggregate values at compile time.&lt;/p&gt;&#xA;&lt;p&gt;It&amp;rsquo;s beneficial to be able to convert your custom types to a human readable string.&#xA;If your type doesn&amp;rsquo;t match any of the supported types, it will default to the &lt;code&gt;&amp;quot;?&amp;quot;&lt;/code&gt; output, which isn&amp;rsquo;t very helpful.&lt;/p&gt;&#xA;&lt;p&gt;All that is needed it to make a function available for the template matching to find it.&lt;/p&gt;</description>
+			</item>
+	</channel>
 </rss>
