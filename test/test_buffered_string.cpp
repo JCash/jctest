@@ -1,7 +1,7 @@
 #include <string.h>
 
 #define JC_TEST_USE_DEFAULT_MAIN
-#include <jc_test.h>
+#include <jc_test.hpp>
 
 TEST(BufferedString, AppendExactFitKeepsTerminatorInBounds)
 {

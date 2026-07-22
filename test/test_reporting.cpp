@@ -27,7 +27,7 @@ struct CapturingLogger
 
 #define JC_TEST_LOGGER_CLASS CapturingLogger
 #define JC_TEST_USE_DEFAULT_MAIN
-#include <jc_test.h>
+#include <jc_test.hpp>
 
 static char g_LastFailure[1024];
 static int  g_CaptureOnly = 0;

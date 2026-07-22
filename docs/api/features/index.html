@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <meta name="generator" content="Hugo 0.59.1" />
+  <meta name="generator" content="Hugo 0.164.0">
   <link rel="canonical" href="/jctest/api/features/">
 
   
@@ -132,12 +132,12 @@
       <header class="intro-and-nav" role="banner">
   <div>
     <div class="intro">
-      <a class="logo" href="/jctest" aria-label="jctest home page">
+      <a class="logo" href="/jctest/" aria-label="jctest home page">
         <img src="/jctest/images/logo.svg" alt="">
       </a>
       <p class="library-desc">
         
-          A small but powerful C++ unit test framework
+          Small but powerful C11 and C++11 unit test frameworks
         
       </p>
     </div>
@@ -307,6 +307,7 @@
 <div id="view-size-normal">
 
 </div>
+
   </div>
 </header>
       <div class="main-and-footer">
@@ -314,285 +315,209 @@
           
   <main id="main">
     <h1>Features</h1>
-    
-
-<h2 id="api">API</h2>
-
-<p>This framework was designed to be a (subset) replacement of the Googletest.</p>
-
-<p><small></p>
-
+    <h2 id="api">API</h2>
+<p>These frameworks were designed as subset replacements for Googletest. The assertion names are
+shared by C11 and C++11; C generic comparisons accept scalar values, while C++ also accepts types
+that provide the corresponding operator.</p>
+<small>
 <table>
-<thead>
-<tr>
-<th align="right">Features</th>
-<th>jc_test</th>
-<th>gtest</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td align="right">ASSERT_EQ</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_NE</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_GT</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_LT</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_GE</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_LE</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_ARRAY_EQ</td>
-<td>Yes</td>
-<td>No</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_ARRAY_EQ_LEN</td>
-<td>Yes</td>
-<td>No</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_STREQ</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_STRNE</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_NEAR</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_DEATH</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_FLOAT_EQ</td>
-<td>No*</td>
-<td> Yes</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_DOUBLE_EQ</td>
-<td>No*</td>
-<td> Yes</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_TRUE</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">ASSERT_FALSE</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">EXPECT_* variants</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">TEST</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">TEST_F</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">TEST_P</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-
-<tr>
-<td align="right">TYPED_TEST**</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-</tbody>
+	<thead>
+			<tr>
+					<th style="text-align: right">Features</th>
+					<th>jc_test C</th>
+					<th>jc_test C++</th>
+					<th>gtest</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: right">ASSERT_EQ/NE/LT/GT/LE/GE</td>
+					<td>Yes</td>
+					<td>Yes</td>
+					<td>Yes</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">ASSERT_ARRAY_EQ / ASSERT_ARRAY_EQ_LEN</td>
+					<td>Yes</td>
+					<td>Yes</td>
+					<td>No</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">ASSERT_STREQ / ASSERT_STRNE</td>
+					<td>Yes</td>
+					<td>Yes</td>
+					<td>Yes</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">ASSERT_NEAR</td>
+					<td>Yes</td>
+					<td>Yes</td>
+					<td>Yes</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">ASSERT_DEATH</td>
+					<td>Yes</td>
+					<td>Yes</td>
+					<td>Yes</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">ASSERT_TRUE / ASSERT_FALSE</td>
+					<td>Yes</td>
+					<td>Yes</td>
+					<td>Yes</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">EXPECT_* variants</td>
+					<td>Yes</td>
+					<td>Yes</td>
+					<td>Yes</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">TEST</td>
+					<td>Yes</td>
+					<td>Yes</td>
+					<td>Yes</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">TEST_F</td>
+					<td>Yes</td>
+					<td>Yes</td>
+					<td>Yes</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">TEST_P</td>
+					<td>No</td>
+					<td>Yes</td>
+					<td>Yes</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">TYPED_TEST**</td>
+					<td>No</td>
+					<td>Yes</td>
+					<td>Yes</td>
+			</tr>
+	</tbody>
 </table>
-
-<p></small></p>
-
-<p>*) The <code>ASSERT_FLOAT_EQ</code> is replaced by <code>ASSERT_EQ</code> in this framework, with the same margin of 4 ULP.</p>
-
+</small>
+<p><code>ASSERT_FLOAT_EQ</code> and <code>ASSERT_DOUBLE_EQ</code> are represented by <code>ASSERT_EQ</code>, with a margin of 4 ULP.</p>
 <p>**) A maximum number of 4 test types per typed test</p>
-
 <h2 id="other-frameworks">Other frameworks</h2>
-
 <p>Here is a comparison with other C/C++ frameworks
 regarding compile time and runtime.</p>
-
 <p><small><small></p>
-
 <table>
-<thead>
-<tr>
-<th align="right">Feature vs Impl</th>
-<th>jc_test</th>
-<th>gtest</th>
-<th>greatest</th>
-<th>utest</th>
-<th>doctest</th>
-<th>catch2</th>
-<th>snow 2</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td align="right">Header only</td>
-<td>yes</td>
-<td>no</td>
-<td>yes</td>
-<td>yes</td>
-<td>yes</td>
-<td>yes</td>
-<td>yes</td>
-</tr>
-
-<tr>
-<td align="right">Version</td>
-<td>C++98</td>
-<td>C++11</td>
-<td>C89</td>
-<td>C89</td>
-<td>C++11</td>
-<td>C++11</td>
-<td>c99/c11</td>
-</tr>
-
-<tr>
-<td align="right">-Wall</td>
-<td>yes</td>
-<td>yes</td>
-<td>no</td>
-<td>no</td>
-<td>yes</td>
-<td>yes</td>
-<td>yes</td>
-</tr>
-
-<tr>
-<td align="right">-Weverything</td>
-<td>yes</td>
-<td>no</td>
-<td>no</td>
-<td>no</td>
-<td>yes</td>
-<td>no</td>
-<td>no</td>
-</tr>
-
-<tr>
-<td align="right">-pedantic</td>
-<td>yes*</td>
-<td>no</td>
-<td>no</td>
-<td>no</td>
-<td>yes</td>
-<td>no</td>
-<td>no</td>
-</tr>
-
-<tr>
-<td align="right">Lines of Code**</td>
-<td>~1100</td>
-<td>10000+</td>
-<td>&lt;1000</td>
-<td>&lt;400</td>
-<td>4000+</td>
-<td>11000+</td>
-<td>~1100</td>
-</tr>
-
-<tr>
-<td align="right">Size of program***</td>
-<td>27292</td>
-<td>414608</td>
-<td>19228</td>
-<td>18280</td>
-<td>146348</td>
-<td>829572</td>
-<td>23144</td>
-</tr>
-
-<tr>
-<td align="right">Compile time***</td>
-<td>217ms</td>
-<td>600ms</td>
-<td>141ms</td>
-<td>86ms</td>
-<td>1890ms</td>
-<td>10662ms</td>
-<td>216ms</td>
-</tr>
-
-<tr>
-<td align="right">Run time***</td>
-<td>3ms</td>
-<td>3ms</td>
-<td>6ms</td>
-<td>5ms</td>
-<td>3ms</td>
-<td>4ms</td>
-<td>3ms</td>
-</tr>
-</tbody>
+	<thead>
+			<tr>
+					<th style="text-align: right">Feature vs Impl</th>
+					<th>jc_test</th>
+					<th>gtest</th>
+					<th>greatest</th>
+					<th>utest</th>
+					<th>doctest</th>
+					<th>catch2</th>
+					<th>snow 2</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: right">Header only</td>
+					<td>yes</td>
+					<td>no</td>
+					<td>yes</td>
+					<td>yes</td>
+					<td>yes</td>
+					<td>yes</td>
+					<td>yes</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">Version</td>
+					<td>C11/C++11</td>
+					<td>C++11</td>
+					<td>C89</td>
+					<td>C89</td>
+					<td>C++11</td>
+					<td>C++11</td>
+					<td>c99/c11</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">-Wall</td>
+					<td>yes</td>
+					<td>yes</td>
+					<td>no</td>
+					<td>no</td>
+					<td>yes</td>
+					<td>yes</td>
+					<td>yes</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">-Weverything</td>
+					<td>yes</td>
+					<td>no</td>
+					<td>no</td>
+					<td>no</td>
+					<td>yes</td>
+					<td>no</td>
+					<td>no</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">-pedantic</td>
+					<td>yes*</td>
+					<td>no</td>
+					<td>no</td>
+					<td>no</td>
+					<td>yes</td>
+					<td>no</td>
+					<td>no</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">Lines of Code**</td>
+					<td>~1300</td>
+					<td>10000+</td>
+					<td>&lt;1000</td>
+					<td>&lt;400</td>
+					<td>4000+</td>
+					<td>11000+</td>
+					<td>~1100</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">Size of program***</td>
+					<td>27292</td>
+					<td>414608</td>
+					<td>19228</td>
+					<td>18280</td>
+					<td>146348</td>
+					<td>829572</td>
+					<td>23144</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">Compile time***</td>
+					<td>217ms</td>
+					<td>600ms</td>
+					<td>141ms</td>
+					<td>86ms</td>
+					<td>1890ms</td>
+					<td>10662ms</td>
+					<td>216ms</td>
+			</tr>
+			<tr>
+					<td style="text-align: right">Run time***</td>
+					<td>3ms</td>
+					<td>3ms</td>
+					<td>6ms</td>
+					<td>5ms</td>
+					<td>3ms</td>
+					<td>4ms</td>
+					<td>3ms</td>
+			</tr>
+	</tbody>
 </table>
-
 <p></small></small></p>
-
 <ol>
-<li>* Needs -Wno-global-constructors</li>
+<li>
+<ul>
+<li>Needs -Wno-global-constructors</li>
+</ul>
+</li>
 <li>** Counting code lines in C/C++ files using cloc</li>
 <li>*** A minimal test example. &ldquo;clang++ -O2&rdquo;. Picking the fastest time.</li>
 </ol>
@@ -648,6 +573,7 @@ regarding compile time and runtime.</p>
   </script>
   <script async src='https://www.google-analytics.com/analytics.js'></script>
   
+
 
   </body>
 </html>

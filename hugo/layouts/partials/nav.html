@@ -13,7 +13,7 @@
         <li class="pattern">
           {{ $active := 0 }}
           {{ $active = or $active (eq .Name $current.Title) }}
-          <a href="{{ .URL }}" {{ if $active }}aria-current="page"{{ end }}>
+          <a href="{{ .RelPermalink }}" {{ if $active }}aria-current="page"{{ end }}>
             <svg class="bookmark-icon" aria-hidden="true" focusable="false" viewBox="0 0 40 50">
               <use xlink:href="#bookmark"></use>
             </svg>
@@ -26,7 +26,7 @@
                 <li>
                   {{ $active := 0 }}
                   {{ $active = or $active (eq .Name $current.Title) }}
-                  <a href="{{ .URL }}" {{ if $active }}aria-current="page"{{ end }}>
+                  <a href="{{ .RelPermalink }}" {{ if $active }}aria-current="page"{{ end }}>
                     <svg class="bookmark-icon" aria-hidden="false" focusable="false" viewBox="0 0 40 50">
                       <use xlink:href="#bookmark"></use>
                     </svg>

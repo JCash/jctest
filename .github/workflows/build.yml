@@ -3,6 +3,52 @@ name: Build
 on: [push, pull_request]
 
 jobs:
+  build-c-linux:
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+        arch: ["-m64", "-m32"]
+        standard: [c11, c17, c23]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install multilib support
+        run: sudo apt-get update && sudo apt-get install -y gcc-multilib
+      - name: Build C tests
+        run: CC=${{ matrix.compiler }} CSTDVERSION=${{ matrix.standard }} ARCH=${{ matrix.arch }} ./scripts/compile_c.sh
+      - name: Run C tests
+        run: ./scripts/run_c_tests.sh
+
+  build-c-macos:
+    strategy:
+      matrix:
+        standard: [c11, c17, c23]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build C tests
+        run: CC=clang CSTDVERSION=${{ matrix.standard }} ./scripts/compile_c.sh
+      - name: Run C tests
+        run: ./scripts/run_c_tests.sh
+
+  build-c-windows:
+    strategy:
+      matrix:
+        arch: [amd64, amd64_x86]
+        standard: [c11, c17]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+      - name: Build C tests
+        env:
+          CSTDVERSION: ${{ matrix.standard }}
+        run: ./scripts/compile_c_cl.bat
+      - name: Run C tests
+        run: ./scripts/run_c_tests.bat
+
   build-linux:
     strategy:
       matrix:
@@ -12,7 +58,7 @@ jobs:
         platform: [c++0x, c++11, c++14, c++17, c++20, c++2b]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install
         run: sudo apt-get update && sudo apt-get install -y gcc-multilib g++-multilib
       - name: Build tests
@@ -23,7 +69,7 @@ jobs:
   build-linux-ubsan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install
         run: sudo apt-get update && sudo apt-get install -y clang
       - name: Build tests
@@ -34,7 +80,7 @@ jobs:
   build-linux-msan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install
         run: sudo apt-get update && sudo apt-get install -y clang
       - name: Build tests
@@ -49,7 +95,7 @@ jobs:
         platform: [c++0x, c++11, c++14, c++17, c++20, c++2b]
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Build tests
         run: STDVERSION=${{ matrix.platform }} ${{ matrix.feature }} ./scripts/compile.sh
       - name: Run Tests
@@ -58,7 +104,7 @@ jobs:
   build-linux-staticanalyze:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install
         run: sudo apt-get update && sudo apt-get install -y clang
       - name: Build tests
@@ -69,7 +115,7 @@ jobs:
   build-macos-staticanalyze:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Build tests
         run: CXX=clang++ STDVERSION=c++17 ARCH=-m64 USE_STATICANALYZE=1 ./scripts/compile.sh
       - name: Run Tests
@@ -81,7 +127,7 @@ jobs:
         arch:       [amd64, amd64_x86] #, amd64_arm64]
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.arch }}
@@ -94,7 +140,7 @@ jobs:
     runs-on: windows-latest
     if: ${{ false }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: amd64

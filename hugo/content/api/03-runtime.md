@@ -6,10 +6,14 @@ weight: 4
 
 ## Command line options
 
-### `--test-filter <substring>`
+### `--test-filter <pattern>`
 
-If the substring matches part of the full test name, the test will be included.
-The non matching tests will be skipped.
+If a pattern matches the full test name, the test will be included. Patterns containing `*` use
+wildcard matching. Patterns without `*` retain substring matching for compatibility. Repeating
+the option combines patterns with OR semantics.
+
+The equivalent `--test-filter=<pattern>` and utest-compatible `--filter=<pattern>` forms are also
+accepted. Recognized test arguments are removed from `argv`.
 
 The complete name isn't written out during the tests, but is pieced together from the components making up the test. E.g.:
 
@@ -37,3 +41,4 @@ The option `--test-filter Test/0` will match:
     FirstParamsTest/ParamsTest.Test/0
     SecondParamsTest/ParamsTest.Test/0
 
+The option `--filter=*ParamsTest.Test1/0` uses wildcard matching.

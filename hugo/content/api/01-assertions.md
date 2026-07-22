@@ -6,6 +6,11 @@ weight: 2
 
 There are two main types of assertions: fatal (`ASSERT_*`) and non-fatal (`EXPECT_*`).
 
+The macro names are shared by the C11 and C++11 headers. C11 generic comparisons support integer
+types, compatible enums, floating-point values, object pointers, and null pointer comparisons.
+Operands are evaluated once. Ordered comparisons require numeric operands; use the string and
+array macros for those data types.
+
 The general format of each assertion is that the expected value is to the left,
 and the value to test is on the right. This is good to know so that the error reporting doesn't get confusing.
 
@@ -35,8 +40,8 @@ TEST(Example, TestValue) {
 ## Value comparison checks
 
 Value A vs B checks.
-Supports any type that has the correct operator defined.
-It also supports types `float` and `double` within the precision of 4 `ulp`.
+The C++ header supports types that define the corresponding operator. The C header supports its
+documented scalar set. Both support `float` and `double` equality within 4 `ulp`.
 
 <small>
 

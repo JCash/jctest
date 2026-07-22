@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <meta name="generator" content="Hugo 0.59.1" />
+  <meta name="generator" content="Hugo 0.164.0">
   <link rel="canonical" href="/jctest/">
 
   
     
-      <meta name="description" content="A small but powerful C&#43;&#43; unit test framework">
+      <meta name="description" content="Small but powerful C11 and C&#43;&#43;11 unit test frameworks">
     
   
 
@@ -138,12 +138,12 @@
       <header class="intro-and-nav" role="banner">
   <div>
     <div class="intro">
-      <a class="logo" href="/jctest" aria-label="jctest home page">
+      <a class="logo" href="/jctest/" aria-label="jctest home page">
         <img src="/jctest/images/logo.svg" alt="">
       </a>
       <p class="library-desc">
         
-          A small but powerful C++ unit test framework
+          Small but powerful C11 and C++11 unit test frameworks
         
       </p>
     </div>
@@ -313,6 +313,7 @@
 <div id="view-size-normal">
 
 </div>
+
   </div>
 </header>
       <div class="main-and-footer">
@@ -321,16 +322,52 @@
   
     <main id="main">
       <h1>JCTEST</h1>
-    <p><code>jctest</code> is a C++ single file, header only library implementing a GTEST-like API.
-The library was build as a lightweight replacement for <code>googletest</code>.</p>
-
+    <p><code>jctest</code> provides single-header C11 and C++11 test frameworks implementing a GTest-like API.
+The libraries were built as lightweight replacements for <code>googletest</code> and similar C frameworks.</p>
+<p>Use <code>jc_test.h</code> from C and <code>jc_test.hpp</code> from C++. A C++ translation unit that still includes
+<code>jc_test.h</code> is forwarded to <code>jc_test.hpp</code> for compatibility. The implementations are separate
+runtimes and cannot both define <code>JC_TEST_IMPLEMENTATION</code> in the same executable.</p>
+<h2 id="minimal-c-example">Minimal C example</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#define JC_TEST_IMPLEMENTATION
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;jc_test.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">TEST</span>(Math, Multiply)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ASSERT_EQ</span>(<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc, <span style="color:#66d9ef">char</span><span style="color:#f92672">**</span> argv)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">jc_test_init</span>(<span style="color:#f92672">&amp;</span>argc, argv);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">jc_test_run_all</span>();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+<h2 id="minimal-c-example-1">Minimal C++ example</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#define JC_TEST_IMPLEMENTATION
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;jc_test.hpp&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TEST(MyTest, Multiplication) {
+</span></span><span style="display:flex;"><span>    ASSERT_EQ(<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>TEST(MyTest, Division) {
+</span></span><span style="display:flex;"><span>    ASSERT_EQ(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">4</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc, <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>argv[]) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Parses and removes any jc_test specific arguments
+</span></span></span><span style="display:flex;"><span>    jc_test_init(<span style="color:#f92672">&amp;</span>argc, argv);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... Do your test initialization
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> jc_test_run_all();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+<p>Failures are reported immediately. At the end of a long run, every failed check is repeated with
+its full test name and source location before the totals.</p>
 <figure>
     <img src="/jctest/main/images/test_example.png"
          alt="An example where all tests pass"/> <figcaption>
             An example where all tests pass
         </figcaption>
 </figure>
-
 <figure>
     <img src="/jctest/main/images/test_example_fail.png"
          alt="An example of how failing tests look"/> <figcaption>
@@ -390,6 +427,7 @@ The library was build as a lightweight replacement for <code>googletest</code>.<
   </script>
   <script async src='https://www.google-analytics.com/analytics.js'></script>
   
+
 
   </body>
 </html>

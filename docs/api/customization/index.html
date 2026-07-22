@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <meta name="generator" content="Hugo 0.59.1" />
+  <meta name="generator" content="Hugo 0.164.0">
   <link rel="canonical" href="/jctest/api/customization/">
 
   
@@ -132,12 +132,12 @@
       <header class="intro-and-nav" role="banner">
   <div>
     <div class="intro">
-      <a class="logo" href="/jctest" aria-label="jctest home page">
+      <a class="logo" href="/jctest/" aria-label="jctest home page">
         <img src="/jctest/images/logo.svg" alt="">
       </a>
       <p class="library-desc">
         
-          A small but powerful C++ unit test framework
+          Small but powerful C11 and C++11 unit test frameworks
         
       </p>
     </div>
@@ -307,6 +307,7 @@
 <div id="view-size-normal">
 
 </div>
+
   </div>
 </header>
       <div class="main-and-footer">
@@ -314,59 +315,51 @@
           
   <main id="main">
     <h1>Customization</h1>
-    
-
-<h2 id="custom-type-formatting">Custom type formatting</h2>
-
+    <h2 id="custom-type-formatting">Custom type formatting</h2>
+<p>Custom value formatters are a C++ feature of <code>jc_test.hpp</code>. The C11 generic assertions intentionally
+accept the documented scalar set and reject aggregate values at compile time.</p>
 <p>It&rsquo;s beneficial to be able to convert your custom types to a human readable string.
 If your type doesn&rsquo;t match any of the supported types, it will default to the <code>&quot;?&quot;</code> output, which isn&rsquo;t very helpful.</p>
-
 <p>All that is needed it to make a function available for the template matching to find it.</p>
-
 <p>Here is an example that takes a custom enum and converts that to a readable output:</p>
-
-<pre><code class="language-cpp">#include &lt;stdint.h&gt;
-
-#define JC_TEST_IMPLEMENTATION
-#include &lt;jc_test.h&gt;
-
-enum Result { RESULT_OK, RESULT_FAIL };
-
-static const char* ResultToString(Result r) {
-    switch(r) {
-        case RESULT_OK: return &quot;RESULT_OK&quot;;
-        case RESULT_FAIL: return &quot;RESULT_FAIL&quot;;
-    }
-}
-
-template &lt;&gt; char* jc_test_print_value(char* buffer, size_t buffer_len, Result r) {
-    return buffer + JC_TEST_SNPRINTF(buffer, buffer_len, &quot;%s&quot;, ResultToString(r));
-}
-
-static Result ReturnFail() {
-    return RESULT_FAIL;
-}
-
-TEST(Example, CustomPrint) {
-    ASSERT_EQ(RESULT_OK, ReturnFail());
-}
-
-int main(int argc, char **argv)
-{
-    jc_test_init(&amp;argc, argv);
-    return jc_test_run_all();
-}
-
-</code></pre>
-
-<pre><code class="language-bash"># Compile the app
-$ clang++ -I src hugo/static/code/example_custom_print.cpp
-
-# Run the app
-$ ./a.out
-</code></pre>
-
-<figure>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdint.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#define JC_TEST_IMPLEMENTATION
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;jc_test.hpp&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">Result</span> { RESULT_OK, RESULT_FAIL };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> <span style="color:#a6e22e">ResultToString</span>(Result r) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">switch</span>(r) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> RESULT_OK: <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;RESULT_OK&#34;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> RESULT_FAIL: <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;RESULT_FAIL&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;&gt;</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> jc_test_print_value(<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> buffer, size_t buffer_len, Result r) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> buffer <span style="color:#f92672">+</span> JC_TEST_SNPRINTF(buffer, buffer_len, <span style="color:#e6db74">&#34;%s&#34;</span>, ResultToString(r));
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> Result <span style="color:#a6e22e">ReturnFail</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> RESULT_FAIL;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TEST(Example, CustomPrint) {
+</span></span><span style="display:flex;"><span>    ASSERT_EQ(RESULT_OK, ReturnFail());
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc, <span style="color:#66d9ef">char</span> <span style="color:#f92672">**</span>argv)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    jc_test_init(<span style="color:#f92672">&amp;</span>argc, argv);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> jc_test_run_all();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Compile the app</span>
+</span></span><span style="display:flex;"><span>$ clang++ -I src hugo/static/code/example_custom_print.cpp
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Run the app</span>
+</span></span><span style="display:flex;"><span>$ ./a.out
+</span></span></code></pre></div><figure>
     <img src="/jctest/images/example_custom_print.png"/> 
 </figure>
 
@@ -421,6 +414,7 @@ $ ./a.out
   </script>
   <script async src='https://www.google-analytics.com/analytics.js'></script>
   
+
 
   </body>
 </html>
