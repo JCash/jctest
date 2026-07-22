@@ -26,7 +26,7 @@ TEST(Recap, MultipleFailures)
 }
 
 struct RecapFixture : public jc_test_base_class {
-    virtual ~RecapFixture() JC_OVERRIDE;
+    virtual ~RecapFixture() override;
 };
 
 RecapFixture::~RecapFixture() {}
@@ -46,7 +46,7 @@ TEST_F(RecapFixture, RunsAfterFatal)
 }
 
 struct RecapParam : public jc_test_params_class<int> {
-    virtual ~RecapParam() JC_OVERRIDE;
+    virtual ~RecapParam() override;
 };
 
 RecapParam::~RecapParam() {}

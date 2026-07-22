@@ -1,24 +1,84 @@
+:root {
+    color-scheme: light dark;
+    --page: #f4f4f2;
+    --surface: #ffffff;
+    --sidebar: #eeeeeb;
+    --surface-raised: #f8f8f7;
+    --text: #292d31;
+    --heading: #202428;
+    --muted: #62686d;
+    --link: #40566b;
+    --link-hover: #1f2a34;
+    --border: #d1d3d2;
+    --border-strong: #aeb2b3;
+    --hover: #dedfdd;
+    --active: #353b40;
+    --active-text: #ffffff;
+    --focus: #5d666d;
+    --code: #f1f1ef;
+    --inline-code: #e9e9e6;
+    --shadow: rgba(24, 28, 31, 0.10);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --page: #141617;
+        --surface: #1b1e20;
+        --sidebar: #181a1c;
+        --surface-raised: #222629;
+        --text: #dfe1e2;
+        --heading: #f1f2f2;
+        --muted: #a8adb0;
+        --link: #c2ccd5;
+        --link-hover: #ffffff;
+        --border: #3a3f42;
+        --border-strong: #596064;
+        --hover: #292d30;
+        --active: #d5d8da;
+        --active-text: #1d2124;
+        --focus: #c2c7ca;
+        --code: #222629;
+        --inline-code: #2a2e31;
+        --shadow: rgba(0, 0, 0, 0.28);
+    }
+}
+
+html {
+    color: var(--text);
+    background-color: var(--page);
+}
+
+body {
+    background-color: var(--page);
+}
+
 h1,
 h2,
 h3,
 h4 {
     font-family: Miriam Libre, serif;
     line-height: 1.0;
+    color: var(--heading);
 }
+
 h1 {
     font-size: 1.4rem;
 }
+
 h2 {
     font-size: 1.25rem;
 }
+
 h3 {
     font-size: 1.15rem;
 }
+
 h4,
 h5 {
     font-size: 1rem;
     font-family: PT Sans, sans-serif;
 }
+
 h5 {
     font-size: 0.85rem;
     text-transform: uppercase;
@@ -28,18 +88,165 @@ p {
     font-size: 0.85rem;
 }
 
+a {
+    color: var(--link);
+    border-bottom-color: var(--border-strong);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.15em;
+}
+
+a:hover {
+    color: var(--link-hover);
+    border-bottom-color: currentColor;
+}
+
+:focus:not([tabindex="-1"]),
+[data-expands]:focus svg,
+.patterns a:focus .text {
+    outline-color: var(--focus);
+}
+
+kbd {
+    box-shadow: 0.125rem 0.125rem 0 var(--border-strong);
+}
+
+button,
+.cmd {
+    color: var(--active-text);
+    background-color: var(--active);
+}
+
+.cmd code {
+    color: var(--active-text);
+}
+
+.intro-and-nav,
+.intro-and-nav > div {
+    background-color: var(--sidebar);
+}
+
+.intro-and-nav {
+    border-right-color: var(--border);
+}
+
+.intro,
+.library-desc {
+    color: var(--muted);
+}
+
+.logo img {
+    max-width: 8.5rem;
+    max-height: 18vh;
+    padding: 0.8rem;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    box-shadow: 0 0.35rem 1rem var(--shadow);
+}
+
 #patterns-nav {
     overflow: unset;
     line-height: 1.2;
     margin-top: 1.0rem;
 }
 
-.image-link {
-    border-bottom: 0px;
+.pattern a {
+    color: var(--text);
+    border-radius: 0.4rem;
 }
 
-.logo img {
-    max-height: 18vh;
+.pattern a:hover {
+    color: var(--link-hover);
+    background-color: var(--hover);
+}
+
+.pattern [aria-current] {
+    color: var(--active-text);
+    background-color: var(--active);
+    clip-path: none;
+    box-shadow: 0 0.25rem 0.75rem var(--shadow);
+}
+
+.pattern [aria-current]:hover {
+    color: var(--active-text);
+    background-color: var(--active);
+}
+
+.main-and-footer {
+    background-color: var(--surface);
+}
+
+main h1 {
+    padding-bottom: 0.4rem;
+    border-bottom: 0.2rem solid var(--border-strong);
+}
+
+.h2-container h2,
+main > h2,
+main h3 {
+    color: var(--heading);
+}
+
+main code:not([class*="language-"]) {
+    color: var(--text);
+    background-color: var(--inline-code);
+    border-radius: 0.25rem;
+    padding: 0.08em 0.28em;
+}
+
+.toc {
+    background-color: var(--surface-raised);
+    border-color: var(--border);
+    border-radius: 0.5rem;
+}
+
+blockquote {
+    color: var(--muted);
+    border-left-color: var(--border-strong);
+}
+
+table,
+th,
+td,
+.tested,
+.tested th,
+.tested td {
+    border-color: var(--border);
+}
+
+th,
+.tested th {
+    color: var(--active-text);
+    background-color: var(--active);
+    outline-color: var(--active);
+}
+
+.highlight {
+    background-color: var(--inline-code);
+}
+
+.numbered .highlight::after,
+.code-annotated.numbered + ol li::before {
+    color: var(--active-text);
+    background-color: var(--active);
+}
+
+.file-tree li {
+    background-color: var(--surface);
+}
+
+.site-error {
+    background-color: var(--surface-raised);
+}
+
+[role="contentinfo"] {
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+}
+
+.image-link {
+    border-bottom: 0;
 }
 
 [id^="js-expandable-"] {
@@ -48,42 +255,75 @@ p {
 
 code[class*="language-"],
 pre[class*="language-"] {
-    background-color: rgb(245,245,245);
+    color: var(--text);
+    background-color: var(--code);
     margin-top: 1.25em;
 }
 
+pre[class*="language-"] {
+    border-color: var(--border);
+    border-radius: 0.5rem;
+    box-shadow: inset 0.2rem 0 0 var(--border-strong);
+}
+
 .code-annotated {
-    background-color: rgb(245,245,245);
+    color: var(--text);
+    background-color: var(--code);
+    border-color: var(--border);
+    border-radius: 0.5rem;
 }
 
 figcaption {
+    color: var(--muted);
     font-size: 0.85rem;
     font-style: italic;
-    margin-top: 0.0rem;
+    margin-top: 0;
 }
 
 #sub-patterns-list {
-  margin-top: 0.5rem;
+    margin-top: 0.5rem;
 }
 
 @media screen and (min-width: 45em) {
     #view-size-normal {
         display: block;
     }
+
     #view-size-mobile {
         display: none;
     }
 }
 
 @media screen and (max-width: 45em) {
+    .intro-and-nav {
+        border-bottom: 1px solid var(--border);
+    }
+
+    #menu-button {
+        color: var(--active-text);
+        background-color: var(--active);
+    }
+
+    #patterns-list {
+        border-color: var(--border);
+        background-color: var(--surface-raised);
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .pattern + .pattern {
+        border-top-color: var(--border);
+    }
+
     #sub-patterns-list {
-      margin-top: 0.5rem;
-      margin-left: 0.5rem;
+        margin-top: 0.5rem;
+        margin-left: 0.5rem;
     }
 
     #view-size-normal {
         display: none;
     }
+
     #view-size-mobile {
         display: block;
     }

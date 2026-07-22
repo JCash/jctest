@@ -5,8 +5,7 @@ These instructions apply to the entire repository.
 ## Language and Design
 
 * Prefer C-like C++ ("Orthodox C++"): simple types, explicit ownership, RAII, and clear invariants.
-* Target C++98 when possible.
-* Do not introduce C++11+ features unless there is a clear need. If newer features are required, guard them and keep a C++98-compatible path when practical.
+* Target C++11 and avoid newer language features unless there is a clear need.
 * Keep dependencies minimal and avoid template-heavy or meta-programming-heavy solutions.
 * Do not rely on exceptions (the project builds with `-fno-exceptions`).
 
@@ -20,13 +19,13 @@ These instructions apply to the entire repository.
 
 ## Compatibility Guidelines
 
-* Prefer C/C++98-friendly headers and APIs already used in this repo (`<stdio.h>`, `<string.h>`, etc.) unless there is a reason to use something else.
-* Avoid unguarded use of features like `nullptr`, `auto`, lambdas, `override`, variadic templates, and `static_assert`.
+* Prefer lightweight C-style headers and APIs already used in this repo (`<stdio.h>`, `<string.h>`, etc.) unless there is a reason to use something else.
+* Do not add template-heavy C++ features or standard-library machinery without measuring compile time, runtime, and binary size.
 * Keep code warning-clean under the current compile flags.
 
 ## Validation
 
-* Build with C++98 first when touching C++ code:
-  * `STDVERSION=c++98 scripts/compile.sh`
+* Build with C++11 first when touching C++ code:
+  * `STDVERSION=c++11 scripts/compile.sh`
 * Run tests after changes:
   * `scripts/run_tests.sh`
