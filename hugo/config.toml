@@ -1,24 +1,29 @@
 #baseURL = "http://JCash.github.com/jctest"
 baseURL = "/jctest"
 #baseURL = "/"
-languageCode = "en-us"
+locale = "en-us"
 defaultContentLanguage = "en"
 title = "jctest"
 theme = "cupper-hugo-theme"
 publishDir = "../docs"
-googleAnalytics = "UA-152712676-1"
 enableGitInfo = true
 author = "Mathias Westerdahl"
 
 [permalinks]
-  post = "/:filename/"
+  post = "/:contentbasename/"
 
 [imaging]
   quality = 99
 
+[services.googleAnalytics]
+  id = "UA-152712676-1"
+
+[markup.goldmark.renderer]
+  unsafe = true
+
 [params]
-  description = "A small but powerful C++ unit test framework"
-  homeMetaContent = "A small but powerful C++ unit test framework"
+  description = "Small but powerful C11 and C++11 unit test frameworks"
+  homeMetaContent = "Small but powerful C11 and C++11 unit test frameworks"
   mainPage = "/main"
   mainTitle = "JCTEST"
   katex = false
@@ -44,8 +49,5 @@ author = "Mathias Westerdahl"
 [params.social.e_twitter]
   url = "https://twitter.com/mwesterdahl76"
   imgUrl = "https://img.shields.io/twitter/url?label=%40mwesterdahl76&style=social&url=https%3A%2F%2Ftwitter.com%2Fmwesterdahl76"
-
-
-
 
 

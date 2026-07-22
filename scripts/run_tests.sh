@@ -12,12 +12,11 @@ function run_tests {
     if [ `uname` != "Darwin" ]; then
         EXECUTABLE_PATTERN="-executable"
     fi
-    for name in `find build -iname "${pattern}" $EXECUTABLE_PATTERN`
+    for name in `find build -maxdepth 1 -type f -iname "${pattern}" $EXECUTABLE_PATTERN`
     do
         echo $name
         time $name
     done
 }
 
-#run_tests gtest_*
-run_tests jctest_*
+run_tests jctest_cpp_*

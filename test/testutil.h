@@ -9,5 +9,5 @@
 
     #define jc_test_values_in ::testing::ValuesIn
 #else
-    #include <jc_test.h>
+#include <jc_test.hpp>
 #endif

@@ -1,5 +1,5 @@
 #define JC_TEST_IMPLEMENTATION
-#include <jc_test.h>
+#include <jc_test.hpp>
 
 TEST(MyTest, Multiply) {
     ASSERT_EQ(4, 2*2);

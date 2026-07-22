@@ -1,7 +1,7 @@
 #include <stdint.h>
 
 #define JC_TEST_IMPLEMENTATION
-#include <jc_test.h>
+#include <jc_test.hpp>
 
 enum Result { RESULT_OK, RESULT_FAIL };
 

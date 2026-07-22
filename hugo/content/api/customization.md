@@ -5,6 +5,9 @@ weight: 5
 
 ## Custom type formatting
 
+Custom value formatters are a C++ feature of `jc_test.hpp`. The C11 generic assertions intentionally
+accept the documented scalar set and reject aggregate values at compile time.
+
 It's beneficial to be able to convert your custom types to a human readable string.
 If your type doesn't match any of the supported types, it will default to the `"?"` output, which isn't very helpful.
 

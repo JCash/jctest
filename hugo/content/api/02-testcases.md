@@ -6,6 +6,9 @@ weight: 3
 
 ## Test Fixtures
 
+`TEST` has the same spelling in C and C++. C uses function-pointer test descriptors; C++ uses
+the class-based implementation in `jc_test.hpp`.
+
 ### TEST(FixtureName, TestName)
 
 Tests a single function.
@@ -20,7 +23,7 @@ TEST(MyTest, TestName) {
 
 ### TEST_F(FixtureName, TestName)
 
-Uses a base class:
+In C++, `TEST_F` uses a base class:
 
 ```cpp
 struct MyTest : public jc_test_base_class {
@@ -35,7 +38,33 @@ TEST_F(MyTest, TestName) {
 }
 ```
 
+In C11, fixtures are zero-initialized structures. Setup and teardown definitions are required,
+even when their bodies are empty. Each body receives an explicit, typed `jc_test_fixture` pointer.
+
+```c
+typedef struct MyTest {
+    int value;
+} MyTest;
+
+JC_TEST_FIXTURE_SETUP(MyTest) {
+    jc_test_fixture->value = 42;
+}
+
+JC_TEST_FIXTURE_TEARDOWN(MyTest) {
+    EXPECT_EQ(42, jc_test_fixture->value);
+}
+
+TEST_F(MyTest, TestName) {
+    ASSERT_EQ(42, jc_test_fixture->value);
+}
+```
+
+Teardown runs after setup begins, including after a fatal setup or test-body assertion. A fatal
+setup assertion skips the body.
+
 ### TEST_P + INSTANTIATE_TEST_CASE_P
+
+Parameterized tests are available in C++ only.
 
 Using a templated base class which accepts a parameter type,
 it's easy to use a test case with multiple values.
@@ -62,6 +91,8 @@ INSTANTIATE_TEST_CASE_P(HighNumbers, MyParamTest, jc_test_values_in(high_values)
 ```
 
 ### TYPED_TEST + INSTANTIATE_TEST_CASE_P
+
+Typed tests are available in C++ only.
 
 If you wish to use a different base class to use with your tests, you can do so.
 You can specify up to 4 classes via the constructs `jc_test_type1` ... `jc_test_type4`
@@ -109,4 +140,3 @@ jc_test_params_class {
     const ParamType& GetParam();
 }
 ```
-

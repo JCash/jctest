@@ -12,6 +12,14 @@ if [ "$CXX" == "" ]; then
     CXX=clang++
 fi
 
+if [ "$CC" == "" ]; then
+    if [ "$CXX" == "g++" ]; then
+        CC=gcc
+    else
+        CC=clang
+    fi
+fi
+
 if [ "$USE_STATICANALYZE" != "" ]; then
     if [ "$CXX" == "clang++" ]; then
         STATIC_ANALYZER_CLANG=1
@@ -103,7 +111,7 @@ fi
 
 # Use pedantic flags when compiling jctest tests
 echo "COMPILING WITH JCTEST"
-PREFIX=jctest
+PREFIX=jctest_cpp
 
 EXAMPLE_SOURCE_DIR=./hugo/static/code
 ANALYZE_INDEX=0
@@ -160,8 +168,13 @@ time compile_test expect -Wno-sign-compare
 time compile_test death
 time compile_test empty
 time compile_test array
+time compile_test_with_main buffered_string
+time compile_test_with_main reporting -Wno-sign-compare
 time compile_test_with_main color_on
 time compile_test_with_main color_off
+time compile_test_with_main failure_recap
+time compile_test_with_main failure_allocation
+time compile_test_with_main filtering
 
 time compile_doc_example minimal
 time compile_doc_example custom_print
