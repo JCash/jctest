@@ -23,6 +23,14 @@
 #ifndef JC_TEST_HPP
 #define JC_TEST_HPP
 
+#if defined(_MSC_VER)
+    #if _MSC_VER < 1900
+        #error "jc_test.hpp requires C++11 or newer"
+    #endif
+#elif __cplusplus < 201103L
+    #error "jc_test.hpp requires C++11 or newer"
+#endif
+
 // ***************************************************************************************
 // PUBLIC API
 
@@ -169,26 +177,11 @@ struct jc_test_params_class : public jc_test_base_class {
 
 #include <type_traits> // painful
 
-// C++0x and above
 #if !defined(_MSC_VER)
     #pragma GCC diagnostic push
-    #if !defined(__GNUC__)
-        #if __cplusplus >= 199711L
-            // Silencing them made the code unreadable, so I opted to disable them instead
-            #pragma GCC diagnostic ignored "-Wc++98-compat"
-        #endif
-    #endif
-    #if __cplusplus >= 201103L
-        #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-        #pragma GCC diagnostic ignored "-Wold-style-cast"
-        #pragma GCC diagnostic ignored "-Wformat-nonliteral"
-    #endif
-#endif
-
-#if __cplusplus > 199711L
-    #define JC_OVERRIDE override
-#else
-    #define JC_OVERRIDE
+    #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+    #pragma GCC diagnostic ignored "-Wold-style-cast"
+    #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -856,7 +849,7 @@ int jc_test_register_param_tests(const char* prototype_fixture_name, const char*
 
 #define TEST3(testfixture,testfn,testname)                                                                                  \
 class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public jc_test_base_class {                                             \
-    virtual void TestBody() JC_OVERRIDE;                                                                                    \
+    virtual void TestBody() override;                                                                                       \
 };                                                                                                                          \
 static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) JC_TEST_UNUSED = jc_test_register_class_test(              \
         testname, #testfn, jc_test_base_class::SetUpTestCase, jc_test_base_class::TearDownTestCase,                         \
@@ -867,7 +860,7 @@ void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
 
 #define TEST_F(testfixture,testfn)                                                                                          \
     class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture {                                                \
-        virtual void TestBody() JC_OVERRIDE;                                                                                \
+        virtual void TestBody() override;                                                                                   \
     };                                                                                                                      \
     static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) JC_TEST_UNUSED = jc_test_register_class_test(          \
             #testfixture, #testfn, testfixture::SetUpTestCase, testfixture::TearDownTestCase,                               \
@@ -876,7 +869,7 @@ void JC_TEST_MAKE_CLASS_NAME(testfixture,testfn)::TestBody()
 
 #define TEST_P(testfixture,testfn)                                                                                          \
     class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture {                                                \
-        virtual void TestBody() JC_OVERRIDE;                                                                                \
+        virtual void TestBody() override;                                                                                   \
     };                                                                                                                      \
     static int JC_TEST_MAKE_UNIQUE_NAME(testfixture,testfn,__LINE__) JC_TEST_UNUSED = jc_test_register_param_class_test(    \
             #testfixture, #testfn, testfixture::SetUpTestCase, testfixture::TearDownTestCase,                               \
@@ -903,7 +896,7 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 
 #define TYPED_TEST(testfixture,testfn)                                                                      \
     template<typename T> class JC_TEST_MAKE_CLASS_NAME(testfixture,testfn) : public testfixture<T> {        \
-        virtual void TestBody() JC_OVERRIDE;                                                                \
+        virtual void TestBody() override;                                                                   \
         typedef testfixture<T> TestFixture;                                                                 \
         typedef T TypeParam;                                                                                \
     };                                                                                                      \
@@ -942,17 +935,9 @@ template<template <typename T> class BaseClass> struct jc_test_template_sel {
 
 #if defined(__GNUC__) || defined(__clang__)
     #pragma GCC diagnostic push
-    #if !defined(__GNUC__)
-        #if __cplusplus >= 199711L
-            // Silencing them made the code unreadable, so I opted to disable them instead
-            #pragma GCC diagnostic ignored "-Wc++98-compat"
-        #endif
-    #endif
-    #if __cplusplus >= 201103L
-        #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-        #pragma GCC diagnostic ignored "-Wold-style-cast"
-        #pragma GCC diagnostic ignored "-Wformat-nonliteral"
-    #endif
+    #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+    #pragma GCC diagnostic ignored "-Wold-style-cast"
+    #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
 
 #if defined(_MSC_VER)
@@ -2249,7 +2234,7 @@ INSTANTIATE_TEST_CASE_P(EvenValues, MyParamTest, jc_test_values(2,4,6,8,10));
  *                          Minimum version is now C++11 due to usage of <type_traits>
  *                          Removed doctest support
  *      0.8     2021-04-03  Added fflush to logging to prevent test output becoming out of order
- *      0.7     2021-02-07  Fixed null pointer warning on C++0x and above
+ *      0.7     2021-02-07  Fixed null pointer warning on C++11 and above
  *                          Test filtering now works on parameterized tests
  *      0.6     2020-03-12  Fixed bootstrap issue w/static initializers
  *                          Added support for JC_TEST_USE_COLORS to force color on/off

@@ -170,10 +170,8 @@ TEST(Assertions, ExpectFail)
 
 TEST(Assertions, ExpectFailPointers)
 {
-#if __cplusplus > 199711L
     EXPECT_EQ(nullptr, (char*)1);
     EXPECT_EQ((char*)1, nullptr);
-#endif
 
     EXPECT_EQ(0, (Foo*)1);
     EXPECT_EQ(0U, (Foo*)1);

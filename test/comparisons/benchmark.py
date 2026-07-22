@@ -70,7 +70,7 @@ def git_revision(path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--utest-dir", type=Path, required=True,
+    parser.add_argument("--utest-dir", type=Path,
                         help="checkout containing utest.h")
     parser.add_argument("--tests", type=int, default=5000)
     parser.add_argument("--runs", type=int, default=10)
@@ -88,8 +88,6 @@ def main():
     root = Path(__file__).resolve().parents[2]
     source_dir = root / "src"
     args.build_dir.mkdir(parents=True, exist_ok=True)
-    if not (args.utest_dir / "utest.h").is_file():
-        parser.error("--utest-dir must contain utest.h")
 
     configs = {
         "jc_test C": ("jctest_c", args.cc, "c11", [source_dir]),
@@ -100,6 +98,10 @@ def main():
         selected = set(args.framework)
         configs = {label: config for label, config in configs.items()
                    if config[0] in selected}
+    if any(config[0] == "utest" for config in configs.values()) and \
+            (args.utest_dir is None or
+             not (args.utest_dir / "utest.h").is_file()):
+        parser.error("--utest-dir must contain utest.h")
     rows = []
     for label, (key, compiler, standard, includes) in configs.items():
         pass_source = args.build_dir / f"{key}_pass.c"
