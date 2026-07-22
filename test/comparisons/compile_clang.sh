@@ -28,7 +28,7 @@ echo "Compiling 'gtest'"
 time clang++ -O2 -std=c++11 -o ${BUILD}/test_gtest -I${EXTERNAL}/googletest/googletest/include -L${EXTERNAL}/googletest/googletest -lgtest test_gtest.cpp
 
 echo "Compiling 'jctest'"
-time clang++ -O2 -std=c++98 -o ${BUILD}/test_jctest -I../../src test_jctest.cpp
+time clang++ -O2 -std=c++11 -o ${BUILD}/test_jctest -I../../src test_jctest.cpp
 
 
 find ${BUILD} -perm +111 -iname "test_*" | sort | xargs ls -la
