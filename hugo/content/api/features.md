@@ -10,23 +10,49 @@ These frameworks were designed as subset replacements for Googletest. The assert
 shared by C11 and C++11; C generic comparisons accept scalar values, while C++ also accepts types
 that provide the corresponding operator.
 
-<small>
+### C
 
-| Features     | jc_test C | jc_test C++ |  gtest |
-|-------------:|-----------|-------------|--------|
-| ASSERT_EQ/NE/LT/GT/LE/GE | Yes | Yes | Yes |
-| ASSERT_ARRAY_EQ / ASSERT_ARRAY_EQ_LEN | Yes | Yes | No |
-| ASSERT_STREQ / ASSERT_STRNE | Yes | Yes | Yes |
-| ASSERT_NEAR | Yes | Yes | Yes |
-| ASSERT_DEATH | Yes | Yes | Yes |
-| ASSERT_TRUE / ASSERT_FALSE | Yes | Yes | Yes |
-| EXPECT_* variants | Yes | Yes | Yes |
-| TEST | Yes | Yes | Yes |
-| TEST_F | Yes | Yes | Yes |
-| TEST_P | No | Yes | Yes |
-| TYPED_TEST** | No | Yes | Yes |
+The utest column refers to [sheredom/utest.h](https://github.com/sheredom/utest.h).
 
-</small>
+<div class="feature-table">
+
+| Macro or capability | jc_test C | utest.h |
+|---------------------:|-----------|---------|
+| ASSERT_EQ/NE/LT/GT/LE/GE | Yes | Yes |
+| ASSERT_ARRAY_EQ / ASSERT_ARRAY_EQ_LEN | Yes | `ASSERT_MEMEQ` |
+| ASSERT_STREQ / ASSERT_STRNE | Yes | Yes |
+| ASSERT_NEAR | Yes | Yes |
+| ASSERT_DEATH | Yes | No |
+| ASSERT_TRUE / ASSERT_FALSE | Yes | Yes |
+| EXPECT_* variants | Yes | Yes |
+| Skip current test | `SKIP` | `UTEST_SKIP` |
+| Basic tests | `TEST` | `UTEST` |
+| Fixtures | `TEST_F` | `UTEST_F` |
+| Parameterized tests | No | No |
+| Typed tests | No | No |
+
+</div>
+
+### C++
+
+<div class="feature-table">
+
+| Macro or capability | jc_test C++ | GoogleTest |
+|---------------------:|-------------|------------|
+| ASSERT_EQ/NE/LT/GT/LE/GE | Yes | Yes |
+| ASSERT_ARRAY_EQ / ASSERT_ARRAY_EQ_LEN | Yes | No |
+| ASSERT_STREQ / ASSERT_STRNE | Yes | Yes |
+| ASSERT_NEAR | Yes | Yes |
+| ASSERT_DEATH | Yes | Yes |
+| ASSERT_TRUE / ASSERT_FALSE | Yes | Yes |
+| EXPECT_* variants | Yes | Yes |
+| Skip current test | `SKIP` | `GTEST_SKIP` |
+| TEST | Yes | Yes |
+| TEST_F | Yes | Yes |
+| TEST_P | Yes | Yes |
+| TYPED_TEST** | Yes | Yes |
+
+</div>
 
 `ASSERT_FLOAT_EQ` and `ASSERT_DOUBLE_EQ` are represented by `ASSERT_EQ`, with a margin of 4 ULP.
 
@@ -38,7 +64,7 @@ that provide the corresponding operator.
 Here is a comparison with other C/C++ frameworks
 regarding compile time and runtime.
 
-<small><small>
+<div class="feature-table feature-table-wide">
 
 | Feature vs Impl        | jc_test |  gtest  | greatest |  utest  | doctest |  catch2 | snow 2  |
 |-----------------------:|---------|---------|----------|---------|---------|---------|---------|
@@ -52,7 +78,7 @@ regarding compile time and runtime.
 | Compile time***        |  217ms  |  600ms  |   141ms  |   86ms  |  1890ms | 10662ms |  216ms  |
 | Run time***            |    3ms  |    3ms  |    6ms   |    5ms  |    3ms  |   4ms   |   3ms   |
 
-</small></small>
+</div>
 
 1. * Needs -Wno-global-constructors
 1. ** Counting code lines in C/C++ files using cloc
