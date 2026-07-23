@@ -1,0 +1,75 @@
+:root {
+    --hextra-max-page-width: 90rem;
+    --hextra-max-navbar-width: 90rem;
+    --hextra-max-footer-width: 90rem;
+}
+
+.content {
+    font-size: 0.95rem;
+}
+
+.content h1,
+.content h2,
+.content h3 {
+    letter-spacing: -0.015em;
+}
+
+.project-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 1rem 0 1.5rem;
+}
+
+.project-badges a,
+.project-badges img {
+    display: block;
+    margin: 0;
+}
+
+.feature-table {
+    margin: 1rem 0 1.5rem;
+    overflow-x: auto;
+    font-size: 0.875rem;
+}
+
+.feature-table table {
+    margin: 0;
+    table-layout: auto;
+}
+
+.feature-table th,
+.feature-table td {
+    white-space: nowrap;
+}
+
+.feature-table-wide table {
+    min-width: 52rem;
+}
+
+.content figure {
+    margin: 1.5rem 0;
+}
+
+.content figure img {
+    border: 1px solid rgb(229 231 235);
+    border-radius: 0.5rem;
+    box-shadow: none;
+    filter: none;
+}
+
+.dark .content figure img {
+    border-color: rgb(64 64 64);
+}
+
+.content figcaption {
+    margin-top: 0.5rem;
+    color: rgb(107 114 128);
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+.dark .content figcaption {
+    color: rgb(163 163 163);
+}

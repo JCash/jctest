@@ -1,16 +1,18 @@
-#baseURL = "http://JCash.github.com/jctest"
-baseURL = "/jctest"
-#baseURL = "/"
-locale = "en-us"
+baseURL = "https://jcash.github.io/jctest/"
 defaultContentLanguage = "en"
 title = "jctest"
-theme = "cupper-hugo-theme"
 publishDir = "../docs"
 enableGitInfo = true
-author = "Mathias Westerdahl"
+enableRobotsTXT = true
+ignoreFiles = ['data/docset-index\.txt$']
 
-[permalinks]
-  post = "/:contentbasename/"
+[module]
+  [[module.imports]]
+    path = "github.com/imfing/hextra"
+
+  [module.hugoVersion]
+    extended = true
+    min = "0.146.0"
 
 [imaging]
   quality = 99
@@ -18,36 +20,83 @@ author = "Mathias Westerdahl"
 [services.googleAnalytics]
   id = "UA-152712676-1"
 
+[markup.highlight]
+  noClasses = false
+
 [markup.goldmark.renderer]
   unsafe = true
 
+[menu]
+  [[menu.main]]
+    name = "Documentation"
+    pageRef = "/main"
+    weight = 1
+  [[menu.main]]
+    name = "API"
+    pageRef = "/api"
+    weight = 2
+  [[menu.main]]
+    name = "Benchmarks"
+    pageRef = "/benchmarks"
+    weight = 3
+  [[menu.main]]
+    name = "Search"
+    weight = 4
+    [menu.main.params]
+      type = "search"
+  [[menu.main]]
+    name = "GitHub"
+    url = "https://github.com/JCash/jctest"
+    weight = 5
+    [menu.main.params]
+      icon = "github"
+
 [params]
   description = "Small but powerful C11 and C++11 unit test frameworks"
-  homeMetaContent = "Small but powerful C11 and C++11 unit test frameworks"
-  mainPage = "/main"
-  mainTitle = "JCTEST"
-  katex = false
-  footer = "©2019 Mathias Westerdahl<br>Built with [HUGO](https://gohugo.io) using [Cupper Theme](https://github.com/zwbetz-gh/cupper-hugo-theme). Icon made by [Freepik](https://www.flaticon.com/authors/freepik) from [www.flaticon.com](https://www.flaticon.com)"
-  custom_css = ['css/custom.css']
+  externalLinkDecoration = true
+  displayUpdatedDate = true
+  dateFormat = "January 2, 2006"
 
-[params.social.a_license]
-  url = "https://github.com/JCash/jctest/blob/master/LICENSE"
-  imgUrl = "https://img.shields.io/github/license/JCash/jctest?label=License"
+  [params.navbar]
+    displayTitle = true
+    displayLogo = true
+    width = "wide"
 
-[params.social.b_github2]
-  url = "https://github.com/JCash/jctest/blob/master/src/jc_test.h"
-  imgUrl = "https://img.shields.io/github/size/JCash/jctest/src/jc_test.h?color=green&label=jc_test.h"
+    [params.navbar.logo]
+      path = "images/logo.svg"
+      width = 32
+      height = 32
 
-[params.social.c_release]
-  url = "https://github.com/JCash/jctest/releases"
-  imgUrl = "https://img.shields.io/github/v/release/JCash/jctest?color=blue&label=Version&sort=semver"
+  [params.theme]
+    default = "system"
+    displayToggle = true
 
-[params.social.d_github]
-  url = "https://github.com/JCash/jctest"
-  imgUrl = "https://img.shields.io/github/stars/JCash/jctest?label=Github&style=social"
+  [params.footer]
+    enable = true
+    displayCopyright = true
+    displayPoweredBy = true
+    width = "wide"
 
-[params.social.e_twitter]
-  url = "https://twitter.com/mwesterdahl76"
-  imgUrl = "https://img.shields.io/twitter/url?label=%40mwesterdahl76&style=social&url=https%3A%2F%2Ftwitter.com%2Fmwesterdahl76"
+  [params.search]
+    enable = true
+    type = "flexsearch"
 
+    [params.search.flexsearch]
+      index = "content"
+      tokenize = "forward"
+      js = "js/vendor/flexsearch.bundle.min.js"
 
+  [params.editURL]
+    enable = true
+    base = "https://github.com/JCash/jctest/edit/master/hugo/content"
+
+  [params.toc]
+    displayTags = false
+
+  [params.highlight.copy]
+    enable = true
+    display = "hover"
+
+  [params.page]
+    width = "wide"
+    displayPagination = true

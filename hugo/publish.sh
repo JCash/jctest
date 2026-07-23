@@ -2,10 +2,10 @@
 
 rm -rf ../docs
 
-./process_images.sh
+hugo --minify
 
-hugo
-
-./optimize_images.sh
+if command -v pngquant >/dev/null 2>&1; then
+    ./optimize_images.sh
+fi
 
 git add ../docs

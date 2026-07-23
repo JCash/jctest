@@ -14,12 +14,9 @@ You can read in more detail about how this library came to be in the blog post:<
 
 This library was created with requirements and guidelines in place:
 
-{{% ticks %}}
 * Replacement for googletest, with minimal changes
 * Support a few use cases: TEST, TEST_F, TEST_P, TYPED_TEST
 * As few templates as possible
 * No STL
 * As small as possible
 * Single header only library
-{{% /ticks %}}
-

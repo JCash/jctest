@@ -11,6 +11,28 @@ types, compatible enums, floating-point values, object pointers, and null pointe
 Operands are evaluated once. Ordered comparisons require numeric operands; use the string and
 array macros for those data types.
 
+## Test control
+
+### SKIP()
+
+Marks the current test as skipped and returns from the current test function. `SKIP()` is available
+in C and C++. In a C fixture setup function it prevents the test body from running; teardown still
+runs after setup has begun.
+
+```c
+TEST(Network, RequiresCredentials) {
+    if (!credentials_available()) {
+        SKIP();
+    }
+    ASSERT_TRUE(connect_to_service());
+}
+```
+
+### SCOPED_TRACE(message)
+
+Accepted for source compatibility with GoogleTest. It is currently a no-op in both C and C++;
+the message is not added to failure diagnostics.
+
 The general format of each assertion is that the expected value is to the left,
 and the value to test is on the right. This is good to know so that the error reporting doesn't get confusing.
 
@@ -20,14 +42,10 @@ and the value to test is on the right. This is good to know so that the error re
 
 ## Boolean checks
 
-<small>
-
 |       | Fatal           | Non fatal       | Expression     |
 |------:|-----------------|-----------------|----------------|
 | True  | ASSERT_TRUE(V)  | EXPECT_TRUE(V)  | V is TRUE      |
 | False | ASSERT_FALSE(V) | EXPECT_FALSE(V) | !(V is TRUE)   |
-
-</small>
 
 ```cpp
 TEST(Example, TestValue) {
@@ -43,8 +61,6 @@ Value A vs B checks.
 The C++ header supports types that define the corresponding operator. The C header supports its
 documented scalar set. Both support `float` and `double` equality within 4 `ulp`.
 
-<small>
-
 |                    | Fatal           | Non fatal       | Expression |
 |-------------------:|-----------------|-----------------|------------|
 | Equal              | ASSERT_EQ(A, B) | EXPECT_EQ(A, B) | A == B     |
@@ -53,9 +69,6 @@ documented scalar set. Both support `float` and `double` equality within 4 `ulp`
 | Greater Than       | ASSERT_GT(A, B) | EXPECT_GT(A, B) | A  > B     |
 | Less Than Equal    | ASSERT_LE(A, B) | EXPECT_LE(A, B) | A <= B     |
 | Greater Than Equal | ASSERT_GE(A, B) | EXPECT_GE(A, B) | A >= B     |
-
-</small>
-
 
 ```cpp
 TEST(Example, TestValue) {
@@ -72,14 +85,9 @@ TEST(Example, TestValue) {
 
 Compares the difference of two floating point values and an error limit.
 
-<small><small>
-
 |                    | Fatal           | Non fatal       | Expression |
 |-------------------:|-------------------|-----------------|------------|
 | Near               | ASSERT_NEAR(A, B, E) | EXPECT_NEAR(A, B, E) | ABS(A - B) <= EPSILON     |
-
-</small></small>
-
 
 ```cpp
 TEST(Example, TestValue) {
@@ -92,14 +100,10 @@ TEST(Example, TestValue) {
 Compares two null terminated strings.
 The comparisons are case sensitive.
 
-<small><small>
-
 |              | Fatal              | Non fatal          | Expression |
 |-------------:|--------------------|--------------------|------------|
 | Equal        | ASSERT_STREQ(A, B) | EXPECT_STREQ(A, B) | A == B     |
 | Not Equal    | ASSERT_STRNE(A, B) | EXPECT_STRNE(A, B) | A != B     |
-
-</small></small>
 
 ```cpp
 TEST(Example, TestStrings) {
@@ -114,14 +118,10 @@ TEST(Example, TestStrings) {
 Tests two arrays of equal length `N`, or `LEN` if specified.
 
 
-<small><small><small>
-
 |              | Fatal              | Non fatal          | Expression |
 |-------------:|--------------------|--------------------|------------|
 | Equal | ASSERT_ARRAY_EQ(A, B) | EXPECT_ARRAY_EQ(A, B) | A[0..N] == B[0..N]     |
 | Equal | ASSERT_ARRAY_EQ_LEN(A, B, N) | EXPECT_ARRAY_EQ_LEN(A, B, N) | A[0..N] == B[0..N]    |
-
-</small></small></small>
 
 ```cpp
 TEST(Example, TestArrays) {
@@ -143,13 +143,9 @@ Uses `setjmp`/`longjmp` to recover from the signal handling.
 Note: The STRING argument is there to make the transition from GTEST easier. It is not used in this framework
 
 
-<small><small><small>
-
 |               | Fatal              | Non fatal          | Expression |
 |--------------:|--------------------|--------------------|------------|
-| Raises signal | ASSERT_DEATH(STATEMENT, STRING) | ASSERT_DEATH(STATEMENT, STRING) | STATEMENT     |
-
-</small></small></small>
+| Raises signal | ASSERT_DEATH(STATEMENT, STRING) | EXPECT_DEATH(STATEMENT, STRING) | STATEMENT     |
 
 ```cpp
 void call_assert(bool v) {

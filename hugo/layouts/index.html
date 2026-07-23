@@ -1,8 +1,0 @@
-{{ define "main" }}
-  {{ with .Site.GetPage .Site.Params.MainPage }}
-    <main id="main">
-      <h1>{{ .Site.Params.MainTitle }}</h1>
-    {{ .Content }}
-    </main>
-  {{ end }}
-{{ end }}

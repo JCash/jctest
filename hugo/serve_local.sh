@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 
-rm -rf ../build/jctest
-hugo server -wDs . -d ../build/jctest
+hugo server \
+    --buildDrafts \
+    --disableFastRender \
+    --renderToMemory \
+    --bind 127.0.0.1 \
+    --port 1313

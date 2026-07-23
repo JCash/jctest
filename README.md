@@ -3,7 +3,7 @@
 
 # Documentation
 
-https://jcash.github.io/jctest/ (or [here](./docs/index.md))
+https://jcash.github.io/jctest/ (or [here](./docs/index.html))
 
 # jctest
 
