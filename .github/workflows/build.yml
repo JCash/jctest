@@ -3,6 +3,18 @@ name: Build
 on: [push, pull_request]
 
 jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.164.0"
+          extended: true
+      - name: Build documentation
+        run: hugo --source hugo --destination /tmp/jctest-docs --cleanDestinationDir --minify
+
   build-c-linux:
     strategy:
       matrix:

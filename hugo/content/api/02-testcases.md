@@ -90,7 +90,13 @@ const TestParam high_values[] = { {100}, {102}, {104} };
 INSTANTIATE_TEST_CASE_P(HighNumbers, MyParamTest, jc_test_values_in(high_values));
 ```
 
-### TYPED_TEST + INSTANTIATE_TEST_CASE_P
+### jc_test_values_in
+
+`jc_test_values_in(begin, end)` and `jc_test_values_in(array)` create the C++ parameter iterator
+used by `INSTANTIATE_TEST_CASE_P`. The array overload determines the element count automatically.
+The returned iterator is owned by the test runtime.
+
+### TYPED_TEST_CASE + TYPED_TEST
 
 Typed tests are available in C++ only.
 
@@ -108,7 +114,7 @@ struct TestClass2 {
     TestClass2() : value(4) {}
 };
 typedef jc_test_type2<TestClass1, TestClass2> TestTypes;
-TYPED_TEST_SUITE(TypedTest, TestTypes);
+TYPED_TEST_CASE(TypedTest, TestTypes);
 
 //Then, create the test cases:
 
@@ -126,7 +132,8 @@ TYPED_TEST(TypedTest, Even)
 
 ### jc_test_base_class
 
-Used in conjunction with `TEST_F`
+Used with `TEST_F`. Override `SetUp()` and `TearDown()` for per-test work. Define static
+`SetUpTestCase()` and `TearDownTestCase()` for work surrounding all tests in a fixture.
 
 ### template <typename ParamType> jc_test_params_class<ParamType>
 

@@ -1,0 +1,30 @@
+name: Release Dash docset
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release-docset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.164.0"
+          extended: true
+
+      - name: Build and validate docset
+        run: python3 scripts/build_docset.py --version "${GITHUB_REF_NAME}"
+
+      - name: Upload docset to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/docset/jctest-${{ github.ref_name }}.docset.tgz
+          generate_release_notes: true
