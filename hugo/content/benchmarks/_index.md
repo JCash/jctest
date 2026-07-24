@@ -4,61 +4,88 @@ weight: 4
 ---
 
 
-## Minimal test example
+## Methodology
 
-A minimal test example was written specifically for each framework.
-You can find them in the [jctest/test/comparisons](https://github.com/JCash/jctest/tree/master/test/comparisons) folder. The tests were compiled with `clang++ -O2`
+The reproducible benchmark generates equivalent 5,000-test suites for each framework. C frameworks
+are compiled as C11 with `clang -O2`; C++ frameworks are compiled as C++11 with `clang++ -O2`.
 
-Comparisons are done using no configurations of the testing framework.
-Also, since the goal was to eliminate a precompiled library, the header only version was chosen where available.
+Each suite is measured in three runtime modes: one filtered passing test, all passing tests, and all
+failing tests. The report also records preprocessed line count, compile time, object size, and
+executable size. Runtime output is suppressed while measuring. Compile time uses one warmup and the
+median of three measured runs; runtime uses two warmups and the median of ten measured runs.
 
-{{% details title="example_minimal.cpp" closed="true" %}}
+The compile metric covers the generated test translation unit. Unity and GoogleTest normally use a
+separately compiled support library, so that one-time library build is excluded from compile time.
+Its object bytes are still included in the object-size total, and its linked code is included in the
+executable size. Header-only frameworks compile their runner as part of the measured translation
+unit. All runtime measurements execute tests in-process; Acutest is invoked with `--no-exec` to
+disable its default per-test child-process isolation.
+
+{{% details title="Minimal C example" closed="true" %}}
+{{% codefile file="/static/code/example_minimal.c" language="c" %}}
+{{% /details %}}
+
+{{% details title="Minimal C++ example" closed="true" %}}
 {{% codefile file="/static/code/example_minimal.cpp" language="cpp" %}}
 {{% /details %}}
 
+The all-fail jctest cases retain and print every failure again in the final recap. They therefore do
+additional allocation and formatting work that the comparison frameworks may not perform. Results
+are informational rather than timing gates in CI.
 
-## Benchmark
-
-|                 | jc_test |  gtest  | greatest |  utest  | doctest |  catch2 | snow 2  |
-|----------------:|---------|---------|----------|---------|---------|---------|---------|
-| Size of program |  27292  |  414608 |   19228  |  18280  |  146348 |  829572 |  23144  |
-| Compile time    |  217ms  |  600ms  |   141ms  |   86ms  |  1890ms | 10662ms |  216ms  |
-| Run time*       |    3ms  |    3ms  |    6ms   |    5ms  |    3ms  |   4ms   |   3ms   |
-
-*) Picking the fastest time.
-
-## Reproducible large-suite benchmark
-
-`test/comparisons/benchmark.py` generates equivalent C jc_test, C++ jc_test, and utest suites.
-Its default workload follows the 5,000-test comparison: one filtered test, all passing tests, and
-all failing tests. It also reports preprocessed lines, compile time, object size, and executable
-size. Runtime output is suppressed while measuring.
+## Reproduce the benchmark
 
 ```bash
 python3 test/comparisons/benchmark.py \
     --utest-dir /path/to/utest.h-checkout \
+    --greatest-dir /path/to/greatest-checkout \
+    --unity-dir /path/to/Unity-checkout \
+    --acutest-dir /path/to/acutest-checkout \
+    --gtest-dir /path/to/googletest-checkout \
+    --doctest-dir /path/to/doctest-checkout \
+    --catch2-dir /path/to/Catch2-v2-checkout \
     --output build/comparisons/results.md
 ```
 
-The report records the platform, compiler versions, flags implied by the script, and utest commit.
-Each runtime metric uses two warmups and the median of ten measured runs. Results are informational
-and are not used as timing gates in CI.
+The report records the platform, compiler versions, workload, and exact dependency commits. The
+generated sources, object files, and executables are kept under `build/comparisons` for inspection.
 
-### Reference run: 2026-07-22
+## Reference run: 2026-07-23
 
-Apple Clang 21.0.0 on arm64 macOS 27.0, using utest commit
-`ebb62ed381c4f32ef2ddafb56890bcae1472ad9d`:
+Apple Clang 21.0.0 on arm64 macOS 27.0. GoogleTest 1.12.1 and Catch2 2.13.10
+are the last release lines of those frameworks that support C++11. Exact revisions for every
+dependency are recorded by the generated report.
+
+{{% details title="External framework revisions" closed="true" %}}
+
+- [utest.h](https://github.com/sheredom/utest.h): `ebb62ed381c4f32ef2ddafb56890bcae1472ad9d`
+- [greatest](https://github.com/silentbicycle/greatest): `11a6af1919049df502405913da64fb385c219361`
+- [Unity](https://github.com/ThrowTheSwitch/Unity): `3a6eb6dfd7706b703adf60f5ce3bcad57f94de4f`
+- [Acutest](https://github.com/mity/acutest): `31751b4089c93b46a9fd8a8183a695f772de66de`
+- [GoogleTest 1.12.1](https://github.com/google/googletest/tree/release-1.12.1): `58d77fa8070e8cec2dc1ed015d66b454c8d78850`
+- [doctest 2.4.12](https://github.com/doctest/doctest/tree/v2.4.12): `1da23a3e8119ec5cce4f9388e91b065e20bf06f5`
+- [Catch2 2.13.10](https://github.com/catchorg/Catch2/tree/v2.13.10): `182c910b4b63ff587a3440e08f84f70497e49a81`
+
+{{% /details %}}
+
+### C frameworks
 
 | Framework | Preprocessed lines | Compile | Object | Executable | Single filter | All pass | All fail |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| jc_test C | 8,675 | 11.821657s | 1,729,648 | 988,608 | 0.003759s | 0.003367s | 0.009799s |
-| jc_test C++ | 12,530 | 3.899378s | 4,704,784 | 3,272,496 | 0.015803s | 0.022645s | 0.029211s |
-| utest C | 118,315 | 14.978207s | 4,441,472 | 2,239,112 | 0.004511s | 0.004451s | 0.006410s |
+| jc_test C | 8,675 | 11.053856s | 1,729,648 | 988,608 | 0.002821s | 0.003776s | 0.009019s |
+| utest.h | 118,315 | 14.368594s | 4,441,472 | 2,239,112 | 0.003942s | 0.003859s | 0.005930s |
+| greatest | 12,499 | 1.863712s | 607,464 | 317,136 | 0.003098s | 0.009336s | 0.010399s |
+| Unity | 11,634 | 5.135419s | 1,859,872 | 749,816 | 0.003487s | 0.007473s | 0.010356s |
+| Acutest | 15,172 | 0.674482s | 1,473,560 | 736,144 | 0.003074s | 0.008260s | 0.010067s |
 
-The jc_test all-fail cases also retain and print every failure again in the final recap, so they
-perform additional allocation and formatting work not present in the utest workload.
+### C++ frameworks
 
-
+| Framework | Preprocessed lines | Compile | Object | Executable | Single filter | All pass | All fail |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| jc_test C++ | 12,508 | 3.688477s | 4,705,720 | 3,272,704 | 0.014315s | 0.022721s | 0.029285s |
+| GoogleTest | 75,200 | 25.334601s | 11,501,576 | 8,639,832 | 0.005366s | 0.013761s | 0.025260s |
+| doctest | 174,853 | 26.525474s | 9,808,888 | 6,117,264 | 0.004898s | 0.013832s | 0.027865s |
+| Catch2 v2 | 204,293 | 12.751911s | 6,255,336 | 4,120,632 | 0.005428s | 0.013625s | 0.049609s |
 
 ## Real life examples
 
